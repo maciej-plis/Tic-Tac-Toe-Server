@@ -1,10 +1,10 @@
 package matthias.tictactoe.web.authentication.controllers;
 
+import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.web.authentication.helpers.UserMapper;
 import matthias.tictactoe.web.authentication.model.User;
 import matthias.tictactoe.web.authentication.model.dtos.UserRegistration;
 import matthias.tictactoe.web.authentication.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -19,14 +19,10 @@ import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin
+@RequiredArgsConstructor
 public class AuthenticationController {
 
-    private UserService userService;
-
-    @Autowired
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+    private final UserService userService;
 
     @RequestMapping("/register")
     public ResponseEntity<Object> createNewUser(@Valid UserRegistration userRegistration, BindingResult bindingResult) {

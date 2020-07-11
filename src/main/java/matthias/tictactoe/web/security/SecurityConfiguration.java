@@ -1,5 +1,6 @@
 package matthias.tictactoe.web.security;
 
+import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.web.authentication.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,17 +14,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-    private UserDetailsServiceImpl userDetailsService;
-
-    @Autowired
-    public SecurityConfiguration(BCryptPasswordEncoder bCryptPasswordEncoder,
-                                 UserDetailsServiceImpl userDetailsService) {
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.userDetailsService = userDetailsService;
-    }
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

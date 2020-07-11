@@ -1,5 +1,6 @@
 package matthias.tictactoe.web.authentication.services;
 
+import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.web.authentication.model.Role;
 import matthias.tictactoe.web.authentication.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +17,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private UserService userService;
-
-    @Autowired
-    public UserDetailsServiceImpl(UserService userService) {
-        this.userService = userService;
-    }
+    private final UserService userService;
 
     @Override
     @Transactional

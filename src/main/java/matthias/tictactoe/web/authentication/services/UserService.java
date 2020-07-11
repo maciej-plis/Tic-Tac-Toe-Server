@@ -1,30 +1,17 @@
 package matthias.tictactoe.web.authentication.services;
 
-import matthias.tictactoe.web.authentication.model.Role;
+import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.web.authentication.model.User;
 import matthias.tictactoe.web.authentication.repos.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    private UserRepository userRepository;
-    private BCryptPasswordEncoder passwordEncoder;
-
-    @Autowired
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-    @Autowired
-    public void setPasswordEncoder(BCryptPasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     public User findUserByEmail(String email) {
         return userRepository.findByEmail(email);
