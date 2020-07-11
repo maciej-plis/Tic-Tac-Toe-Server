@@ -22,10 +22,6 @@ public class UserService {
     }
 
     public User saveUser(User user) {
-
-        user.setPassword(passwordEncoder.encode(user.getPassword())); // TODO remove side effect
-        user.setRoles(new HashSet<>(Arrays.asList(Role.USER))); // TODO remove side effect
-
         return userRepository.save(user);
     }
 }
