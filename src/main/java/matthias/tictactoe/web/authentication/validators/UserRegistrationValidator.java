@@ -1,4 +1,4 @@
-package matthias.tictactoe.web.authentication.helpers;
+package matthias.tictactoe.web.authentication.validators;
 
 import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.web.authentication.services.UserService;

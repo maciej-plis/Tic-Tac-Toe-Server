@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,15 +32,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException("Username doesn't exist");
         }
 
-        List<GrantedAuthority> authorities = getUserAuthority(user.getRoles());
+        List<GrantedAuthority> authorities = new ArrayList<>(user.getRoles());
         return buildUserForAuthentication(user, authorities);
-    }
-
-    private List<GrantedAuthority> getUserAuthority(Set<Role> userRoles) {
-        return userRoles
-                .stream()
-                .map(role -> new SimpleGrantedAuthority(role.toString()))
-                .collect(Collectors.toList());
     }
 
     private UserDetails buildUserForAuthentication(User user, List<GrantedAuthority> authorities) {

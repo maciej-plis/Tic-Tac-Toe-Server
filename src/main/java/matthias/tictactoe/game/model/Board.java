@@ -1,0 +1,68 @@
+package matthias.tictactoe.game.model;
+
+import java.awt.*;
+import java.util.Arrays;
+
+public class Board {
+
+    private final int BOARD_SIZE = 3;
+
+    private final Symbol[][] board= new Symbol[BOARD_SIZE][BOARD_SIZE];
+
+    public Board() {
+        clear();
+    }
+
+    public void clear() {
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                board[i][j] = Symbol.EMPTY;
+            }
+        }
+    }
+
+    public void set(Point point, Symbol symbol) {
+        board[point.x][point.y] = symbol;
+    }
+
+    public Symbol get(Point point) {
+        return board[point.x][point.y];
+    }
+
+    public boolean isEmpty(Point point) {
+        return board[point.x][point.y] == Symbol.EMPTY;
+    }
+
+    public Symbol[][] as2DimArray() {
+        return board;
+    }
+
+    public Symbol[] as1DimArray() {
+        return Arrays.stream(board).flatMap(row -> Arrays.stream(row)).toArray(Symbol[]::new);
+    }
+
+    public Character[][] as2DimCharArray() {
+        return Arrays.stream(board)
+                .map(Arrays::stream)
+                .map(s -> s.map(Symbol::getChar)
+                        .toArray(Character[]::new))
+                .toArray(Character[][]::new);
+    }
+
+    public int getSize() {
+        return this.BOARD_SIZE;
+    }
+
+    public boolean isFull() {
+        for(int i=0; i<BOARD_SIZE; i++) {
+            for(int j=0; j<BOARD_SIZE; j++) {
+                if(board[i][j] == Symbol.EMPTY) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+}

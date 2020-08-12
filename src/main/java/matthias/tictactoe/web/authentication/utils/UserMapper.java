@@ -1,4 +1,4 @@
-package matthias.tictactoe.web.authentication.helpers;
+package matthias.tictactoe.web.authentication.utils;
 
 import matthias.tictactoe.web.authentication.model.Role;
 import matthias.tictactoe.web.authentication.model.User;
@@ -9,7 +9,7 @@ import java.util.HashSet;
 
 public class UserMapper {
 
-    public static User mapToUser(UserRegistration userRegistration, Role... roles) {
+    public static User mapToUserWithRoles(UserRegistration userRegistration, Role... roles) {
         return User
             .builder()
             .username(userRegistration.getUsername())

@@ -1,4 +1,4 @@
-package matthias.tictactoe.web.security;
+package matthias.tictactoe.web.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

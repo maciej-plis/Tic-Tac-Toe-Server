@@ -1,22 +1,22 @@
 package matthias.tictactoe.web.authentication.controllers;
 
 import lombok.RequiredArgsConstructor;
-import matthias.tictactoe.web.authentication.helpers.UserMapper;
-import matthias.tictactoe.web.authentication.helpers.UserRegistrationValidator;
+import matthias.tictactoe.web.authentication.model.ResponseEntityBuilder;
+import matthias.tictactoe.web.authentication.utils.JWTUtils;
+import matthias.tictactoe.web.authentication.utils.UserMapper;
+import matthias.tictactoe.web.authentication.validators.UserRegistrationValidator;
 import matthias.tictactoe.web.authentication.model.Role;
 import matthias.tictactoe.web.authentication.model.User;
+import matthias.tictactoe.web.authentication.model.dtos.UserCredentials;
 import matthias.tictactoe.web.authentication.model.dtos.UserRegistration;
 import matthias.tictactoe.web.authentication.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,41 +30,56 @@ public class AuthenticationController {
     private final UserRegistrationValidator registrationValidator;
     private final UserService userService;
 
-    @RequestMapping("/register")
-    public ResponseEntity<Object> createNewUser(@Valid UserRegistration userRegistration, BindingResult bindingResult) {
+    @PostMapping("/register")
+    public ResponseEntity createNewUser(@Valid @RequestBody UserRegistration userRegistration, BindingResult bindingResult) {
 
         registrationValidator.isUsernameAlreadyRegistered(userRegistration.getUsername(), bindingResult);
         registrationValidator.isEmailAlreadyRegistered(userRegistration.getEmail(), bindingResult);
 
         if(bindingResult.hasErrors()) {
-            return registrationFailure(bindingResult);
+            return ResponseEntityBuilder
+                    .status(200)
+                    .addToPayload("success", false)
+                    .addToPayload("fieldErrors", fieldErrorsToStringMap(bindingResult.getFieldErrors()))
+                    .build();
         }
 
-        User user = UserMapper.mapToUser(userRegistration, Role.USER);
+        User user = UserMapper.mapToUserWithRoles(userRegistration, Role.USER);
         user.setPassword( passwordEncoder.encode(user.getPassword()) );
         userService.saveUser(user);
 
-        return registrationSuccess();
+        return ResponseEntityBuilder
+                .status(200)
+                .addToPayload("success", true)
+                .addToPayload("message", "Registration success")
+                .build();
     }
 
-    private ResponseEntity<Object> registrationSuccess() {
-        Map<String, Object> payload = new HashMap<>();
+    @PostMapping("/authenticate")
+    public ResponseEntity authenticateUser(@RequestBody UserCredentials userCredentials) {
 
-        payload.put("message", "Registration success");
+        User user = userService.findUserByUsername(userCredentials.getUsername());
 
-        return ResponseEntity.ok(payload);
+        if(user == null || !passwordEncoder.matches(userCredentials.getPassword(), user.getPassword())) {
+            return ResponseEntityBuilder
+                    .status(200)
+                    .addToPayload("success", false)
+                    .addToPayload("message", "Incorrect username or password")
+                    .build();
+        }
+
+        return ResponseEntityBuilder
+                .status(200)
+                .addToPayload("success", true)
+                .addToPayload("message", "Authentication success")
+                .addToPayload("user", new Object() {
+                    public String username = user.getUsername();
+                    public String token = JWTUtils.generateJWTForUser(user);
+                })
+                .build();
     }
 
-    private ResponseEntity<Object> registrationFailure(BindingResult bindingResult) {
-        Map<String, Object> payload = new HashMap<>();
-
-        payload.put("message", "Registration failure");
-        payload.put("errors", mapErrors(bindingResult.getFieldErrors()));
-
-        return ResponseEntity.status(422).body(payload);
-    }
-
-    private Map<String, String> mapErrors(List<FieldError> fieldErrors) {
+    private Map<String, String> fieldErrorsToStringMap(List<FieldError> fieldErrors) {
         return fieldErrors
                 .stream()
                 .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
