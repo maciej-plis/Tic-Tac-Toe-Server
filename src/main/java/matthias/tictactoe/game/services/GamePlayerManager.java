@@ -10,7 +10,6 @@ public class GamePlayerManager {
     Map<Symbol, User> players = new EnumMap<>(Symbol.class);
 
     public void newPlayer(User player) {
-
         if(containsPlayer(player)) {
             throw new RuntimeException("Player is already in the room");
         }
@@ -25,7 +24,6 @@ public class GamePlayerManager {
     }
 
     public Symbol removePlayer(User player) {
-
         if(!containsPlayer(player)) {
             throw new RuntimeException("Player is not in the room");
         }

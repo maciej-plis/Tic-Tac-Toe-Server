@@ -1,4 +1,4 @@
-package matthias.tictactoe.web.authentication.model;
+package matthias.tictactoe.web.authentication.utils;
 
 import org.springframework.http.ResponseEntity;
 

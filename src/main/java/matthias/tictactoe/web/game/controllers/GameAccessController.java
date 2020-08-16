@@ -2,7 +2,7 @@ package matthias.tictactoe.web.game.controllers;
 
 import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.game.TicTacToeGame;
-import matthias.tictactoe.web.authentication.model.ResponseEntityBuilder;
+import matthias.tictactoe.web.authentication.utils.ResponseEntityBuilder;
 import matthias.tictactoe.web.authentication.model.User;
 import matthias.tictactoe.web.authentication.services.UserService;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +15,7 @@ import java.security.Principal;
 
 @RequiredArgsConstructor
 @RestController
-@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+@CrossOrigin
 public class GameAccessController {
 
     private final TicTacToeGame game;

@@ -1,7 +1,7 @@
 package matthias.tictactoe.web.authentication.controllers;
 
 import lombok.RequiredArgsConstructor;
-import matthias.tictactoe.web.authentication.model.ResponseEntityBuilder;
+import matthias.tictactoe.web.authentication.utils.ResponseEntityBuilder;
 import matthias.tictactoe.web.authentication.utils.JWTUtils;
 import matthias.tictactoe.web.authentication.utils.UserMapper;
 import matthias.tictactoe.web.authentication.validators.UserRegistrationValidator;
@@ -32,7 +32,6 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity createNewUser(@Valid @RequestBody UserRegistration userRegistration, BindingResult bindingResult) {
-
         registrationValidator.isUsernameAlreadyRegistered(userRegistration.getUsername(), bindingResult);
         registrationValidator.isEmailAlreadyRegistered(userRegistration.getEmail(), bindingResult);
 
@@ -57,7 +56,6 @@ public class AuthenticationController {
 
     @PostMapping("/authenticate")
     public ResponseEntity authenticateUser(@RequestBody UserCredentials userCredentials) {
-
         User user = userService.findUserByUsername(userCredentials.getUsername());
 
         if(user == null || !passwordEncoder.matches(userCredentials.getPassword(), user.getPassword())) {

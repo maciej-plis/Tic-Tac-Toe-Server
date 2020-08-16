@@ -7,8 +7,7 @@ import matthias.tictactoe.game.model.Symbol;
 @Data
 @AllArgsConstructor
 public class PlayerJoinedEvent {
-
-    private final String name = "PLAYER_JOINED";
+    private final GameEventType type = GameEventType.PLAYER_JOINED;
     private Symbol playerSymbol;
     private String playerName;
 }

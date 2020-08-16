@@ -33,7 +33,7 @@ public class GameEventPublisher {
         publisher.publishEvent(new BoardChangedEvent(board));
     }
 
-    public void publishTurnChangedEvent(Symbol sign) {
-        publisher.publishEvent(new TurnChangedEvent(sign));
+    public void publishTurnChangedEvent(Symbol tour) {
+        publisher.publishEvent(new TourChangedEvent(tour));
     }
 }

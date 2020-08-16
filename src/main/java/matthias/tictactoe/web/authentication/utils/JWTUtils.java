@@ -17,7 +17,6 @@ public class JWTUtils {
     private static JWTConfig jwtConfig = JWTConfig.getConfig();
 
     public static String generateJWTForUser(User user) {
-
         String token = Jwts
                 .builder()
                 .setId(UUID.randomUUID().toString())

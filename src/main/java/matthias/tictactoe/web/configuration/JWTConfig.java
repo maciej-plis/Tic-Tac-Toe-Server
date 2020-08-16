@@ -4,7 +4,6 @@ import lombok.Getter;
 
 @Getter
 public class JWTConfig {
-
     private final String header = "Authorization";
     private final String prefix = "Bearer ";
     private final String secretKey = "secretKey";

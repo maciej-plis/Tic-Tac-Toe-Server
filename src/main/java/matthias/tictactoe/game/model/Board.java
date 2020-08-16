@@ -4,9 +4,7 @@ import java.awt.*;
 import java.util.Arrays;
 
 public class Board {
-
     private final int BOARD_SIZE = 3;
-
     private final Symbol[][] board= new Symbol[BOARD_SIZE][BOARD_SIZE];
 
     public Board() {
@@ -25,10 +23,6 @@ public class Board {
         board[point.x][point.y] = symbol;
     }
 
-    public Symbol get(Point point) {
-        return board[point.x][point.y];
-    }
-
     public boolean isEmpty(Point point) {
         return board[point.x][point.y] == Symbol.EMPTY;
     }
@@ -39,18 +33,6 @@ public class Board {
 
     public Symbol[] as1DimArray() {
         return Arrays.stream(board).flatMap(row -> Arrays.stream(row)).toArray(Symbol[]::new);
-    }
-
-    public Character[][] as2DimCharArray() {
-        return Arrays.stream(board)
-                .map(Arrays::stream)
-                .map(s -> s.map(Symbol::getChar)
-                        .toArray(Character[]::new))
-                .toArray(Character[][]::new);
-    }
-
-    public int getSize() {
-        return this.BOARD_SIZE;
     }
 
     public boolean isFull() {

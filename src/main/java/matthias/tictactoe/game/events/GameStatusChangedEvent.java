@@ -7,7 +7,6 @@ import matthias.tictactoe.game.model.GameStatus;
 @Data
 @AllArgsConstructor
 public class GameStatusChangedEvent {
-
-    private final String name = "GAME_STATUS_CHANGED";
+    private final GameEventType type = GameEventType.GAME_STATUS_CHANGED;
     private GameStatus gameStatus;
 }

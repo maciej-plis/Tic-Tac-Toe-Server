@@ -18,12 +18,10 @@ public class TicTacToeGame {
 
     private final GameEventPublisher gameEventPublisher;
 
+    private final GamePlayerManager players;
     private final Board board;
-
     private GameStatus status;
     private Symbol currentSymbol;
-
-    private final GamePlayerManager players;
 
     public TicTacToeGame(GameEventPublisher gameEventPublisher) {
         this.gameEventPublisher = gameEventPublisher;
@@ -36,7 +34,6 @@ public class TicTacToeGame {
     }
 
     public void join(User player) {
-
         players.newPlayer(player);
         gameEventPublisher.publishPlayerJoinedEvent(players.getPlayerSymbol(player), player);
 
@@ -47,7 +44,6 @@ public class TicTacToeGame {
     }
 
     public void leave(User player) {
-
         Symbol symbol = players.removePlayer(player);
         gameEventPublisher.publishPlayerLeftEvent(symbol, player);
 
@@ -61,7 +57,6 @@ public class TicTacToeGame {
     }
 
     public void markSquare(User player, Point point) {
-
         if(!players.containsPlayer(player)) {
             throw new RuntimeException("Player is not in the room");
         }
@@ -95,18 +90,15 @@ public class TicTacToeGame {
 
     public GameData getGameData() {
         GameData gameData = new GameData();
-
-        gameData.setBoard(board.as2DimCharArray());
-
+        gameData.setBoard(board.as2DimArray());
         gameData.setPlayers(players.getPlayers()
                                 .entrySet()
                                 .stream()
                                 .collect(Collectors.toMap(
-                                            e -> e.getKey().getChar(),
+                                            e -> e.getKey(),
                                             e -> e.getValue().getUsername())));
         gameData.setStatus(status);
-        gameData.setTour(currentSymbol.getChar());
-
+        gameData.setTour(currentSymbol);
         return gameData;
     }
 

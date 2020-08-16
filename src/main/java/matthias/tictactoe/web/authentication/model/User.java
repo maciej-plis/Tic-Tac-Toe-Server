@@ -18,7 +18,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "users")
 public class User {
-
     @Id
     @Column(name = "user_id", columnDefinition = "BINARY(16)")
     private final UUID id = UUID.randomUUID();

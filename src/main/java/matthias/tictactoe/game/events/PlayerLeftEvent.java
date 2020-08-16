@@ -7,8 +7,7 @@ import matthias.tictactoe.game.model.Symbol;
 @Data
 @AllArgsConstructor
 public class PlayerLeftEvent {
-
-    private final String name = "PLAYER_LEFT";
+    private final GameEventType type = GameEventType.PLAYER_LEFT;
     private Symbol playerSymbol;
     private String playerName;
 }

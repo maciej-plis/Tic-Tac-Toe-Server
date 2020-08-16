@@ -2,16 +2,14 @@ package matthias.tictactoe.game.model.dto;
 
 import lombok.Data;
 import matthias.tictactoe.game.model.GameStatus;
+import matthias.tictactoe.game.model.Symbol;
 
 import java.util.Map;
 
 @Data
 public class GameData {
-
-    private Character[][] board;
-
-    private Map<Character, String> players;
-
+    private Symbol[][] board;
+    private Map<Symbol, String> players;
     private GameStatus status;
-    private Character tour;
+    private Symbol tour;
 }

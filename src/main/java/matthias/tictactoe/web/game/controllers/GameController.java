@@ -2,19 +2,19 @@ package matthias.tictactoe.web.game.controllers;
 
 import lombok.AllArgsConstructor;
 import matthias.tictactoe.game.TicTacToeGame;
-import matthias.tictactoe.web.authentication.model.ResponseEntityBuilder;
+import matthias.tictactoe.web.authentication.utils.ResponseEntityBuilder;
 import matthias.tictactoe.web.authentication.model.User;
 import matthias.tictactoe.web.authentication.services.UserService;
 import matthias.tictactoe.game.model.dto.GameData;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.*;
+import java.awt.Point;
 import java.security.Principal;
 
 @AllArgsConstructor
 @RestController
-@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+@CrossOrigin
 public class GameController {
 
     private final TicTacToeGame game;
