@@ -1,13 +1,17 @@
 package matthias.tictactoe.game.model;
 
+import matthias.tictactoe.game.services.GameEventPublisher;
+
 import java.awt.*;
 import java.util.Arrays;
 
 public class GameBoard {
+    private  final GameEventPublisher publisher;
     private final int BOARD_SIZE = 3;
-    private final Symbol[][] board= new Symbol[BOARD_SIZE][BOARD_SIZE];
+    private final Symbol[][] board = new Symbol[BOARD_SIZE][BOARD_SIZE];
 
-    public GameBoard() {
+    public GameBoard(GameEventPublisher publisher) {
+        this.publisher = publisher;
         clear();
     }
 
@@ -17,10 +21,12 @@ public class GameBoard {
                 board[i][j] = Symbol.EMPTY;
             }
         }
+        publisher.publishBoardChangedEvent(this);
     }
 
     public void set(Point point, Symbol symbol) {
         board[point.x][point.y] = symbol;
+        publisher.publishBoardChangedEvent(this);
     }
 
     public boolean isEmpty(Point point) {
