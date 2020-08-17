@@ -62,9 +62,9 @@ public class TicTacToeGame {
 
         board.set(point, tour.getTour());
 
-        if(BoardChecker.win(board)) {
+        if(BoardChecker.isWin(board)) {
             status.setStatus(Status.WIN);
-        } else if(BoardChecker.draw(board)) {
+        } else if(BoardChecker.isDraw(board)) {
             status.setStatus(Status.DRAW);
         } else {
             changeTour();

@@ -7,7 +7,7 @@ import java.util.*;
 
 public class GamePlayerManager {
     private final GameEventPublisher publisher;
-    Map<Symbol, User> players = new EnumMap<>(Symbol.class);
+    private Map<Symbol, User> players = new EnumMap<>(Symbol.class);
 
     public GamePlayerManager(GameEventPublisher publisher) {
         this.publisher = publisher;
