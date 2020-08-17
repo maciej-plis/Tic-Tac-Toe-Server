@@ -1,9 +1,7 @@
 package matthias.tictactoe.game;
 
 import matthias.tictactoe.game.helpers.BoardChecker;
-import matthias.tictactoe.game.model.Board;
-import matthias.tictactoe.game.model.GameStatus;
-import matthias.tictactoe.game.model.Symbol;
+import matthias.tictactoe.game.model.*;
 import matthias.tictactoe.game.model.dto.GameData;
 import matthias.tictactoe.game.services.GameEventPublisher;
 import matthias.tictactoe.game.services.GamePlayerManager;
@@ -19,18 +17,17 @@ public class TicTacToeGame {
     private final GameEventPublisher gameEventPublisher;
 
     private final GamePlayerManager players;
-    private final Board board;
-    private GameStatus status;
-    private Symbol currentSymbol;
+    private final GameBoard board;
+    private final GameStatus status;
+    private final GameTour tour;
 
     public TicTacToeGame(GameEventPublisher gameEventPublisher) {
         this.gameEventPublisher = gameEventPublisher;
 
         this.players = new GamePlayerManager();
-        this.board = new Board();
-
-        this.status = GameStatus.NOT_ENOUGH_PLAYERS;
-        this.currentSymbol = Symbol.X;
+        this.board = new GameBoard();
+        this.status = new GameStatus(Status.NOT_ENOUGH_PLAYERS);
+        this.tour = new GameTour(Symbol.X);
     }
 
     public void join(User player) {
@@ -38,8 +35,8 @@ public class TicTacToeGame {
         gameEventPublisher.publishPlayerJoinedEvent(players.getPlayerSymbol(player), player);
 
         if(players.getPlayersCount() == 2) {
-            status = GameStatus.IN_PROGRESS;
-            gameEventPublisher.publishGameStatusChangedEvent(status);
+            status.setStatus(Status.IN_PROGRESS);
+            gameEventPublisher.publishGameStatusChangedEvent(status.getStatus());
         }
     }
 
@@ -47,9 +44,9 @@ public class TicTacToeGame {
         Symbol symbol = players.removePlayer(player);
         gameEventPublisher.publishPlayerLeftEvent(symbol, player);
 
-        if(status != GameStatus.NOT_ENOUGH_PLAYERS) {
-            status = GameStatus.NOT_ENOUGH_PLAYERS;
-            gameEventPublisher.publishGameStatusChangedEvent(status);
+        if(status.getStatus() != Status.NOT_ENOUGH_PLAYERS) {
+            status.setStatus(Status.NOT_ENOUGH_PLAYERS);
+            gameEventPublisher.publishGameStatusChangedEvent(status.getStatus());
 
             board.clear();
             gameEventPublisher.publishBoardChangedEvent(board);
@@ -61,11 +58,11 @@ public class TicTacToeGame {
             throw new RuntimeException("Player is not in the room");
         }
 
-        if(status != GameStatus.IN_PROGRESS) {
+        if(status.getStatus() != Status.IN_PROGRESS) {
             throw new RuntimeException("Game is not in progress");
         }
 
-        if(!players.getPlayer(currentSymbol).equals(player)) {
+        if(!players.getPlayer(tour.getTour()).equals(player)) {
             throw new RuntimeException("Please wait your turn");
         }
 
@@ -73,18 +70,18 @@ public class TicTacToeGame {
             throw new RuntimeException("This square is already marked");
         }
 
-        board.set(point, currentSymbol);
+        board.set(point, tour.getTour());
         gameEventPublisher.publishBoardChangedEvent(board);
 
         if(BoardChecker.win(board)) {
-            status = GameStatus.WIN;
-            gameEventPublisher.publishGameStatusChangedEvent(status);
+            status.setStatus(Status.WIN);
+            gameEventPublisher.publishGameStatusChangedEvent(status.getStatus());
         } else if(BoardChecker.draw(board)) {
-            status = GameStatus.DRAW;
-            gameEventPublisher.publishGameStatusChangedEvent(status);
+            status.setStatus(Status.DRAW);
+            gameEventPublisher.publishGameStatusChangedEvent(status.getStatus());
         } else {
             changeTour();
-            gameEventPublisher.publishTurnChangedEvent(currentSymbol);
+            gameEventPublisher.publishTurnChangedEvent(tour.getTour());
         }
     }
 
@@ -97,16 +94,16 @@ public class TicTacToeGame {
                                 .collect(Collectors.toMap(
                                             e -> e.getKey(),
                                             e -> e.getValue().getUsername())));
-        gameData.setStatus(status);
-        gameData.setTour(currentSymbol);
+        gameData.setStatus(status.getStatus());
+        gameData.setTour(tour.getTour());
         return gameData;
     }
 
     private void changeTour() {
-        if(this.currentSymbol == Symbol.X) {
-            this.currentSymbol = Symbol.O;
+        if(this.tour.getTour() == Symbol.X) {
+            this.tour.setTour(Symbol.O);
         } else {
-            this.currentSymbol = Symbol.X;
+            this.tour.setTour(Symbol.X);
         }
     }
 

@@ -2,7 +2,7 @@ package matthias.tictactoe.web.game.services;
 
 import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.game.events.*;
-import matthias.tictactoe.game.model.GameStatus;
+import matthias.tictactoe.game.model.Status;
 import matthias.tictactoe.game.model.Symbol;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -54,7 +54,7 @@ public class GameStateEmitter {
 
         Object message = new Object() {
             public GameEventType type = gameStatusChangedEvent.getType();
-            public GameStatus status = gameStatusChangedEvent.getGameStatus();
+            public Status status = gameStatusChangedEvent.getGameStatus();
         };
 
         template.convertAndSend("/topic/game", message);

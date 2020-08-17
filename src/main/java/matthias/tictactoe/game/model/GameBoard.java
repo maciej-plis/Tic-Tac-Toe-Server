@@ -3,11 +3,11 @@ package matthias.tictactoe.game.model;
 import java.awt.*;
 import java.util.Arrays;
 
-public class Board {
+public class GameBoard {
     private final int BOARD_SIZE = 3;
     private final Symbol[][] board= new Symbol[BOARD_SIZE][BOARD_SIZE];
 
-    public Board() {
+    public GameBoard() {
         clear();
     }
 

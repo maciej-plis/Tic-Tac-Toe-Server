@@ -2,8 +2,8 @@ package matthias.tictactoe.game.services;
 
 import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.game.events.*;
-import matthias.tictactoe.game.model.Board;
-import matthias.tictactoe.game.model.GameStatus;
+import matthias.tictactoe.game.model.GameBoard;
+import matthias.tictactoe.game.model.Status;
 import matthias.tictactoe.game.model.Symbol;
 import matthias.tictactoe.web.authentication.model.User;
 import org.springframework.context.ApplicationEventPublisher;
@@ -25,11 +25,11 @@ public class GameEventPublisher {
         publisher.publishEvent(new PlayerLeftEvent(symbol, playerName) );
     }
 
-    public void publishGameStatusChangedEvent(GameStatus status) {
+    public void publishGameStatusChangedEvent(Status status) {
         publisher.publishEvent(new GameStatusChangedEvent(status));
     }
 
-    public void publishBoardChangedEvent(Board board) {
+    public void publishBoardChangedEvent(GameBoard board) {
         publisher.publishEvent(new BoardChangedEvent(board));
     }
 
