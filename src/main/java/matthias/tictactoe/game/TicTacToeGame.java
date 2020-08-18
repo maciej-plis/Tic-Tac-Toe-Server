@@ -3,15 +3,16 @@ package matthias.tictactoe.game;
 import matthias.tictactoe.game.helpers.BoardChecker;
 import matthias.tictactoe.game.model.*;
 import matthias.tictactoe.game.model.dto.GameData;
-import matthias.tictactoe.game.services.GameEventPublisher;
 import matthias.tictactoe.game.services.GamePlayerManager;
 import matthias.tictactoe.web.authentication.model.User;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
 import java.util.stream.Collectors;
 
 @Component
+@DependsOn("GameEventPublisher")
 public class TicTacToeGame {
 
     private final GamePlayerManager players;
@@ -19,11 +20,11 @@ public class TicTacToeGame {
     private final GameStatus status;
     private final GameTour tour;
 
-    public TicTacToeGame(GameEventPublisher gameEventPublisher) {
-        this.players = new GamePlayerManager(gameEventPublisher);
-        this.board = new GameBoard(gameEventPublisher);
-        this.status = new GameStatus(Status.NOT_ENOUGH_PLAYERS, gameEventPublisher);
-        this.tour = new GameTour(Symbol.X, gameEventPublisher);
+    public TicTacToeGame() {
+        this.players = new GamePlayerManager();
+        this.board = new GameBoard();
+        this.status = new GameStatus(Status.NOT_ENOUGH_PLAYERS);
+        this.tour = new GameTour(Symbol.X);
     }
 
     public void join(User player) {

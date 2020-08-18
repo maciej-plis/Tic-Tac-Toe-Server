@@ -2,15 +2,11 @@ package matthias.tictactoe.game.model;
 
 import matthias.tictactoe.game.services.GameEventPublisher;
 
-import java.util.Objects;
-
 public class GameStatus {
-    private  final GameEventPublisher publisher;
     private Status status;
 
-    public GameStatus(Status status, GameEventPublisher publisher) {
+    public GameStatus(Status status) {
         this.status = status;
-        this.publisher = publisher;
     }
 
     public Status getStatus() {
@@ -19,7 +15,7 @@ public class GameStatus {
 
     public void setStatus(Status status) {
         this.status = status;
-        publisher.publishGameStatusChangedEvent(status);
+        GameEventPublisher.publishGameStatusChangedEvent(status);
     }
 
     @Override

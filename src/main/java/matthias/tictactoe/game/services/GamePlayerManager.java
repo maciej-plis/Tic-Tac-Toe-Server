@@ -6,12 +6,7 @@ import matthias.tictactoe.web.authentication.model.User;
 import java.util.*;
 
 public class GamePlayerManager {
-    private final GameEventPublisher publisher;
     private Map<Symbol, User> players = new EnumMap<>(Symbol.class);
-
-    public GamePlayerManager(GameEventPublisher publisher) {
-        this.publisher = publisher;
-    }
 
     public void newPlayer(User player) {
         if(containsPlayer(player)) {
@@ -25,7 +20,7 @@ public class GamePlayerManager {
         }
 
         this.players.put(availableSymbols.get(0), player);
-        this.publisher.publishPlayerJoinedEvent(availableSymbols.get(0), player);
+        GameEventPublisher.publishPlayerJoinedEvent(availableSymbols.get(0), player);
     }
 
     public Symbol removePlayer(User player) {
@@ -35,7 +30,7 @@ public class GamePlayerManager {
 
         Symbol symbol = getPlayerSymbol(player);
         players.values().remove(player);
-        this.publisher.publishPlayerLeftEvent(symbol, player);
+        GameEventPublisher.publishPlayerLeftEvent(symbol, player);
 
         return symbol;
     }

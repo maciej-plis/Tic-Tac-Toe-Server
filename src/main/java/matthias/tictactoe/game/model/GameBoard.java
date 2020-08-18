@@ -6,12 +6,10 @@ import java.awt.*;
 import java.util.Arrays;
 
 public class GameBoard {
-    private  final GameEventPublisher publisher;
     private final int BOARD_SIZE = 3;
     private final Symbol[][] board = new Symbol[BOARD_SIZE][BOARD_SIZE];
 
-    public GameBoard(GameEventPublisher publisher) {
-        this.publisher = publisher;
+    public GameBoard() {
         clear();
     }
 
@@ -21,12 +19,12 @@ public class GameBoard {
                 board[i][j] = Symbol.EMPTY;
             }
         }
-        publisher.publishBoardChangedEvent(this);
+        GameEventPublisher.publishBoardChangedEvent(this);
     }
 
     public void set(Point point, Symbol symbol) {
         board[point.x][point.y] = symbol;
-        publisher.publishBoardChangedEvent(this);
+        GameEventPublisher.publishBoardChangedEvent(this);
     }
 
     public boolean isEmpty(Point point) {
