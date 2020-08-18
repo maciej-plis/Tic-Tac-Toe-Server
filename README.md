@@ -1,7 +1,7 @@
 # Tic-Tac-Toe-Server
 
 Backend part of my multiplayer tic tac toe game in java. Main technology used\
-to build this project is **spring**. There is aslo a second part of the project, which is\
+to build this project is **spring**. There is also a second part of the project, which is\
 game [client](https://github.com/maciejplis/Tic-Tac-Toe-Client) created in **angular**.
 
 ## Motivation
@@ -14,7 +14,3 @@ master more design patterns and clean code conventions.
 - JPA | Hibernate
 - Websockets
 - MySql
-
-## Tic-Tac-Toe-Client
-
-I am also building game [client](https://github.com/maciejplis/Tic-Tac-Toe-Client) using **angular**
