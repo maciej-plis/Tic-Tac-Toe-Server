@@ -18,16 +18,7 @@ public class GameStatus {
         GameEventPublisher.publishGameStatusChangedEvent(status);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GameStatus that = (GameStatus) o;
-        return status == that.status;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(status);
+    public boolean hasStatus(Status status) {
+        return this.status == status;
     }
 }

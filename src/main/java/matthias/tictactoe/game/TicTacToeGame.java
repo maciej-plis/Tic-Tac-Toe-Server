@@ -38,7 +38,7 @@ public class TicTacToeGame {
     public void leave(User player) {
         players.removePlayer(player);
 
-        if(!status.equals(Status.NOT_ENOUGH_PLAYERS)) {
+        if(!status.hasStatus(Status.NOT_ENOUGH_PLAYERS)) {
             status.setStatus(Status.NOT_ENOUGH_PLAYERS);
             board.clear();
         }
@@ -49,7 +49,7 @@ public class TicTacToeGame {
             throw new RuntimeException("Player is not in the room");
         }
 
-        if(!status.equals(Status.IN_PROGRESS)) {
+        if(!status.hasStatus(Status.IN_PROGRESS)) {
             throw new RuntimeException("Game is not in progress");
         }
 
