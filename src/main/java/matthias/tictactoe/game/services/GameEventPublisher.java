@@ -1,6 +1,7 @@
 package matthias.tictactoe.game.services;
 
 import matthias.tictactoe.game.events.*;
+import matthias.tictactoe.game.model.ActivePlayer;
 import matthias.tictactoe.game.model.GameBoard;
 import matthias.tictactoe.game.model.Status;
 import matthias.tictactoe.game.model.Symbol;
@@ -35,7 +36,7 @@ public class GameEventPublisher {
         publisher.publishEvent(new BoardChangedEvent(board));
     }
 
-    public static void publishTurnChangedEvent(Symbol tour) {
-        publisher.publishEvent(new TourChangedEvent(tour));
+    public static void publishActivePlayerChangedEvent(ActivePlayer active) {
+        publisher.publishEvent(new ActivePlayerChangedEvent(active));
     }
 }

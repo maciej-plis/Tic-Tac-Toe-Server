@@ -60,12 +60,12 @@ public class GameStateEmitter {
         template.convertAndSend("/topic/game", message);
     }
 
-    @EventListener(TourChangedEvent.class)
-    public void playerTurnChanged(TourChangedEvent tourChangedEvent) {
+    @EventListener(ActivePlayerChangedEvent.class)
+    public void activePlayerChanged(ActivePlayerChangedEvent activePlayerChangedEvent) {
 
         Object message = new Object() {
-            public GameEventType type = tourChangedEvent.getType();
-            public Symbol tour = tourChangedEvent.getTour();
+            public GameEventType type = activePlayerChangedEvent.getType();
+            public Symbol symbol = activePlayerChangedEvent.getActivePlayer().getSymbol();
         };
 
         template.convertAndSend("/topic/game", message);

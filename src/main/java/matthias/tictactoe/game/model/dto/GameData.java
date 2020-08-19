@@ -11,5 +11,5 @@ public class GameData {
     private Symbol[][] board;
     private Map<Symbol, String> players;
     private Status status;
-    private Symbol tour;
+    private Symbol activePlayer;
 }

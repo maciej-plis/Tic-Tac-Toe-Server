@@ -18,7 +18,7 @@ public class TicTacToeGame {
     private final GamePlayerManager players;
     private final GameBoard board;
     private final GameStatus status;
-    private final GameTour tour;
+    private final ActivePlayer active;
 
     /**
      * constructs TicTacToeGame with defaults:<br>
@@ -31,7 +31,7 @@ public class TicTacToeGame {
         this.players = new GamePlayerManager();
         this.board = new GameBoard();
         this.status = new GameStatus(Status.NOT_ENOUGH_PLAYERS);
-        this.tour = new GameTour(Symbol.X);
+        this.active = new ActivePlayer(Symbol.X);
     }
 
     /**
@@ -83,7 +83,7 @@ public class TicTacToeGame {
             throw new RuntimeException("Game is not in progress");
         }
 
-        if(!players.getPlayer(tour.getTour()).equals(player)) {
+        if(!players.getPlayer(active.getSymbol()).equals(player)) {
             throw new RuntimeException("Please wait your turn");
         }
 
@@ -91,14 +91,14 @@ public class TicTacToeGame {
             throw new RuntimeException("This square is already marked");
         }
 
-        board.set(point, tour.getTour());
+        board.set(point, active.getSymbol());
 
         if(BoardChecker.isWin(board)) {
             status.setStatus(Status.WIN);
         } else if(BoardChecker.isDraw(board)) {
             status.setStatus(Status.DRAW);
         } else {
-            changeTour();
+            changeActivePlayer();
         }
     }
 
@@ -107,7 +107,7 @@ public class TicTacToeGame {
      * board - 2dim Symbol array<br>
      * players - map (Symbol = PlayerName)<br>
      * status - current game status<br>
-     * tour - current tour symbol
+     * activePlayer - currently active player symbol
      */
     public GameData getGameData() {
         GameData gameData = new GameData();
@@ -119,20 +119,20 @@ public class TicTacToeGame {
                                             e -> e.getKey(),
                                             e -> e.getValue().getUsername())));
         gameData.setStatus(status.getStatus());
-        gameData.setTour(tour.getTour());
+        gameData.setActivePlayer(active.getSymbol());
         return gameData;
     }
 
     /**
-     * Changes tour of the game.<br>
+     * Changes currently active player in game.<br>
      * x -> O<br>
      * O -> X
      */
-    private void changeTour() {
-        if(this.tour.getTour() == Symbol.X) {
-            this.tour.setTour(Symbol.O);
+    private void changeActivePlayer() {
+        if(this.active.getSymbol() == Symbol.X) {
+            this.active.setSymbol(Symbol.O);
         } else {
-            this.tour.setTour(Symbol.X);
+            this.active.setSymbol(Symbol.X);
         }
     }
 
