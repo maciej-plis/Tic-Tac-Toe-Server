@@ -1,10 +1,14 @@
 package matthias.tictactoe.game.model;
 
 import matthias.tictactoe.game.services.GameEventPublisher;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.awt.*;
 import java.util.Arrays;
 
+@Component
+@Scope("prototype")
 public class GameBoard {
     private final int BOARD_SIZE = 3;
     private final Symbol[][] board = new Symbol[BOARD_SIZE][BOARD_SIZE];

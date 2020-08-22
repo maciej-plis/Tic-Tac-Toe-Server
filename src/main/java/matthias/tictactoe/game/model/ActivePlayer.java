@@ -1,12 +1,16 @@
 package matthias.tictactoe.game.model;
 
 import matthias.tictactoe.game.services.GameEventPublisher;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component
+@Scope("prototype")
 public class ActivePlayer {
     private Symbol symbol;
 
-    public ActivePlayer(Symbol symbol) {
-        this.symbol = symbol;
+    public ActivePlayer() {
+        this.symbol = Symbol.X;
     }
 
     public Symbol getSymbol() {

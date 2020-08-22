@@ -1,5 +1,6 @@
 package matthias.tictactoe.game;
 
+import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.game.helpers.BoardChecker;
 import matthias.tictactoe.game.model.*;
 import matthias.tictactoe.game.model.dto.GameData;
@@ -11,28 +12,14 @@ import org.springframework.stereotype.Component;
 import java.awt.*;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Component
 @DependsOn("GameEventPublisher")
 public class TicTacToeGame {
-
     private final GamePlayerManager players;
     private final GameBoard board;
     private final GameStatus status;
     private final ActivePlayer active;
-
-    /**
-     * constructs TicTacToeGame with defaults:<br>
-     * players - empty<br>
-     * board - empty<br>
-     * status - NOT_ENOUGH_PLAYERS<br>
-     * active player - X
-     */
-    public TicTacToeGame() {
-        this.players = new GamePlayerManager();
-        this.board = new GameBoard();
-        this.status = new GameStatus(Status.NOT_ENOUGH_PLAYERS);
-        this.active = new ActivePlayer(Symbol.X);
-    }
 
     /**
      * adds given player to the game.

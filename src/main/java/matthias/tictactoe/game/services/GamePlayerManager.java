@@ -2,9 +2,13 @@ package matthias.tictactoe.game.services;
 
 import matthias.tictactoe.game.model.Symbol;
 import matthias.tictactoe.web.authentication.model.User;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+@Component
+@Scope("prototype")
 public class GamePlayerManager {
     private Map<Symbol, User> players = new EnumMap<>(Symbol.class);
 
