@@ -36,6 +36,7 @@ public class GamePlayerManager {
         }
 
         Player removedPlayer = players.remove(name);
+        this.availableSymbols.add(removedPlayer.getSymbol());
         GameEventPublisher.publishPlayerLeftEvent(removedPlayer);
     }
 
