@@ -54,7 +54,7 @@ public class GameStateEmitter {
 
         Object message = new Object() {
             public GameEventType type = gameStatusChangedEvent.getType();
-            public Status status = gameStatusChangedEvent.getGameStatus();
+            public Status status = gameStatusChangedEvent.getGameStatus().getStatus();
         };
 
         template.convertAndSend("/topic/game", message);

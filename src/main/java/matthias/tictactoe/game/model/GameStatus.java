@@ -19,7 +19,7 @@ public class GameStatus {
 
     public void setStatus(Status status) {
         this.status = status;
-        GameEventPublisher.publishGameStatusChangedEvent(status);
+        GameEventPublisher.publishGameStatusChangedEvent(this);
     }
 
     public boolean hasStatus(Status status) {

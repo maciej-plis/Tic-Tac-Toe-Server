@@ -22,7 +22,7 @@ public class GameEventPublisher {
         publisher.publishEvent(new PlayerLeftEvent(player) );
     }
 
-    public static void publishGameStatusChangedEvent(Status status) {
+    public static void publishGameStatusChangedEvent(GameStatus status) {
         publisher.publishEvent(new GameStatusChangedEvent(status));
     }
 
