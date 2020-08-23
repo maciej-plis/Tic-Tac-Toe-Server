@@ -20,12 +20,12 @@ public class TicTacToeGame {
     private final ActivePlayer active;
 
     /**
-     * adds given player to the game.
+     * Creates new player and adds him to the game.
      *
-     * when number of players in game is
+     * When number of players in game is
      * equal to 2 game status changes for IN_PROGRESS
      *
-     * @param player joining the game
+     * @param name of player to be added
      */
     public void join(String name) {
         players.newPlayer(name);
@@ -36,13 +36,12 @@ public class TicTacToeGame {
     }
 
     /**
-     * removes given player from the game.
+     * Removes player from the game.
      *
-     * when number of players in game drops down
-     * to 1 game status changes for NOT_ENOUGH_PLAYERS
-     * and board is cleared
+     * When game status is different from NOT_ENOUGH_PLAYERS
+     * then game status changes to it and board is cleared
      *
-     * @param player leaving the game
+     * @param name of player to be removed
      */
     public void leave(String name) {
         players.removePlayer(name);
@@ -54,9 +53,9 @@ public class TicTacToeGame {
     }
 
     /**
-     * Marks given square of game board with player symbol.
+     * Marks square of game board with player symbol.
      *
-     * @param player player trying to mark square
+     * @param name of player marking square
      * @param point coordinates of board square
      */
     public void markSquare(String name, Point point) {
@@ -92,7 +91,7 @@ public class TicTacToeGame {
     /**
      * @return Game data containing:<br>
      * board - 2dim Symbol array<br>
-     * players - map (Symbol = PlayerName)<br>
+     * players - collection of players<br>
      * status - current game status<br>
      * activePlayer - currently active player symbol
      */
