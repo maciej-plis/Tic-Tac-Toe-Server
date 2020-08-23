@@ -17,7 +17,7 @@ public class TicTacToeGame {
     private final GamePlayerManager players;
     private final GameBoard board;
     private final GameStatus status;
-    private final ActivePlayer active;
+    private final ActiveSymbol active;
 
     /**
      * Creates new player and adds him to the game.
@@ -84,7 +84,7 @@ public class TicTacToeGame {
         } else if(BoardChecker.isDraw(board)) {
             status.setStatus(Status.DRAW);
         } else {
-            changeActivePlayer();
+            changeActiveSymbol();
         }
     }
 
@@ -100,7 +100,7 @@ public class TicTacToeGame {
         gameData.setBoard(board.as2DimArray());
         gameData.setPlayers(players.getPlayers());
         gameData.setStatus(status.getStatus());
-        gameData.setActivePlayer(active.getSymbol());
+        gameData.setActiveSymbol(active.getSymbol());
         return gameData;
     }
 
@@ -109,7 +109,7 @@ public class TicTacToeGame {
      * x -> O<br>
      * O -> X
      */
-    private void changeActivePlayer() {
+    private void changeActiveSymbol() {
         if(this.active.getSymbol() == PlayerSymbol.X) {
             this.active.setSymbol(PlayerSymbol.O);
         } else {

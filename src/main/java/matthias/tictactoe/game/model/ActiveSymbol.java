@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Scope("prototype")
-public class ActivePlayer {
+public class ActiveSymbol {
     private PlayerSymbol symbol;
 
-    public ActivePlayer() {
+    public ActiveSymbol() {
         this.symbol = PlayerSymbol.X;
     }
 
@@ -19,7 +19,7 @@ public class ActivePlayer {
 
     public void setSymbol(PlayerSymbol symbol) {
         this.symbol = symbol;
-        GameEventPublisher.publishActivePlayerChangedEvent(this);
+        GameEventPublisher.publishActiveSymbolChangedEvent(this);
     }
 
     public boolean is(PlayerSymbol symbol) {

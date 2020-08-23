@@ -60,12 +60,12 @@ public class GameStateEmitter {
         template.convertAndSend("/topic/game", message);
     }
 
-    @EventListener(ActivePlayerChangedEvent.class)
-    public void activePlayerChanged(ActivePlayerChangedEvent activePlayerChangedEvent) {
+    @EventListener(ActiveSymbolChangedEvent.class)
+    public void activeSymbolChanged(ActiveSymbolChangedEvent activeSymbolChangedEvent) {
 
         Object message = new Object() {
-            public GameEventType type = activePlayerChangedEvent.getType();
-            public PlayerSymbol symbol = activePlayerChangedEvent.getActivePlayer().getSymbol();
+            public GameEventType type = activeSymbolChangedEvent.getType();
+            public PlayerSymbol activeSymbol = activeSymbolChangedEvent.getActiveSymbol().getSymbol();
         };
 
         template.convertAndSend("/topic/game", message);

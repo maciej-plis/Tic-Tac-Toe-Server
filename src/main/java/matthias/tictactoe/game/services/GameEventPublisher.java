@@ -30,7 +30,7 @@ public class GameEventPublisher {
         publisher.publishEvent(new BoardChangedEvent(board));
     }
 
-    public static void publishActivePlayerChangedEvent(ActivePlayer active) {
-        publisher.publishEvent(new ActivePlayerChangedEvent(active));
+    public static void publishActiveSymbolChangedEvent(ActiveSymbol active) {
+        publisher.publishEvent(new ActiveSymbolChangedEvent(active));
     }
 }
