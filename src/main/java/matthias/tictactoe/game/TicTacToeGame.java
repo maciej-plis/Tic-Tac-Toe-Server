@@ -5,12 +5,10 @@ import matthias.tictactoe.game.helpers.BoardChecker;
 import matthias.tictactoe.game.model.*;
 import matthias.tictactoe.game.model.dto.GameData;
 import matthias.tictactoe.game.services.GamePlayerManager;
-import matthias.tictactoe.web.authentication.model.User;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
@@ -29,8 +27,8 @@ public class TicTacToeGame {
      *
      * @param player joining the game
      */
-    public void join(User player) {
-        players.newPlayer(player);
+    public void join(String name) {
+        players.newPlayer(name);
 
         if(players.getPlayersCount() == 2) {
             status.setStatus(Status.IN_PROGRESS);
@@ -46,8 +44,8 @@ public class TicTacToeGame {
      *
      * @param player leaving the game
      */
-    public void leave(User player) {
-        players.removePlayer(player);
+    public void leave(String name) {
+        players.removePlayer(name);
 
         if(!status.hasStatus(Status.NOT_ENOUGH_PLAYERS)) {
             status.setStatus(Status.NOT_ENOUGH_PLAYERS);
@@ -61,8 +59,10 @@ public class TicTacToeGame {
      * @param player player trying to mark square
      * @param point coordinates of board square
      */
-    public void markSquare(User player, Point point) {
-        if(!players.containsPlayer(player)) {
+    public void markSquare(String name, Point point) {
+        Player player = players.getPlayer(name);
+
+        if(player == null) {
             throw new RuntimeException("Player is not in the room");
         }
 
@@ -70,7 +70,7 @@ public class TicTacToeGame {
             throw new RuntimeException("Game is not in progress");
         }
 
-        if(!players.getPlayer(active.getSymbol()).equals(player)) {
+        if(!active.is(player.getSymbol())) {
             throw new RuntimeException("Please wait your turn");
         }
 
@@ -78,7 +78,7 @@ public class TicTacToeGame {
             throw new RuntimeException("This square is already marked");
         }
 
-        board.set(point, active.getSymbol());
+        board.set(point, active.getSymbol().symbol());
 
         if(BoardChecker.isWin(board)) {
             status.setStatus(Status.WIN);
@@ -99,12 +99,7 @@ public class TicTacToeGame {
     public GameData getGameData() {
         GameData gameData = new GameData();
         gameData.setBoard(board.as2DimArray());
-        gameData.setPlayers(players.getPlayers()
-                                .entrySet()
-                                .stream()
-                                .collect(Collectors.toMap(
-                                            e -> e.getKey(),
-                                            e -> e.getValue().getUsername())));
+        gameData.setPlayers(players.getPlayers());
         gameData.setStatus(status.getStatus());
         gameData.setActivePlayer(active.getSymbol());
         return gameData;
@@ -116,10 +111,10 @@ public class TicTacToeGame {
      * O -> X
      */
     private void changeActivePlayer() {
-        if(this.active.getSymbol() == Symbol.X) {
-            this.active.setSymbol(Symbol.O);
+        if(this.active.getSymbol() == PlayerSymbol.X) {
+            this.active.setSymbol(PlayerSymbol.O);
         } else {
-            this.active.setSymbol(Symbol.X);
+            this.active.setSymbol(PlayerSymbol.X);
         }
     }
 

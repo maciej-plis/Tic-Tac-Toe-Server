@@ -3,8 +3,6 @@ package matthias.tictactoe.web.game.controllers;
 import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.game.TicTacToeGame;
 import matthias.tictactoe.web.authentication.utils.ResponseEntityBuilder;
-import matthias.tictactoe.web.authentication.model.User;
-import matthias.tictactoe.web.authentication.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,13 +17,11 @@ import java.security.Principal;
 public class GameAccessController {
 
     private final TicTacToeGame game;
-    private final UserService userService;
 
     @PostMapping("/join")
     public ResponseEntity<?> joinGame(Principal principal) {
 
-        User user = userService.findUserByUsername(principal.getName());
-        game.join(user);
+        game.join(principal.getName());
 
         return ResponseEntityBuilder
                 .status(200)
@@ -37,8 +33,7 @@ public class GameAccessController {
     @PostMapping("/leave")
     public ResponseEntity<?> leaveGame(Principal principal) {
 
-        User user = userService.findUserByUsername(principal.getName());
-        game.leave(user);
+        game.leave(principal.getName());
 
         return ResponseEntityBuilder
                 .status(200)

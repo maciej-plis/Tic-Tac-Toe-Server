@@ -1,7 +1,7 @@
 package matthias.tictactoe.game.services;
 
-import matthias.tictactoe.game.model.Symbol;
-import matthias.tictactoe.web.authentication.model.User;
+import matthias.tictactoe.game.model.Player;
+import matthias.tictactoe.game.model.PlayerSymbol;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -10,67 +10,48 @@ import java.util.*;
 @Component
 @Scope("prototype")
 public class GamePlayerManager {
-    private Map<Symbol, User> players = new EnumMap<>(Symbol.class);
+    private final List<PlayerSymbol> availableSymbols = new ArrayList<>(Arrays.asList(PlayerSymbol.values()));
+    private final Map<String, Player> players = new HashMap<>();
 
-    public void newPlayer(User player) {
-        if(containsPlayer(player)) {
+    public void newPlayer(String name) {
+        if(containsPlayer(name)) {
             throw new RuntimeException("Player is already in the room");
         }
-
-        List<Symbol> availableSymbols = getAvailableSymbols();
 
         if(availableSymbols.isEmpty()) {
             throw new RuntimeException("Room is full");
         }
 
-        this.players.put(availableSymbols.get(0), player);
-        GameEventPublisher.publishPlayerJoinedEvent(availableSymbols.get(0), player);
+        PlayerSymbol symbol = availableSymbols.get(0);
+        availableSymbols.remove(symbol);
+        Player player = new Player(symbol, name);
+
+        this.players.put(name, player);
+        GameEventPublisher.publishPlayerJoinedEvent(player);
     }
 
-    public Symbol removePlayer(User player) {
-        if(!containsPlayer(player)) {
+    public void removePlayer(String name) {
+        if(!containsPlayer(name)) {
             throw new RuntimeException("Player is not in the room");
         }
 
-        Symbol symbol = getPlayerSymbol(player);
-        players.values().remove(player);
-        GameEventPublisher.publishPlayerLeftEvent(symbol, player);
-
-        return symbol;
+        Player removedPlayer = players.remove(name);
+        GameEventPublisher.publishPlayerLeftEvent(removedPlayer);
     }
 
-    public User getPlayer(Symbol symbol) {
-        return players.get(symbol);
+    public Player getPlayer(String name) {
+        return players.get(name);
     }
 
-    public boolean containsPlayer(User player) {
-        return players.containsValue(player);
-    }
-
-    public Symbol getPlayerSymbol(User player) {
-        for(Symbol symbol : players.keySet()) {
-            if(players.get(symbol).equals(player)) {
-                return symbol;
-            }
-        }
-
-        return null;
+    public boolean containsPlayer(String name) {
+        return players.containsKey(name);
     }
 
     public int getPlayersCount() {
         return this.players.size();
     }
 
-    public Map<Symbol, User> getPlayers() {
-        return this.players;
-    }
-
-    private List<Symbol> getAvailableSymbols() {
-        List<Symbol> availableSymbols = new ArrayList<>(Arrays.asList(Symbol.values()));
-
-        availableSymbols.remove(Symbol.EMPTY);
-        availableSymbols.removeAll(players.keySet());
-
-        return availableSymbols;
+    public Collection<Player> getPlayers() {
+        return this.players.values();
     }
 }

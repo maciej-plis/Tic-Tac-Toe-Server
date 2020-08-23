@@ -1,11 +1,7 @@
 package matthias.tictactoe.game.services;
 
 import matthias.tictactoe.game.events.*;
-import matthias.tictactoe.game.model.ActivePlayer;
-import matthias.tictactoe.game.model.GameBoard;
-import matthias.tictactoe.game.model.Status;
-import matthias.tictactoe.game.model.Symbol;
-import matthias.tictactoe.web.authentication.model.User;
+import matthias.tictactoe.game.model.*;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -18,14 +14,12 @@ public class GameEventPublisher {
         publisher = eventPublisher;
     }
 
-    public static void publishPlayerJoinedEvent(Symbol symbol, User player) {
-        String playerName = player.getUsername();
-        publisher.publishEvent(new PlayerJoinedEvent(symbol, playerName) );
+    public static void publishPlayerJoinedEvent(Player player) {
+        publisher.publishEvent(new PlayerJoinedEvent(player) );
     }
 
-    public static void publishPlayerLeftEvent(Symbol symbol, User player) {
-        String playerName = player.getUsername();
-        publisher.publishEvent(new PlayerLeftEvent(symbol, playerName) );
+    public static void publishPlayerLeftEvent(Player player) {
+        publisher.publishEvent(new PlayerLeftEvent(player) );
     }
 
     public static void publishGameStatusChangedEvent(Status status) {

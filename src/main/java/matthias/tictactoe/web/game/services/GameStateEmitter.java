@@ -2,6 +2,8 @@ package matthias.tictactoe.web.game.services;
 
 import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.game.events.*;
+import matthias.tictactoe.game.model.Player;
+import matthias.tictactoe.game.model.PlayerSymbol;
 import matthias.tictactoe.game.model.Status;
 import matthias.tictactoe.game.model.Symbol;
 import org.springframework.context.event.EventListener;
@@ -19,8 +21,7 @@ public class GameStateEmitter {
 
         Object message = new Object() {
             public GameEventType type = playerJoinedEvent.getType();
-            public String name = playerJoinedEvent.getPlayerName();
-            public Symbol symbol = playerJoinedEvent.getPlayerSymbol();
+            public Player player = playerJoinedEvent.getPlayer();
         };
 
         template.convertAndSend("/topic/game", message);
@@ -31,8 +32,7 @@ public class GameStateEmitter {
 
         Object message = new Object() {
             public GameEventType type = playerLeftEvent.getType();
-            public String name = playerLeftEvent.getPlayerName();
-            public Symbol symbol = playerLeftEvent.getPlayerSymbol();
+            public Player player = playerLeftEvent.getPlayer();
         };
 
         template.convertAndSend("/topic/game", message);
@@ -65,7 +65,7 @@ public class GameStateEmitter {
 
         Object message = new Object() {
             public GameEventType type = activePlayerChangedEvent.getType();
-            public Symbol symbol = activePlayerChangedEvent.getActivePlayer().getSymbol();
+            public PlayerSymbol symbol = activePlayerChangedEvent.getActivePlayer().getSymbol();
         };
 
         template.convertAndSend("/topic/game", message);

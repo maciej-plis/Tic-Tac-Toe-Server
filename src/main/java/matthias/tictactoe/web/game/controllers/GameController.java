@@ -3,8 +3,6 @@ package matthias.tictactoe.web.game.controllers;
 import lombok.AllArgsConstructor;
 import matthias.tictactoe.game.TicTacToeGame;
 import matthias.tictactoe.web.authentication.utils.ResponseEntityBuilder;
-import matthias.tictactoe.web.authentication.model.User;
-import matthias.tictactoe.web.authentication.services.UserService;
 import matthias.tictactoe.game.model.dto.GameData;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,13 +16,11 @@ import java.security.Principal;
 public class GameController {
 
     private final TicTacToeGame game;
-    private final UserService userService;
 
     @PostMapping("/mark")
     public ResponseEntity<?> makeMove(Principal principal, @RequestBody Point point) {
 
-        User user = userService.findUserByUsername(principal.getName());
-        game.markSquare(user, point);
+        game.markSquare(principal.getName(), point);
 
         return ResponseEntityBuilder
                 .status(200)
