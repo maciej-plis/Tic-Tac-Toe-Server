@@ -29,6 +29,18 @@ public class GameController {
                 .build();
     }
 
+    @PostMapping("/rematch")
+    public ResponseEntity<?> rematch(Principal principal) {
+
+        game.rematch(principal.getName());
+
+        return ResponseEntityBuilder
+                .status(200)
+                .addToPayload("success", true)
+                .addToPayload("message", "You are tagged as ready for rematch ")
+                .build();
+    }
+
     @GetMapping("/game-data")
     public GameData getGameData() {
         return game.getGameData();

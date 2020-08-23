@@ -1,4 +1,4 @@
-package matthias.tictactoe.game.helpers;
+package matthias.tictactoe.game.utils;
 
 import matthias.tictactoe.game.model.GameBoard;
 import matthias.tictactoe.game.model.Symbol;

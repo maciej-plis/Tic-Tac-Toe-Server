@@ -1,10 +1,11 @@
 package matthias.tictactoe.game;
 
 import lombok.RequiredArgsConstructor;
-import matthias.tictactoe.game.helpers.BoardChecker;
+import matthias.tictactoe.game.utils.BoardChecker;
 import matthias.tictactoe.game.model.*;
 import matthias.tictactoe.game.model.dto.GameData;
 import matthias.tictactoe.game.services.GamePlayerManager;
+import matthias.tictactoe.game.utils.PlayerUtils;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
@@ -85,6 +86,43 @@ public class TicTacToeGame {
             status.setStatus(Status.DRAW);
         } else {
             changeActiveSymbol();
+        }
+
+        if(!status.hasStatus(Status.IN_PROGRESS)) {
+            PlayerUtils.untagRematchForEveryone(players.getPlayers());
+        }
+    }
+
+
+    /**
+     * Tag player as ready for rematch.
+     *
+     * When all players are tagged game
+     * status changes for IN_PROGRESS
+     *
+     * @param name of player wanting rematch
+     */
+    public void rematch(String name) {
+        Player player = players.getPlayer(name);
+
+        if(player == null) {
+            throw new RuntimeException("Player is not in the room");
+        }
+
+        if(!status.hasStatus(Status.WIN) && !status.hasStatus(Status.DRAW)) {
+            throw new RuntimeException("It's not time for rematch");
+        }
+
+        if(player.isReadyForRematch()) {
+            throw new RuntimeException("Wait for second player to rematch");
+        }
+
+        player.rematchReady(true);
+
+        if(PlayerUtils.areEveryoneReadyForRematch(players.getPlayers())) {
+            status.setStatus(Status.IN_PROGRESS);
+            changeActiveSymbol();
+            board.clear();
         }
     }
 

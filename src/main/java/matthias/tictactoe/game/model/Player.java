@@ -7,19 +7,15 @@ public class Player {
 
     PlayerSymbol symbol;
     String name;
-    boolean isReady;
+    boolean readyForRematch;
 
     public Player(PlayerSymbol symbol, String name) {
         this.symbol = symbol;
         this.name = name;
-        this.isReady = false;
+        this.readyForRematch = false;
     }
 
-    public void ready() {
-        this.isReady = true;
-    }
-
-    public void notReady() {
-        this.isReady = false;
+    public void rematchReady(boolean ready) {
+        this.readyForRematch = ready;
     }
 }

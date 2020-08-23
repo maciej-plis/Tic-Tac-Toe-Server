@@ -23,7 +23,7 @@ cleaner code.
 - Game Room
   - [X] Marking square
   - [X] Ending game
-  - [ ] Rematch
+  - [X] Rematch
   - [X] Updating game state
 - Others
   - [ ] saving user game scores
