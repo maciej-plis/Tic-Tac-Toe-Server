@@ -1,5 +1,7 @@
 package matthias.tictactoe.web.authentication.validators;
 
+import matthias.tictactoe.web.authentication.validators.annotations.ValidPassword;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 

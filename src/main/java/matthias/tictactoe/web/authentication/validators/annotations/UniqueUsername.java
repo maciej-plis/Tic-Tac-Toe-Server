@@ -1,4 +1,6 @@
-package matthias.tictactoe.web.authentication.validators;
+package matthias.tictactoe.web.authentication.validators.annotations;
+
+import matthias.tictactoe.web.authentication.validators.UsernameUniquenessValidator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -7,15 +9,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Constraint(validatedBy = FieldsValueMatchValidator.class)
-@Target({ ElementType.TYPE })
+@Constraint(validatedBy = UsernameUniquenessValidator.class)
+@Target( { ElementType.FIELD } )
 @Retention(RetentionPolicy.RUNTIME)
-public @interface FieldsValueMatch {
-
-    String message() default "Fields values don't match";
+public @interface UniqueUsername {
+    String message() default "Username already exist";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
-
-    String field();
-    String fieldMatch();
 }

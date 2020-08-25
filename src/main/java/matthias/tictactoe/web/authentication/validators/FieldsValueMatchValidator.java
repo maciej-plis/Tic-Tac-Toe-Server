@@ -1,5 +1,6 @@
 package matthias.tictactoe.web.authentication.validators;
 
+import matthias.tictactoe.web.authentication.validators.annotations.FieldsValueMatch;
 import org.springframework.beans.BeanWrapperImpl;
 
 import javax.validation.ConstraintValidator;

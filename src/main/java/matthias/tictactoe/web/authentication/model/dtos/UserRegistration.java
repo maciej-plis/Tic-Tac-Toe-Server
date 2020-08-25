@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import matthias.tictactoe.web.authentication.validators.FieldsValueMatch;
-import matthias.tictactoe.web.authentication.validators.ValidPassword;
+import matthias.tictactoe.web.authentication.validators.annotations.FieldsValueMatch;
+import matthias.tictactoe.web.authentication.validators.annotations.UniqueEmail;
+import matthias.tictactoe.web.authentication.validators.annotations.UniqueUsername;
+import matthias.tictactoe.web.authentication.validators.annotations.ValidPassword;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Email;
@@ -25,13 +27,15 @@ public class UserRegistration {
     @Length(min = 5, max = 16, message = "Your username must be 5-16 characters")
     @Pattern(regexp = "^[\\w]*$", message = "The username can only contain letters, numbers and underscore")
     @NotEmpty(message = "Please provide a username")
+    @UniqueUsername
     private String username;
 
     @Email(message = "Please provide a valid Email")
     @NotEmpty(message = "Please provide an email")
+    @UniqueEmail
     private String email;
 
-    @ValidPassword()
+    @ValidPassword
     @NotEmpty(message = "Please provide your password")
     private String password;
 
