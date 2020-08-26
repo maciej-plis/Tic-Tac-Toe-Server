@@ -1,5 +1,6 @@
 package matthias.tictactoe.game.services;
 
+import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.game.model.Player;
 import matthias.tictactoe.game.model.PlayerSymbol;
 import org.springframework.context.annotation.Scope;
@@ -7,9 +8,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+@RequiredArgsConstructor
 @Component
 @Scope("prototype")
 public class GamePlayerManager {
+    private final GameEventPublisher gameEventPublisher;
     private final List<PlayerSymbol> availableSymbols = new ArrayList<>(Arrays.asList(PlayerSymbol.values()));
     private final Map<String, Player> players = new HashMap<>();
 
@@ -27,7 +30,7 @@ public class GamePlayerManager {
         Player player = new Player(symbol, name);
 
         this.players.put(name, player);
-        GameEventPublisher.publishPlayerJoinedEvent(player);
+        gameEventPublisher.publishPlayerJoinedEvent(player);
     }
 
     public void removePlayer(String name) {
@@ -37,7 +40,7 @@ public class GamePlayerManager {
 
         Player removedPlayer = players.remove(name);
         this.availableSymbols.add(removedPlayer.getSymbol());
-        GameEventPublisher.publishPlayerLeftEvent(removedPlayer);
+        gameEventPublisher.publishPlayerLeftEvent(removedPlayer);
     }
 
     public Player getPlayer(String name) {

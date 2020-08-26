@@ -10,10 +10,12 @@ import java.util.Arrays;
 @Component
 @Scope("prototype")
 public class GameBoard {
+    private final GameEventPublisher gameEventPublisher;
     private final int BOARD_SIZE = 3;
     private final Symbol[][] board = new Symbol[BOARD_SIZE][BOARD_SIZE];
 
-    public GameBoard() {
+    public GameBoard(GameEventPublisher gameEventPublisher) {
+        this.gameEventPublisher = gameEventPublisher;
         clear();
     }
 
@@ -23,12 +25,12 @@ public class GameBoard {
                 board[i][j] = Symbol.EMPTY;
             }
         }
-        GameEventPublisher.publishBoardChangedEvent(this);
+        gameEventPublisher.publishBoardChangedEvent(this);
     }
 
     public void set(Point point, Symbol symbol) {
         board[point.x][point.y] = symbol;
-        GameEventPublisher.publishBoardChangedEvent(this);
+        gameEventPublisher.publishBoardChangedEvent(this);
     }
 
     public boolean isEmpty(Point point) {

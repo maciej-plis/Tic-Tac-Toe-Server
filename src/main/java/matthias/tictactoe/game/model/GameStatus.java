@@ -7,9 +7,11 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("prototype")
 public class GameStatus {
+    private final GameEventPublisher gameEventPublisher;
     private Status status;
 
-    public GameStatus() {
+    public GameStatus(GameEventPublisher gameEventPublisher) {
+        this.gameEventPublisher = gameEventPublisher;
         this.status = Status.NOT_ENOUGH_PLAYERS;
     }
 
@@ -19,7 +21,7 @@ public class GameStatus {
 
     public void setStatus(Status status) {
         this.status = status;
-        GameEventPublisher.publishGameStatusChangedEvent(this);
+        gameEventPublisher.publishGameStatusChangedEvent(this);
     }
 
     public boolean hasStatus(Status status) {

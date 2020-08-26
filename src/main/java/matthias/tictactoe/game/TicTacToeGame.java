@@ -6,14 +6,12 @@ import matthias.tictactoe.game.model.*;
 import matthias.tictactoe.game.model.dto.GameData;
 import matthias.tictactoe.game.services.GamePlayerManager;
 import matthias.tictactoe.game.utils.PlayerUtils;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
 
 @RequiredArgsConstructor
 @Component
-@DependsOn("GameEventPublisher")
 public class TicTacToeGame {
     private final GamePlayerManager players;
     private final GameBoard board;

@@ -1,36 +1,34 @@
 package matthias.tictactoe.game.services;
 
+import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.game.events.*;
 import matthias.tictactoe.game.model.*;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-@Service("GameEventPublisher")
+@RequiredArgsConstructor
+@Service
 public class GameEventPublisher {
 
-    private static ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher publisher;
 
-    public GameEventPublisher(ApplicationEventPublisher eventPublisher) {
-        publisher = eventPublisher;
-    }
-
-    public static void publishPlayerJoinedEvent(Player player) {
+    public void publishPlayerJoinedEvent(Player player) {
         publisher.publishEvent(new PlayerJoinedEvent(player) );
     }
 
-    public static void publishPlayerLeftEvent(Player player) {
+    public void publishPlayerLeftEvent(Player player) {
         publisher.publishEvent(new PlayerLeftEvent(player) );
     }
 
-    public static void publishGameStatusChangedEvent(GameStatus status) {
+    public void publishGameStatusChangedEvent(GameStatus status) {
         publisher.publishEvent(new GameStatusChangedEvent(status));
     }
 
-    public static void publishBoardChangedEvent(GameBoard board) {
+    public void publishBoardChangedEvent(GameBoard board) {
         publisher.publishEvent(new BoardChangedEvent(board));
     }
 
-    public static void publishActiveSymbolChangedEvent(ActiveSymbol active) {
+    public void publishActiveSymbolChangedEvent(ActiveSymbol active) {
         publisher.publishEvent(new ActiveSymbolChangedEvent(active));
     }
 }
