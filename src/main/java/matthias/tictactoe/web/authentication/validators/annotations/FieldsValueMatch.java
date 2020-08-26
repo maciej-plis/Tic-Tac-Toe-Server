@@ -9,6 +9,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Validates sameness of 2 specified fields by comparing them
+ * with <b>field</b> equals method. Constrain violation is applied to <b>fieldMatch</b>.
+ */
 @Constraint(validatedBy = FieldsValueMatchValidator.class)
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)

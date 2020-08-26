@@ -9,6 +9,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Validates uniqueness of annotated username field
+ * by checking usernames of already registered users.
+ */
 @Constraint(validatedBy = UsernameUniquenessValidator.class)
 @Target( { ElementType.FIELD } )
 @Retention(RetentionPolicy.RUNTIME)
