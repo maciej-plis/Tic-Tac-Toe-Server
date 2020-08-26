@@ -16,7 +16,7 @@ public class GamePlayerManager {
     private final List<PlayerSymbol> availableSymbols = new ArrayList<>(Arrays.asList(PlayerSymbol.values()));
     private final Map<String, Player> players = new HashMap<>();
 
-    public void newPlayer(String name) {
+    public Player newPlayer(String name) {
         if(containsPlayer(name)) {
             throw new RuntimeException("Player is already in the room");
         }
@@ -31,9 +31,11 @@ public class GamePlayerManager {
 
         this.players.put(name, player);
         gameEventPublisher.publishPlayerJoinedEvent(player);
+
+        return player;
     }
 
-    public void removePlayer(String name) {
+    public Player removePlayer(String name) {
         if(!containsPlayer(name)) {
             throw new RuntimeException("Player is not in the room");
         }
@@ -41,6 +43,8 @@ public class GamePlayerManager {
         Player removedPlayer = players.remove(name);
         this.availableSymbols.add(removedPlayer.getSymbol());
         gameEventPublisher.publishPlayerLeftEvent(removedPlayer);
+
+        return removedPlayer;
     }
 
     public Player getPlayer(String name) {
@@ -57,5 +61,9 @@ public class GamePlayerManager {
 
     public Collection<Player> getPlayers() {
         return this.players.values();
+    }
+
+    public List<PlayerSymbol> getAvailableSymbols() {
+        return this.availableSymbols;
     }
 }
