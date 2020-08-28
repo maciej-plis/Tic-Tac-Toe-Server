@@ -1,6 +1,7 @@
 package matthias.tictactoe.game;
 
 import lombok.RequiredArgsConstructor;
+import matthias.tictactoe.game.services.GameSymbolManager;
 import matthias.tictactoe.game.utils.BoardChecker;
 import matthias.tictactoe.game.model.*;
 import matthias.tictactoe.game.model.dto.GameData;
@@ -9,10 +10,12 @@ import matthias.tictactoe.game.utils.PlayerUtils;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Component
 public class TicTacToeGame {
+    private final GameSymbolManager symbols;
     private final GamePlayerManager players;
     private final GameBoard board;
     private final GameStatus status;
@@ -27,7 +30,8 @@ public class TicTacToeGame {
      * @param name of player to be added
      */
     public void join(String name) {
-        players.newPlayer(name);
+        Player player = createPlayer(name);
+        players.addPlayer(player);
 
         if(players.getPlayersCount() == 2) {
             status.setStatus(Status.IN_PROGRESS);
@@ -43,7 +47,8 @@ public class TicTacToeGame {
      * @param name of player to be removed
      */
     public void leave(String name) {
-        players.removePlayer(name);
+        Player removedPlayer = players.removePlayer(name);
+        symbols.returnSymbol(removedPlayer.getSymbol());
 
         if(!status.hasStatus(Status.NOT_ENOUGH_PLAYERS)) {
             status.setStatus(Status.NOT_ENOUGH_PLAYERS);
@@ -138,6 +143,16 @@ public class TicTacToeGame {
         gameData.setStatus(status.getStatus());
         gameData.setActiveSymbol(active.getSymbol());
         return gameData;
+    }
+
+    private Player createPlayer(String name) {
+        Optional<PlayerSymbol> symbol = symbols.getFirstAvailableSymbol();
+
+        if(symbol.isEmpty()) {
+            throw new RuntimeException("Game is full!");
+        }
+
+        return new Player(symbol.get(), name);
     }
 
     /**

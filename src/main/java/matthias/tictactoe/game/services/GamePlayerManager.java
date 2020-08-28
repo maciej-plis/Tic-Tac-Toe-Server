@@ -2,7 +2,6 @@ package matthias.tictactoe.game.services;
 
 import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.game.model.Player;
-import matthias.tictactoe.game.model.PlayerSymbol;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -13,23 +12,14 @@ import java.util.*;
 @Scope("prototype")
 public class GamePlayerManager {
     private final GameEventPublisher gameEventPublisher;
-    private final List<PlayerSymbol> availableSymbols = new ArrayList<>(Arrays.asList(PlayerSymbol.values()));
     private final Map<String, Player> players = new HashMap<>();
 
-    public Player newPlayer(String name) {
-        if(containsPlayer(name)) {
+    public Player addPlayer(Player player) {
+        if(containsPlayer(player.getName())) {
             throw new RuntimeException("Player is already in the room");
         }
 
-        if(availableSymbols.isEmpty()) {
-            throw new RuntimeException("Room is full");
-        }
-
-        PlayerSymbol symbol = availableSymbols.get(0);
-        availableSymbols.remove(symbol);
-        Player player = new Player(symbol, name);
-
-        this.players.put(name, player);
+        this.players.put(player.getName(), player);
         gameEventPublisher.publishPlayerJoinedEvent(player);
 
         return player;
@@ -41,7 +31,6 @@ public class GamePlayerManager {
         }
 
         Player removedPlayer = players.remove(name);
-        this.availableSymbols.add(removedPlayer.getSymbol());
         gameEventPublisher.publishPlayerLeftEvent(removedPlayer);
 
         return removedPlayer;
@@ -61,9 +50,5 @@ public class GamePlayerManager {
 
     public Collection<Player> getPlayers() {
         return this.players.values();
-    }
-
-    public List<PlayerSymbol> getAvailableSymbols() {
-        return this.availableSymbols;
     }
 }
