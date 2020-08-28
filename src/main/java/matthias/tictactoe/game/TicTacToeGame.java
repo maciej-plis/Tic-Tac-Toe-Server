@@ -25,10 +25,12 @@ public class TicTacToeGame {
     /**
      * Creates new player and adds him to the game.
      *
-     * When number of players in game is
-     * equal to 2 game status changes for IN_PROGRESS
+     * When there is no available symbols (game is full),
+     * then game status changes for IN_PROGRESS.
      *
-     * @param name of player to be added
+     * @param name of player joining the game.
+     * @throws GameException when couldn't create player or
+     * add him to list of game players.
      */
     public void join(String name) {
         try {
@@ -46,10 +48,11 @@ public class TicTacToeGame {
     /**
      * Removes player from the game.
      *
-     * When game status is different from NOT_ENOUGH_PLAYERS
-     * then game status changes to it and board is cleared
+     * When game status is different from NOT_ENOUGH_PLAYERS,
+     * game status changes to it and board is cleared.
      *
-     * @param name of player to be removed
+     * @param name of player to be removed.
+     * @throws GameException when couldn't remove player.
      */
     public void leave(String name) {
         try {
@@ -68,8 +71,11 @@ public class TicTacToeGame {
     /**
      * Marks square of game board with player symbol.
      *
-     * @param name of player marking square
-     * @param point coordinates of board square
+     * @param name of player marking square.
+     * @param point coordinates of board square.
+     *s @throws GameException when player was not found, game hasn't
+     * started yet, player symbol is not active or couldn't mark
+     * choosen square.
      */
     public void markSquare(String name, Point point) {
         Player player = players.getPlayer(name);
@@ -110,9 +116,11 @@ public class TicTacToeGame {
      * Tag player as ready for rematch.
      *
      * When all players are tagged game
-     * status changes for IN_PROGRESS
+     * status changes for IN_PROGRESS.
      *
-     * @param name of player wanting rematch
+     * @param name of player wanting rematch.
+     * @throws GameException when player was not found, game status
+     * doesn't allow rematch or player send rematch request second time.
      */
     public void rematch(String name) {
         Player player = players.getPlayer(name);
