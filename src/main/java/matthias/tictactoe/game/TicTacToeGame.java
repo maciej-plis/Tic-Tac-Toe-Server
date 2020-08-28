@@ -8,6 +8,7 @@ import matthias.tictactoe.game.model.dto.GameData;
 import matthias.tictactoe.game.services.GamePlayerManager;
 import matthias.tictactoe.game.utils.PlayerUtils;
 import org.springframework.stereotype.Component;
+import matthias.tictactoe.game.exceptions.*;
 
 import java.awt.*;
 import java.util.Optional;
@@ -30,8 +31,12 @@ public class TicTacToeGame {
      * @param name of player to be added
      */
     public void join(String name) {
-        Player player = createPlayer(name);
-        players.addPlayer(player);
+        try {
+            Player player = createPlayer(name);
+            players.addPlayer(player);
+        } catch(PlayerCreationException | PlayerInsertionException e) {
+            throw new GameException(e.getMessage());
+        }
 
         if(players.getPlayersCount() == 2) {
             status.setStatus(Status.IN_PROGRESS);
@@ -47,8 +52,12 @@ public class TicTacToeGame {
      * @param name of player to be removed
      */
     public void leave(String name) {
-        Player removedPlayer = players.removePlayer(name);
-        symbols.returnSymbol(removedPlayer.getSymbol());
+        try {
+            Player removedPlayer = players.removePlayer(name);
+            symbols.returnSymbol(removedPlayer.getSymbol());
+        } catch(PlayerRemovalException e) {
+            throw new GameException(e.getMessage());
+        }
 
         if(!status.hasStatus(Status.NOT_ENOUGH_PLAYERS)) {
             status.setStatus(Status.NOT_ENOUGH_PLAYERS);
@@ -66,22 +75,22 @@ public class TicTacToeGame {
         Player player = players.getPlayer(name);
 
         if(player == null) {
-            throw new RuntimeException("Player is not in the room");
+            throw new GameException("Player is not in the room");
         }
 
         if(!status.hasStatus(Status.IN_PROGRESS)) {
-            throw new RuntimeException("Game is not in progress");
+            throw new GameException("Game is not in progress");
         }
 
         if(!active.is(player.getSymbol())) {
-            throw new RuntimeException("Please wait your turn");
+            throw new GameException("Please wait your turn");
         }
 
-        if(!board.isEmpty(point)) {
-            throw new RuntimeException("This square is already marked");
+        try {
+            board.mark(point, active.getSymbol().symbol());
+        } catch(SquareMarkingException e) {
+            throw new GameException(e.getMessage());
         }
-
-        board.set(point, active.getSymbol().symbol());
 
         if(BoardChecker.isWin(board)) {
             status.setStatus(Status.WIN);
@@ -109,15 +118,15 @@ public class TicTacToeGame {
         Player player = players.getPlayer(name);
 
         if(player == null) {
-            throw new RuntimeException("Player is not in the room");
+            throw new GameException("Player is not in the room");
         }
 
-        if(!status.hasStatus(Status.WIN) && !status.hasStatus(Status.DRAW)) {
-            throw new RuntimeException("It's not time for rematch");
+        if(!status.isNot(Status.WIN) && !status.isNot(Status.DRAW)) {
+            throw new GameException("It's not time for rematch");
         }
 
         if(player.isReadyForRematch()) {
-            throw new RuntimeException("Wait for second player to rematch");
+            throw new GameException("Wait for second player to rematch");
         }
 
         player.rematchReady(true);
@@ -145,11 +154,19 @@ public class TicTacToeGame {
         return gameData;
     }
 
+    /**
+     * creates Player with given name and first
+     * available symbol.
+     *
+     * @param name name of the player.
+     * @return created Player.
+     * @throws PlayerCreationException when there is no available symbol.
+     */
     private Player createPlayer(String name) {
         Optional<PlayerSymbol> symbol = symbols.getFirstAvailableSymbol();
 
         if(symbol.isEmpty()) {
-            throw new RuntimeException("Game is full!");
+            throw new PlayerCreationException("Game is full!");
         }
 
         return new Player(symbol.get(), name);

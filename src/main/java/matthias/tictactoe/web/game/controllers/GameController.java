@@ -2,6 +2,7 @@ package matthias.tictactoe.web.game.controllers;
 
 import lombok.AllArgsConstructor;
 import matthias.tictactoe.game.TicTacToeGame;
+import matthias.tictactoe.game.exceptions.GameException;
 import matthias.tictactoe.web.authentication.utils.ResponseEntityBuilder;
 import matthias.tictactoe.game.model.dto.GameData;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +47,7 @@ public class GameController {
         return game.getGameData();
     }
 
-    @ExceptionHandler({Exception.class})
+    @ExceptionHandler({GameException.class})
     public ResponseEntity handleException(Exception e) {
         return ResponseEntityBuilder
                 .status(200)

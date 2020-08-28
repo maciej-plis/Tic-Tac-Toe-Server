@@ -1,5 +1,6 @@
 package matthias.tictactoe.game.model;
 
+import matthias.tictactoe.game.exceptions.SquareMarkingException;
 import matthias.tictactoe.game.services.GameEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,13 @@ public class GameBoard {
     }
 
     public void set(Point point, Symbol symbol) {
+        if(board[point.x][point.y] != Symbol.EMPTY) {
+            throw new SquareMarkingException("This square is already marked");
+        }
+        if(point.x < 0 || point.x > BOARD_SIZE || point.y < 0 || point.y > BOARD_SIZE) {
+            throw new SquareMarkingException(String.format("point (%d, %d) is not on the board", point.x, point.y));
+        }
+
         board[point.x][point.y] = symbol;
         gameEventPublisher.publishBoardChangedEvent(this);
     }
