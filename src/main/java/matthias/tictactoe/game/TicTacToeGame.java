@@ -1,6 +1,7 @@
 package matthias.tictactoe.game;
 
 import lombok.RequiredArgsConstructor;
+import matthias.tictactoe.game.exceptions.*;
 import matthias.tictactoe.game.services.GameSymbolManager;
 import matthias.tictactoe.game.utils.BoardChecker;
 import matthias.tictactoe.game.model.*;
@@ -8,7 +9,6 @@ import matthias.tictactoe.game.model.dto.GameData;
 import matthias.tictactoe.game.services.GamePlayerManager;
 import matthias.tictactoe.game.utils.PlayerUtils;
 import org.springframework.stereotype.Component;
-import matthias.tictactoe.game.exceptions.*;
 
 import java.awt.*;
 import java.util.Optional;
@@ -59,7 +59,7 @@ public class TicTacToeGame {
             throw new GameException(e.getMessage());
         }
 
-        if(!status.hasStatus(Status.NOT_ENOUGH_PLAYERS)) {
+        if(status.isNot(Status.NOT_ENOUGH_PLAYERS)) {
             status.setStatus(Status.NOT_ENOUGH_PLAYERS);
             board.clear();
         }
@@ -78,7 +78,7 @@ public class TicTacToeGame {
             throw new GameException("Player is not in the room");
         }
 
-        if(!status.hasStatus(Status.IN_PROGRESS)) {
+        if(status.isNot(Status.IN_PROGRESS)) {
             throw new GameException("Game is not in progress");
         }
 
@@ -100,7 +100,7 @@ public class TicTacToeGame {
             changeActiveSymbol();
         }
 
-        if(!status.hasStatus(Status.IN_PROGRESS)) {
+        if(status.isNot(Status.IN_PROGRESS)) {
             PlayerUtils.untagRematchForEveryone(players.getPlayers());
         }
     }
@@ -121,7 +121,7 @@ public class TicTacToeGame {
             throw new GameException("Player is not in the room");
         }
 
-        if(!status.isNot(Status.WIN) && !status.isNot(Status.DRAW)) {
+        if(status.isNot(Status.WIN) && status.isNot(Status.DRAW)) {
             throw new GameException("It's not time for rematch");
         }
 
@@ -129,7 +129,7 @@ public class TicTacToeGame {
             throw new GameException("Wait for second player to rematch");
         }
 
-        player.rematchReady(true);
+        player.readyForRematch(true);
 
         if(PlayerUtils.areEveryoneReadyForRematch(players.getPlayers())) {
             status.setStatus(Status.IN_PROGRESS);

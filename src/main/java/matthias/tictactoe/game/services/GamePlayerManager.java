@@ -7,7 +7,9 @@ import matthias.tictactoe.game.model.Player;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Component

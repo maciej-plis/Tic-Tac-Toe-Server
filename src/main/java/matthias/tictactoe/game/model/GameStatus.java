@@ -24,7 +24,7 @@ public class GameStatus {
         gameEventPublisher.publishGameStatusChangedEvent(this);
     }
 
-    public boolean hasStatus(Status status) {
-        return this.status == status;
+    public boolean isNot(Status status) {
+        return this.status != status;
     }
 }

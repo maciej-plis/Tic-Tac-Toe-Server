@@ -15,7 +15,7 @@ public class Player {
         this.readyForRematch = false;
     }
 
-    public void rematchReady(boolean ready) {
+    public void readyForRematch(boolean ready) {
         this.readyForRematch = ready;
     }
 }

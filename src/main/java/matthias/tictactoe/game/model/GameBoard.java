@@ -29,7 +29,7 @@ public class GameBoard {
         gameEventPublisher.publishBoardChangedEvent(this);
     }
 
-    public void set(Point point, Symbol symbol) {
+    public void mark(Point point, Symbol symbol) {
         if(board[point.x][point.y] != Symbol.EMPTY) {
             throw new SquareMarkingException("This square is already marked");
         }
@@ -41,16 +41,12 @@ public class GameBoard {
         gameEventPublisher.publishBoardChangedEvent(this);
     }
 
-    public boolean isEmpty(Point point) {
-        return board[point.x][point.y] == Symbol.EMPTY;
-    }
-
     public Symbol[][] as2DimArray() {
         return board;
     }
 
     public Symbol[] as1DimArray() {
-        return Arrays.stream(board).flatMap(row -> Arrays.stream(row)).toArray(Symbol[]::new);
+        return Arrays.stream(board).flatMap(Arrays::stream).toArray(Symbol[]::new);
     }
 
     public boolean isFull() {

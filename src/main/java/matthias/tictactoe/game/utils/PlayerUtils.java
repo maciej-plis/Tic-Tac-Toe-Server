@@ -18,7 +18,7 @@ public class PlayerUtils {
 
     public static void untagRematchForEveryone(Collection<Player> players) {
         for(Player player : players) {
-            player.rematchReady(false);
+            player.readyForRematch(false);
         }
     }
 }
