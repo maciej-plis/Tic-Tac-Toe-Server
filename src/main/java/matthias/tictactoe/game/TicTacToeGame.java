@@ -1,196 +1,54 @@
 package matthias.tictactoe.game;
 
-import lombok.RequiredArgsConstructor;
-import matthias.tictactoe.game.exceptions.*;
-import matthias.tictactoe.game.services.GameSymbolManager;
-import matthias.tictactoe.game.utils.BoardChecker;
-import matthias.tictactoe.game.model.*;
-import matthias.tictactoe.game.model.dto.GameData;
 import matthias.tictactoe.game.services.GamePlayerManager;
-import matthias.tictactoe.game.utils.PlayerUtils;
+import matthias.tictactoe.game.states.GameState;
+import matthias.tictactoe.game.states.NotEnoughPlayersGameState;
+import org.springframework.context.ApplicationContext;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
-import java.util.Optional;
 
-@RequiredArgsConstructor
 @Component
 public class TicTacToeGame {
-    private final GameSymbolManager symbols;
-    private final GamePlayerManager players;
-    private final GameBoard board;
-    private final GameStatus status;
-    private final ActiveSymbol active;
+    private final GamePlayerManager playersManager;
+    private GameState state;
 
-    /**
-     * Creates new player and adds him to the game.
-     *
-     * When there is no available symbols (game is full),
-     * then game status changes for IN_PROGRESS.
-     *
-     * @param name of player joining the game.
-     * @throws GameException when couldn't create player or
-     * add him to list of game players.
-     */
+    public TicTacToeGame(GamePlayerManager playersManager, ApplicationContext context) {
+        this.playersManager = playersManager;
+        this.state = context.getBean(NotEnoughPlayersGameState.class, this);
+    }
+
     public void join(String name) {
-        try {
-            Player player = createPlayer(name);
-            players.addPlayer(player);
-        } catch(PlayerCreationException | PlayerInsertionException e) {
-            throw new GameException(e.getMessage());
-        }
-
-        if(players.getPlayersCount() == 2) {
-            status.setStatus(Status.IN_PROGRESS);
-        }
+        this.state.join(name);
     }
 
-    /**
-     * Removes player from the game.
-     *
-     * When game status is different from NOT_ENOUGH_PLAYERS,
-     * game status changes to it and board is cleared.
-     *
-     * @param name of player to be removed.
-     * @throws GameException when couldn't remove player.
-     */
     public void leave(String name) {
-        try {
-            Player removedPlayer = players.removePlayer(name);
-            symbols.returnSymbol(removedPlayer.getSymbol());
-        } catch(PlayerRemovalException e) {
-            throw new GameException(e.getMessage());
-        }
-
-        if(status.isNot(Status.NOT_ENOUGH_PLAYERS)) {
-            status.setStatus(Status.NOT_ENOUGH_PLAYERS);
-            board.clear();
-        }
+        verifyAccess(name);
+        this.state.leave(name);
     }
 
-    /**
-     * Marks square of game board with player symbol.
-     *
-     * @param name of player marking square.
-     * @param point coordinates of board square.
-     *s @throws GameException when player was not found, game hasn't
-     * started yet, player symbol is not active or couldn't mark
-     * choosen square.
-     */
     public void markSquare(String name, Point point) {
-        Player player = players.getPlayer(name);
-
-        if(player == null) {
-            throw new GameException("Player is not in the room");
-        }
-
-        if(status.isNot(Status.IN_PROGRESS)) {
-            throw new GameException("Game is not in progress");
-        }
-
-        if(!active.is(player.getSymbol())) {
-            throw new GameException("Please wait your turn");
-        }
-
-        try {
-            board.mark(point, active.getSymbol().symbol());
-        } catch(SquareMarkingException e) {
-            throw new GameException(e.getMessage());
-        }
-
-        if(BoardChecker.isWin(board)) {
-            status.setStatus(Status.WIN);
-        } else if(BoardChecker.isDraw(board)) {
-            status.setStatus(Status.DRAW);
-        } else {
-            changeActiveSymbol();
-        }
-
-        if(status.isNot(Status.IN_PROGRESS)) {
-            PlayerUtils.untagRematchForEveryone(players.getPlayers());
-        }
+        verifyAccess(name);
+        this.state.mark(name, point);
     }
 
-
-    /**
-     * Tag player as ready for rematch.
-     *
-     * When all players are tagged game
-     * status changes for IN_PROGRESS.
-     *
-     * @param name of player wanting rematch.
-     * @throws GameException when player was not found, game status
-     * doesn't allow rematch or player send rematch request second time.
-     */
     public void rematch(String name) {
-        Player player = players.getPlayer(name);
-
-        if(player == null) {
-            throw new GameException("Player is not in the room");
-        }
-
-        if(status.isNot(Status.WIN) && status.isNot(Status.DRAW)) {
-            throw new GameException("It's not time for rematch");
-        }
-
-        if(player.isReadyForRematch()) {
-            throw new GameException("Wait for second player to rematch");
-        }
-
-        player.readyForRematch(true);
-
-        if(PlayerUtils.areEveryoneReadyForRematch(players.getPlayers())) {
-            status.setStatus(Status.IN_PROGRESS);
-            changeActiveSymbol();
-            board.clear();
-        }
+        verifyAccess(name);
+        this.state.rematch(name);
     }
 
-    /**
-     * @return Game data containing:<br>
-     * board - 2dim Symbol array<br>
-     * players - collection of players<br>
-     * status - current game status<br>
-     * activePlayer - currently active player symbol
-     */
-    public GameData getGameData() {
-        GameData gameData = new GameData();
-        gameData.setBoard(board.as2DimArray());
-        gameData.setPlayers(players.getPlayers());
-        gameData.setStatus(status.getStatus());
-        gameData.setActiveSymbol(active.getSymbol());
-        return gameData;
+    public GamePlayerManager getPlayersManager() {
+        return playersManager;
     }
 
-    /**
-     * creates Player with given name and first
-     * available symbol.
-     *
-     * @param name name of the player.
-     * @return created Player.
-     * @throws PlayerCreationException when there is no available symbol.
-     */
-    private Player createPlayer(String name) {
-        Optional<PlayerSymbol> symbol = symbols.getFirstAvailableSymbol();
-
-        if(symbol.isEmpty()) {
-            throw new PlayerCreationException("Game is full!");
-        }
-
-        return new Player(symbol.get(), name);
+    public void setState(GameState state) {
+        this.state = state;
     }
 
-    /**
-     * Changes currently active player in game.<br>
-     * x -> O<br>
-     * O -> X
-     */
-    private void changeActiveSymbol() {
-        if(this.active.getSymbol() == PlayerSymbol.X) {
-            this.active.setSymbol(PlayerSymbol.O);
-        } else {
-            this.active.setSymbol(PlayerSymbol.X);
+    private void verifyAccess(String name) {
+        if(!playersManager.containsPlayer(name)) {
+            throw new AccessDeniedException("You are not allowed to do that.");
         }
     }
-
 }

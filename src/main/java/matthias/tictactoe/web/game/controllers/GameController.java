@@ -42,11 +42,6 @@ public class GameController {
                 .build();
     }
 
-    @GetMapping("/game-data")
-    public GameData getGameData() {
-        return game.getGameData();
-    }
-
     @ExceptionHandler({GameException.class})
     public ResponseEntity handleException(Exception e) {
         return ResponseEntityBuilder
