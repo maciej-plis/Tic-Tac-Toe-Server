@@ -6,6 +6,8 @@ import matthias.tictactoe.game.exceptions.SquareMarkingException;
 import matthias.tictactoe.game.model.ActiveSymbol;
 import matthias.tictactoe.game.model.GameBoard;
 import matthias.tictactoe.game.model.Player;
+import matthias.tictactoe.game.model.StateType;
+import matthias.tictactoe.game.utils.BoardChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -19,7 +21,7 @@ public class InProgressGameState extends GameState {
     private ActiveSymbol active;
 
     public InProgressGameState(TicTacToeGame game) {
-        super(game);
+        super(game, StateType.IN_PROGRESS);
     }
 
     @Override
@@ -47,7 +49,13 @@ public class InProgressGameState extends GameState {
             throw new GameException(e.getMessage());
         }
 
-        game.setState(context.getBean(FinishedGameState.class, game));
+        if(BoardChecker.isWin(board)) {
+            game.setState(context.getBean(FinishedGameState.class, game, StateType.WIN));
+        } else if(BoardChecker.isDraw(board)) {
+            game.setState(context.getBean(FinishedGameState.class, game, StateType.DRAW));
+        } else {
+            active.next();
+        }
     }
 
     @Override

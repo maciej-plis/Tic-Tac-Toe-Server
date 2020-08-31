@@ -20,8 +20,8 @@ public class GameEventPublisher {
         publisher.publishEvent(new PlayerLeftEvent(player) );
     }
 
-    public void publishGameStatusChangedEvent(GameStatus status) {
-        publisher.publishEvent(new GameStatusChangedEvent(status));
+    public void publishGameStatusChangedEvent(StateType stateType) {
+        publisher.publishEvent(new GameStateChangedEvent(stateType));
     }
 
     public void publishBoardChangedEvent(GameBoard board) {

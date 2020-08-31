@@ -19,8 +19,12 @@ public class ActiveSymbol {
         return symbol;
     }
 
-    public void setSymbol(PlayerSymbol symbol) {
-        this.symbol = symbol;
+    public void next() {
+        if(symbol == PlayerSymbol.X) {
+            symbol = PlayerSymbol.O;
+        } else {
+            symbol = PlayerSymbol.X;
+        }
         gameEventPublisher.publishActiveSymbolChangedEvent(this);
     }
 

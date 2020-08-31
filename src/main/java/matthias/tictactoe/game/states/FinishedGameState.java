@@ -2,6 +2,7 @@ package matthias.tictactoe.game.states;
 
 import matthias.tictactoe.game.TicTacToeGame;
 import matthias.tictactoe.game.exceptions.GameException;
+import matthias.tictactoe.game.model.StateType;
 import matthias.tictactoe.game.utils.PlayerUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -12,8 +13,8 @@ import java.awt.*;
 @Scope(scopeName = "prototype")
 public class FinishedGameState extends GameState {
 
-    protected FinishedGameState(TicTacToeGame game) {
-        super(game);
+    protected FinishedGameState(TicTacToeGame game, StateType type) {
+        super(game, type);
     }
 
     @Override

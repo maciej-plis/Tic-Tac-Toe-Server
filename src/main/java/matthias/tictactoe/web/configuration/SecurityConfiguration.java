@@ -31,7 +31,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/register", "/authenticate").permitAll()
                 .antMatchers(HttpMethod.POST, "/join", "/leave").authenticated()
                 .antMatchers(HttpMethod.POST, "/mark", "/rematch").authenticated()
-                .antMatchers(HttpMethod.GET, "/game-data").authenticated()
+                .antMatchers(HttpMethod.GET, "/initial-data").authenticated()
                 .antMatchers("/tic-tac-toe/**").permitAll()
                 .anyRequest().denyAll()
                 .and()

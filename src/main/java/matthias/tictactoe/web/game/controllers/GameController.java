@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import matthias.tictactoe.game.TicTacToeGame;
 import matthias.tictactoe.game.exceptions.GameException;
 import matthias.tictactoe.web.authentication.utils.ResponseEntityBuilder;
-import matthias.tictactoe.game.model.dto.GameData;
+import matthias.tictactoe.game.model.dto.InitialGameData;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,6 +40,11 @@ public class GameController {
                 .addToPayload("success", true)
                 .addToPayload("message", "You are tagged as ready for rematch ")
                 .build();
+    }
+
+    @GetMapping("/initial-data")
+    public InitialGameData getGameData() {
+        return game.getInitialGameData();
     }
 
     @ExceptionHandler({GameException.class})
