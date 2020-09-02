@@ -4,12 +4,12 @@ import lombok.AllArgsConstructor;
 import matthias.tictactoe.game.TicTacToeGame;
 import matthias.tictactoe.game.exceptions.GameException;
 import matthias.tictactoe.web.authentication.utils.ResponseEntityBuilder;
-import matthias.tictactoe.game.model.dto.InitialGameData;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.awt.Point;
 import java.security.Principal;
+import java.util.Map;
 
 @AllArgsConstructor
 @RestController
@@ -43,7 +43,7 @@ public class GameController {
     }
 
     @GetMapping("/initial-data")
-    public InitialGameData getGameData() {
+    public Map<String, Object> getGameData() {
         return game.getInitialGameData();
     }
 

@@ -35,7 +35,11 @@ public class FinishedGameState extends GameState {
 
     @Override
     public void rematch(String name) {
-        playersManager.getPlayer(name).isReadyForRematch();
+        if(playersManager.getPlayer(name).isReadyForRematch()) {
+            throw new GameException("You already requested rematch.");
+        }
+
+        playersManager.getPlayer(name).readyForRematch(true);
 
         if(PlayerUtils.areEveryoneReadyForRematch(playersManager.getPlayers())) {
             game.setState(context.getBean(InProgressGameState.class, game));

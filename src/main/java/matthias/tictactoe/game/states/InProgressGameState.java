@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
+import java.util.Map;
 
 @Component
 @Scope(scopeName = "prototype")
@@ -61,6 +62,14 @@ public class InProgressGameState extends GameState {
     @Override
     public void rematch(String name) {
         throw new GameException("You can vote for rematch after finished game.");
+    }
+
+    @Override
+    public Map<String, Object> getGameData() {
+        Map<String, Object> gameData = super.getGameData();
+        gameData.put("board", board.as2DimArray());
+        gameData.put("activeSymbol", active.getSymbol());
+        return gameData;
     }
 
     @Autowired

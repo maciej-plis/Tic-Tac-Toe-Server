@@ -1,7 +1,5 @@
 package matthias.tictactoe.game;
 
-import matthias.tictactoe.game.model.StateType;
-import matthias.tictactoe.game.model.dto.InitialGameData;
 import matthias.tictactoe.game.services.GameEventPublisher;
 import matthias.tictactoe.game.services.GamePlayerManager;
 import matthias.tictactoe.game.states.GameState;
@@ -11,6 +9,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
+import java.util.Map;
 
 @Component
 public class TicTacToeGame {
@@ -45,11 +44,8 @@ public class TicTacToeGame {
         this.state.rematch(name);
     }
 
-    public InitialGameData getInitialGameData() {
-        return InitialGameData.builder()
-                .players(playersManager.getPlayers())
-                .state(state.getType())
-                .build();
+    public Map<String, Object> getInitialGameData() {
+        return state.getGameData();
     }
 
     public GamePlayerManager getPlayersManager() {

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class GameState {
     protected ApplicationContext context;
@@ -27,6 +29,13 @@ public abstract class GameState {
     public abstract void leave(String name);
     public abstract void mark(String name, Point point);
     public abstract void rematch(String name);
+
+    public Map<String, Object> getGameData() {
+        Map<String, Object> gameData = new HashMap<>();
+        gameData.put("players", playersManager.getPlayers());
+        gameData.put("state", type);
+        return gameData;
+    }
 
     public StateType getType() {
         return type;
