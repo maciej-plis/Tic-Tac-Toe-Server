@@ -1,5 +1,7 @@
 package matthias.tictactoe.game;
 
+import matthias.tictactoe.game.events.GameEvent;
+import matthias.tictactoe.game.events.GameEventsFollower;
 import matthias.tictactoe.game.services.GameEventPublisher;
 import matthias.tictactoe.game.services.GamePlayerManager;
 import matthias.tictactoe.game.states.GameState;
@@ -9,10 +11,13 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Component
 public class TicTacToeGame {
+    private final List<GameEventsFollower> followers = new ArrayList<>();
     private final GamePlayerManager playersManager;
     private GameState state;
     private GameEventPublisher eventPublisher;
@@ -42,6 +47,16 @@ public class TicTacToeGame {
     public void rematch(String name) {
         verifyAccess(name);
         this.state.rematch(name);
+    }
+
+    public void followGameEvents(GameEventsFollower follower) {
+        followers.add(follower);
+    }
+
+    public void newEvent(GameEvent event) {
+        for(GameEventsFollower follower : followers) {
+            follower.eventOccurred(event);
+        }
     }
 
     public Map<String, Object> getInitialGameData() {
