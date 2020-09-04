@@ -1,22 +1,24 @@
 package matthias.tictactoe.game.services;
 
-import lombok.RequiredArgsConstructor;
+import matthias.tictactoe.game.events.GameEvent;
+import matthias.tictactoe.game.events.GameEventFactory;
 import matthias.tictactoe.game.exceptions.PlayerInsertionException;
 import matthias.tictactoe.game.exceptions.PlayerRemovalException;
 import matthias.tictactoe.game.model.Player;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
-@RequiredArgsConstructor
-@Component
-@Scope("prototype")
 public class GamePlayerManager {
-    private final GameEventPublisher gameEventPublisher;
-    private final Map<String, Player> players = new HashMap<>();
+    private final Consumer<GameEvent> eventCallback;
+    private final Map<String, Player> players;
+
+    public GamePlayerManager(Consumer<GameEvent> eventCallback) {
+        this.eventCallback = eventCallback;
+        this.players = new HashMap<>();
+    }
 
     public Player addPlayer(Player player) {
         if(containsPlayer(player.getName())) {
@@ -24,7 +26,7 @@ public class GamePlayerManager {
         }
 
         this.players.put(player.getName(), player);
-        gameEventPublisher.publishPlayerJoinedEvent(player);
+        eventCallback.accept(GameEventFactory.createPlayerJoinedEvent(player));
 
         return player;
     }
@@ -35,7 +37,7 @@ public class GamePlayerManager {
         }
 
         Player removedPlayer = players.remove(name);
-        gameEventPublisher.publishPlayerLeftEvent(removedPlayer);
+        eventCallback.accept(GameEventFactory.createPlayerLeftEvent(removedPlayer));
 
         return removedPlayer;
     }

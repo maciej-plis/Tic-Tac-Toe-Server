@@ -7,7 +7,7 @@ import java.util.Map;
 
 @Data
 public class GameEvent {
-    private GameEventType eventType;
+    private GameEventType type;
     private Map<String, Object> payload;
 
     public static GameEventBuilder builder() {
@@ -15,7 +15,7 @@ public class GameEvent {
     }
 
     public static final class GameEventBuilder {
-        private GameEventType eventType;
+        private GameEventType type;
         private Map<String, Object> payload;
 
         private GameEventBuilder() {
@@ -23,7 +23,7 @@ public class GameEvent {
         }
 
         public GameEventBuilder eventType(GameEventType eventType) {
-            this.eventType = eventType;
+            this.type = eventType;
             return this;
         }
 
@@ -34,7 +34,7 @@ public class GameEvent {
 
         public GameEvent build() {
             GameEvent gameEvent = new GameEvent();
-            gameEvent.eventType = this.eventType;
+            gameEvent.type = this.type;
             gameEvent.payload = this.payload;
             return gameEvent;
         }

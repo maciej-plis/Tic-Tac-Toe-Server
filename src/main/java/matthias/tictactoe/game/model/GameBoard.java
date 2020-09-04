@@ -1,5 +1,7 @@
 package matthias.tictactoe.game.model;
 
+import matthias.tictactoe.game.events.GameEvent;
+import matthias.tictactoe.game.events.GameEventFactory;
 import matthias.tictactoe.game.exceptions.SquareMarkingException;
 import matthias.tictactoe.game.services.GameEventPublisher;
 import org.springframework.context.annotation.Scope;
@@ -7,16 +9,15 @@ import org.springframework.stereotype.Component;
 
 import java.awt.*;
 import java.util.Arrays;
+import java.util.function.Consumer;
 
-@Component
-@Scope("prototype")
 public class GameBoard {
-    private final GameEventPublisher gameEventPublisher;
+    private final Consumer<GameEvent> eventCallback;
     private final int BOARD_SIZE = 3;
     private final Symbol[][] board = new Symbol[BOARD_SIZE][BOARD_SIZE];
 
-    public GameBoard(GameEventPublisher gameEventPublisher) {
-        this.gameEventPublisher = gameEventPublisher;
+    public GameBoard(Consumer<GameEvent> eventCallback) {
+        this.eventCallback = eventCallback;
         clear();
     }
 
@@ -26,7 +27,7 @@ public class GameBoard {
                 board[i][j] = Symbol.EMPTY;
             }
         }
-        gameEventPublisher.publishBoardChangedEvent(this);
+        eventCallback.accept(GameEventFactory.createBoardChangedEvent(board));
     }
 
     public void mark(Point point, Symbol symbol) {
@@ -38,7 +39,7 @@ public class GameBoard {
         }
 
         board[point.x][point.y] = symbol;
-        gameEventPublisher.publishBoardChangedEvent(this);
+        eventCallback.accept(GameEventFactory.createBoardChangedEvent(board));
     }
 
     public Symbol[][] as2DimArray() {

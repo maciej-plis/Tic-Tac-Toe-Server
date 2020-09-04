@@ -1,6 +1,8 @@
 package matthias.tictactoe.game.states;
 
+import jdk.jfr.EventFactory;
 import matthias.tictactoe.game.TicTacToeGame;
+import matthias.tictactoe.game.events.GameEventFactory;
 import matthias.tictactoe.game.exceptions.GameException;
 import matthias.tictactoe.game.model.Player;
 import matthias.tictactoe.game.model.PlayerSymbol;
@@ -34,7 +36,7 @@ public class NotEnoughPlayersGameState extends GameState {
         playersManager.addPlayer(player);
 
         if(availableSymbols.isEmpty()) {
-            game.setState(context.getBean(InProgressGameState.class, game));
+            game.setState(new InProgressGameState(game));
         }
     }
 

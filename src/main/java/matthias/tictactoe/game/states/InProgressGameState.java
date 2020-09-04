@@ -1,6 +1,7 @@
 package matthias.tictactoe.game.states;
 
 import matthias.tictactoe.game.TicTacToeGame;
+import matthias.tictactoe.game.events.GameEventFactory;
 import matthias.tictactoe.game.exceptions.GameException;
 import matthias.tictactoe.game.exceptions.SquareMarkingException;
 import matthias.tictactoe.game.model.ActiveSymbol;
@@ -8,21 +9,18 @@ import matthias.tictactoe.game.model.GameBoard;
 import matthias.tictactoe.game.model.Player;
 import matthias.tictactoe.game.model.StateType;
 import matthias.tictactoe.game.utils.BoardChecker;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.awt.*;
 import java.util.Map;
 
-@Component
-@Scope(scopeName = "prototype")
 public class InProgressGameState extends GameState {
     private GameBoard board;
     private ActiveSymbol active;
 
     public InProgressGameState(TicTacToeGame game) {
         super(game, StateType.IN_PROGRESS);
+        board = new GameBoard(game::newEvent);
+        active = new ActiveSymbol(game::newEvent);
     }
 
     @Override
@@ -32,8 +30,9 @@ public class InProgressGameState extends GameState {
 
     @Override
     public void leave(String name) {
-        playersManager.removePlayer(name);
-        game.setState(context.getBean(NotEnoughPlayersGameState.class, game));
+        Player removedPlayer = playersManager.removePlayer(name);
+        game.newEvent(GameEventFactory.createPlayerLeftEvent(removedPlayer));
+        game.setState(new NotEnoughPlayersGameState(game));
     }
 
     @Override
@@ -46,16 +45,18 @@ public class InProgressGameState extends GameState {
 
         try {
             board.mark(point, player.getSymbol().symbol());
+            game.newEvent(GameEventFactory.createBoardChangedEvent(board.as2DimArray()));
         } catch(SquareMarkingException e) {
             throw new GameException(e.getMessage());
         }
 
         if(BoardChecker.isWin(board)) {
-            game.setState(context.getBean(FinishedGameState.class, game, StateType.WIN));
+            game.setState(new FinishedGameState(game, StateType.WIN));
         } else if(BoardChecker.isDraw(board)) {
-            game.setState(context.getBean(FinishedGameState.class, game, StateType.DRAW));
+            game.setState(new FinishedGameState(game, StateType.DRAW));
         } else {
             active.next();
+            game.newEvent(GameEventFactory.createActiveSymbolChangedEvent(active.getSymbol()));
         }
     }
 
@@ -70,15 +71,5 @@ public class InProgressGameState extends GameState {
         gameData.put("board", board.as2DimArray());
         gameData.put("activeSymbol", active.getSymbol());
         return gameData;
-    }
-
-    @Autowired
-    public void setBoard(GameBoard board) {
-        this.board = board;
-    }
-
-    @Autowired
-    public void setActive(ActiveSymbol active) {
-        this.active = active;
     }
 }

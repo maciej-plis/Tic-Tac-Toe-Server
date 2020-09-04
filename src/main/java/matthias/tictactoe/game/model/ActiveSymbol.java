@@ -1,17 +1,19 @@
 package matthias.tictactoe.game.model;
 
+import matthias.tictactoe.game.events.GameEvent;
+import matthias.tictactoe.game.events.GameEventFactory;
 import matthias.tictactoe.game.services.GameEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Component
-@Scope("prototype")
+import java.util.function.Consumer;
+
 public class ActiveSymbol {
-    private final GameEventPublisher gameEventPublisher;
+    private final Consumer<GameEvent> eventCallback;
     private PlayerSymbol symbol;
 
-    public ActiveSymbol(GameEventPublisher gameEventPublisher) {
-        this.gameEventPublisher = gameEventPublisher;
+    public ActiveSymbol(Consumer<GameEvent> eventCallback) {
+        this.eventCallback = eventCallback;
         this.symbol = PlayerSymbol.X;
     }
 
@@ -25,7 +27,7 @@ public class ActiveSymbol {
         } else {
             symbol = PlayerSymbol.X;
         }
-        gameEventPublisher.publishActiveSymbolChangedEvent(this);
+        eventCallback.accept(GameEventFactory.createActiveSymbolChangedEvent(symbol));
     }
 
     public boolean is(PlayerSymbol symbol) {

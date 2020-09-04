@@ -1,16 +1,14 @@
 package matthias.tictactoe.game.states;
 
 import matthias.tictactoe.game.TicTacToeGame;
+import matthias.tictactoe.game.events.GameEventFactory;
 import matthias.tictactoe.game.exceptions.GameException;
+import matthias.tictactoe.game.model.Player;
 import matthias.tictactoe.game.model.StateType;
 import matthias.tictactoe.game.utils.PlayerUtils;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.awt.*;
 
-@Component
-@Scope(scopeName = "prototype")
 public class FinishedGameState extends GameState {
 
     protected FinishedGameState(TicTacToeGame game, StateType type) {
@@ -24,8 +22,9 @@ public class FinishedGameState extends GameState {
 
     @Override
     public void leave(String name) {
-        playersManager.removePlayer(name);
-        game.setState(context.getBean(NotEnoughPlayersGameState.class, game));
+        Player removedPlayer = playersManager.removePlayer(name);
+        game.newEvent(GameEventFactory.createPlayerLeftEvent(removedPlayer));
+        game.setState(new NotEnoughPlayersGameState(game));
     }
 
     @Override
@@ -42,7 +41,7 @@ public class FinishedGameState extends GameState {
         playersManager.getPlayer(name).readyForRematch(true);
 
         if(PlayerUtils.areEveryoneReadyForRematch(playersManager.getPlayers())) {
-            game.setState(context.getBean(InProgressGameState.class, game));
+            game.setState(new InProgressGameState(game));
         }
     }
 }

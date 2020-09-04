@@ -1,12 +1,12 @@
 package matthias.tictactoe.game;
 
 import matthias.tictactoe.game.events.GameEvent;
+import matthias.tictactoe.game.events.GameEventFactory;
 import matthias.tictactoe.game.events.GameEventsFollower;
-import matthias.tictactoe.game.services.GameEventPublisher;
 import matthias.tictactoe.game.services.GamePlayerManager;
 import matthias.tictactoe.game.states.GameState;
 import matthias.tictactoe.game.states.NotEnoughPlayersGameState;
-import org.springframework.context.ApplicationContext;
+import matthias.tictactoe.web.game.services.GameStateEmitter;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
@@ -18,16 +18,15 @@ import java.util.Map;
 @Component
 public class TicTacToeGame {
     private final List<GameEventsFollower> followers = new ArrayList<>();
-    private final GamePlayerManager playersManager;
     private GameState state;
-    private GameEventPublisher eventPublisher;
+    private GameStateEmitter gameStateEmitter;
 
-    public TicTacToeGame(GamePlayerManager playersManager,
-                         ApplicationContext context,
-                         GameEventPublisher eventPublisher) {
-        this.playersManager = playersManager;
-        this.state = context.getBean(NotEnoughPlayersGameState.class, this);
-        this.eventPublisher = eventPublisher;
+    private final GamePlayerManager playersManager;
+
+    public TicTacToeGame(GameStateEmitter gameStateEmitter) {
+        this.gameStateEmitter = gameStateEmitter;
+        this.playersManager = new GamePlayerManager(this::newEvent);
+        this.state = new NotEnoughPlayersGameState(this);
     }
 
     public void join(String name) {
@@ -57,6 +56,7 @@ public class TicTacToeGame {
         for(GameEventsFollower follower : followers) {
             follower.eventOccurred(event);
         }
+        gameStateEmitter.emitGameEvent(event);
     }
 
     public Map<String, Object> getInitialGameData() {
@@ -69,7 +69,6 @@ public class TicTacToeGame {
 
     public void setState(GameState state) {
         this.state = state;
-        this.eventPublisher.publishGameStatusChangedEvent(state.getType());
     }
 
     private void verifyAccess(String name) {

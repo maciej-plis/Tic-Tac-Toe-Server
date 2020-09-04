@@ -16,6 +16,10 @@ public class GameStateEmitter {
 
     private final SimpMessagingTemplate template;
 
+    public void emitGameEvent(GameEvent gameEvent) {
+        template.convertAndSend("/topic/game", gameEvent);
+    }
+
     @EventListener(PlayerJoinedEvent.class)
     public void playerJoined(PlayerJoinedEvent playerJoinedEvent) {
 

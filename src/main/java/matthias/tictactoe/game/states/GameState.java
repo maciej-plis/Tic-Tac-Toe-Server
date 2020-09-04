@@ -1,20 +1,15 @@
 package matthias.tictactoe.game.states;
 
 import matthias.tictactoe.game.TicTacToeGame;
+import matthias.tictactoe.game.events.GameEventFactory;
 import matthias.tictactoe.game.model.StateType;
-import matthias.tictactoe.game.services.GameEventPublisher;
 import matthias.tictactoe.game.services.GamePlayerManager;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class GameState {
-    protected ApplicationContext context;
-    protected GameEventPublisher eventPublisher;
-
     protected final StateType type;
     protected final TicTacToeGame game;
     protected final GamePlayerManager playersManager;
@@ -23,6 +18,7 @@ public abstract class GameState {
         this.game = game;
         this.type = type;
         this.playersManager = game.getPlayersManager();
+        game.newEvent(GameEventFactory.createStateChangedEvent(type));
     }
 
     public abstract void join(String name);
@@ -35,19 +31,5 @@ public abstract class GameState {
         gameData.put("players", playersManager.getPlayers());
         gameData.put("state", type);
         return gameData;
-    }
-
-    public StateType getType() {
-        return type;
-    }
-
-    @Autowired
-    public final void setContext(ApplicationContext context) {
-        this.context = context;
-    }
-
-    @Autowired
-    public final void setEventPublisher(GameEventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
     }
 }
