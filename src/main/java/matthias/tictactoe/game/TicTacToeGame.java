@@ -1,7 +1,6 @@
 package matthias.tictactoe.game;
 
 import matthias.tictactoe.game.events.GameEvent;
-import matthias.tictactoe.game.events.GameEventFactory;
 import matthias.tictactoe.game.events.GameEventsFollower;
 import matthias.tictactoe.game.services.GamePlayerManager;
 import matthias.tictactoe.game.states.GameState;

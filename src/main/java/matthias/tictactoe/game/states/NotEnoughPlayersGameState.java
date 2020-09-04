@@ -1,13 +1,10 @@
 package matthias.tictactoe.game.states;
 
-import jdk.jfr.EventFactory;
 import matthias.tictactoe.game.TicTacToeGame;
-import matthias.tictactoe.game.events.GameEventFactory;
 import matthias.tictactoe.game.exceptions.GameException;
 import matthias.tictactoe.game.model.Player;
 import matthias.tictactoe.game.model.PlayerSymbol;
 import matthias.tictactoe.game.model.StateType;
-import matthias.tictactoe.game.services.GameSymbolManager;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 

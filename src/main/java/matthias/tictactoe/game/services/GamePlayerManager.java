@@ -50,10 +50,6 @@ public class GamePlayerManager {
         return players.containsKey(name);
     }
 
-    public int getPlayersCount() {
-        return this.players.size();
-    }
-
     public Collection<Player> getPlayers() {
         return this.players.values();
     }

@@ -3,9 +3,6 @@ package matthias.tictactoe.game.model;
 import matthias.tictactoe.game.events.GameEvent;
 import matthias.tictactoe.game.events.GameEventFactory;
 import matthias.tictactoe.game.exceptions.SquareMarkingException;
-import matthias.tictactoe.game.services.GameEventPublisher;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.awt.*;
 import java.util.Arrays;

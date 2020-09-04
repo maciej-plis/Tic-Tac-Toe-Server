@@ -3,7 +3,6 @@ package matthias.tictactoe.web.authentication.services;
 import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.web.authentication.model.User;
 import matthias.tictactoe.web.authentication.repos.UserRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
