@@ -41,6 +41,7 @@ public class FinishedGameState extends GameState {
         playersManager.getPlayer(name).readyForRematch(true);
 
         if(PlayerUtils.areEveryoneReadyForRematch(playersManager.getPlayers())) {
+            PlayerUtils.untagRematchForEveryone(playersManager.getPlayers());
             game.setState(new InProgressGameState(game));
         }
     }
