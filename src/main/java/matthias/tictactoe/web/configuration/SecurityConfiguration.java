@@ -27,9 +27,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
             .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/register", "/authenticate").permitAll()
-                .antMatchers(HttpMethod.POST, "/join", "/leave").authenticated()
-                .antMatchers(HttpMethod.POST, "/mark", "/rematch").authenticated()
-                .antMatchers(HttpMethod.GET, "/initial-data").authenticated()
+                .antMatchers("/games/**").authenticated()
                 .antMatchers("/tic-tac-toe/**").permitAll()
                 .anyRequest().denyAll()
                 .and()
@@ -42,5 +40,4 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .userDetailsService(userDetailsService)
             .passwordEncoder(bCryptPasswordEncoder);
     }
-
 }

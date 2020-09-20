@@ -5,25 +5,23 @@ import matthias.tictactoe.game.events.GameEventsFollower;
 import matthias.tictactoe.game.services.GamePlayerManager;
 import matthias.tictactoe.game.states.GameState;
 import matthias.tictactoe.game.states.NotEnoughPlayersGameState;
-import matthias.tictactoe.web.game.services.GameStateEmitter;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Component;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Component
 public class TicTacToeGame {
     private final List<GameEventsFollower> followers = new ArrayList<>();
     private GameState state;
-    private GameStateEmitter gameStateEmitter;
+
+    private final String name;
 
     private final GamePlayerManager playersManager;
 
-    public TicTacToeGame(GameStateEmitter gameStateEmitter) {
-        this.gameStateEmitter = gameStateEmitter;
+    public TicTacToeGame(String name) {
+        this.name = name;
         this.playersManager = new GamePlayerManager(this::newEvent);
         this.state = new NotEnoughPlayersGameState(this);
     }
@@ -53,9 +51,8 @@ public class TicTacToeGame {
 
     public void newEvent(GameEvent event) {
         for(GameEventsFollower follower : followers) {
-            follower.eventOccurred(event);
+            follower.eventOccurred(this.name, event);
         }
-        gameStateEmitter.emitGameEvent(event);
     }
 
     public Map<String, Object> getInitialGameData() {
@@ -68,6 +65,10 @@ public class TicTacToeGame {
 
     public void setState(GameState state) {
         this.state = state;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     private void verifyAccess(String name) {

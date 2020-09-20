@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import matthias.tictactoe.game.TicTacToeGame;
 import matthias.tictactoe.game.exceptions.GameException;
 import matthias.tictactoe.web.authentication.utils.ResponseEntityBuilder;
+import matthias.tictactoe.web.game.exceptions.GameNotFoundException;
+import matthias.tictactoe.web.game.services.GamesManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,11 +17,35 @@ import java.util.Map;
 @RestController
 @CrossOrigin
 public class GameController {
+    private final GamesManager gamesManager;
 
-    private final TicTacToeGame game;
+    @PostMapping("/games/{gameID}/join")
+    public ResponseEntity<?> joinGame(@PathVariable String gameID, Principal principal) {
+        TicTacToeGame game = gamesManager.getGame(gameID);
+        game.join(principal.getName());
 
-    @PostMapping("/mark")
-    public ResponseEntity<?> makeMove(Principal principal, @RequestBody Point point) {
+        return ResponseEntityBuilder
+                .status(200)
+                .addToPayload("success", true)
+                .addToPayload("message", "Room join success")
+                .build();
+    }
+
+    @PostMapping("/games/{gameID}/leave")
+    public ResponseEntity<?> leaveGame(@PathVariable String gameID, Principal principal) {
+        TicTacToeGame game = gamesManager.getGame(gameID);
+        game.leave(principal.getName());
+
+        return ResponseEntityBuilder
+                .status(200)
+                .addToPayload("success", true)
+                .addToPayload("message", "Room leave success")
+                .build();
+    }
+
+    @PostMapping("/games/{gameID}/mark")
+    public ResponseEntity<?> makeMove(@PathVariable String gameID, Principal principal, @RequestBody Point point) {
+        TicTacToeGame game = gamesManager.getGame(gameID);
 
         game.markSquare(principal.getName(), point);
 
@@ -30,8 +56,9 @@ public class GameController {
                 .build();
     }
 
-    @PostMapping("/rematch")
-    public ResponseEntity<?> rematch(Principal principal) {
+    @PostMapping("/games/{gameID}/rematch")
+    public ResponseEntity<?> rematch(@PathVariable String gameID, Principal principal) {
+        TicTacToeGame game = gamesManager.getGame(gameID);
 
         game.rematch(principal.getName());
 
@@ -42,8 +69,9 @@ public class GameController {
                 .build();
     }
 
-    @GetMapping("/initial-data")
-    public Map<String, Object> getGameData() {
+    @GetMapping("/games/{gameID}")
+    public Map<String, Object> getGameData(@PathVariable String gameID) {
+        TicTacToeGame game = gamesManager.getGame(gameID);
         return game.getInitialGameData();
     }
 
@@ -54,5 +82,10 @@ public class GameController {
                 .addToPayload("success", false)
                 .addToPayload("message", e.getMessage())
                 .build();
+    }
+
+    @ExceptionHandler({GameNotFoundException.class})
+    public ResponseEntity handleException(GameNotFoundException e){
+        return ResponseEntity.notFound().build();
     }
 }

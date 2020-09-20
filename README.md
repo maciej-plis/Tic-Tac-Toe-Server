@@ -16,7 +16,7 @@ cleaner code.
 - Login
   - [X] login returning user
 - Rooms
-  - [ ] Multiple rooms
+  - [X] Multiple rooms
   - [X] Joining room
   - [X] Leaving room
   - [ ] Updating rooms state
