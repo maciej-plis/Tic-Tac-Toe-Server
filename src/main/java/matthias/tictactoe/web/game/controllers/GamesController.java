@@ -13,7 +13,7 @@ import java.util.Collection;
 
 @AllArgsConstructor
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 public class GamesController {
     private final GamesManager gamesManager;
 
@@ -33,12 +33,12 @@ public class GamesController {
     }
 
     @ExceptionHandler({GameCreationException.class})
-    public ResponseEntity handleException(GameCreationException e) {
+    public ResponseEntity<?> handleException(GameCreationException e) {
         return ResponseEntity.status(409).build();
     }
 
     @ExceptionHandler({GameNotFoundException.class})
-    public ResponseEntity handleException(GameNotFoundException e) {
+    public ResponseEntity<?> handleException(GameNotFoundException e) {
         return ResponseEntity.notFound().build();
     }
 }

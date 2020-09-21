@@ -15,7 +15,7 @@ import java.util.Map;
 
 @AllArgsConstructor
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 public class GameController {
     private final GamesManager gamesManager;
 
@@ -76,7 +76,7 @@ public class GameController {
     }
 
     @ExceptionHandler({GameException.class})
-    public ResponseEntity handleException(Exception e) {
+    public ResponseEntity<?> handleException(Exception e) {
         return ResponseEntityBuilder
                 .status(200)
                 .addToPayload("success", false)
@@ -85,7 +85,7 @@ public class GameController {
     }
 
     @ExceptionHandler({GameNotFoundException.class})
-    public ResponseEntity handleException(GameNotFoundException e){
+    public ResponseEntity<?> handleException(GameNotFoundException e){
         return ResponseEntity.notFound().build();
     }
 }

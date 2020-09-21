@@ -9,10 +9,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class JWTAuthorizationFilter extends OncePerRequestFilter {
@@ -20,30 +25,30 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        try {
-            String authToken = request.getHeader(jwtConfig.getHeader());
+        List<Cookie> cookies = Arrays.asList(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]));
 
-            if (authToken == null || !authToken.startsWith(jwtConfig.getPrefix())) {
-                SecurityContextHolder.clearContext();
-                filterChain.doFilter(request, response);
+        Optional<Cookie> authCookieOpt = cookies.stream()
+                .filter(cookie -> cookie.getName().equals(jwtConfig.getHeader()))
+                .findFirst();
+
+        if(authCookieOpt.isPresent()) {
+            Cookie authCookie = authCookieOpt.get();
+            try {
+                String token = URLDecoder.decode(authCookie.getValue(), StandardCharsets.UTF_8);
+                Claims claims = validateToken(token);
+                setUpSpringAuthentication(claims);
+            } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException e) {
+                authCookie.setMaxAge(0);
+                response.addCookie(authCookie);
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
                 return;
             }
-
-            Claims claims = validateToken(authToken);
-
-            if (claims.get("authorities") == null) {
-                SecurityContextHolder.clearContext();
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            setUpSpringAuthentication(claims);
-            filterChain.doFilter(request, response);
-
-        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException e) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+        } else {
+            SecurityContextHolder.clearContext();
         }
+
+        filterChain.doFilter(request, response);
     }
 
     private Claims validateToken(String token) {
@@ -57,7 +62,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 
     private void setUpSpringAuthentication(Claims claims) {
         @SuppressWarnings("unchecked")
-        List<String> authorities = (List)claims.get("authorities");
+        List<String> authorities = (List<String>)claims.get("authorities");
 
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(claims.getSubject(), null,
                 authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));

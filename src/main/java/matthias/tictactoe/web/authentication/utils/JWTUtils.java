@@ -7,6 +7,9 @@ import matthias.tictactoe.web.configuration.JWTConfig;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.Cookie;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,11 +30,15 @@ public class JWTUtils {
                         .collect(Collectors.toList()))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtConfig.getExpirationTime()))
-                .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecretKey().getBytes()).compact();
-
-        System.out.println(user.getUsername() + " token " + token);
+                .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecretKey().getBytes())
+                .compact();
 
         return jwtConfig.getPrefix() + token;
+    }
+
+    public static Cookie generateJWTCookieForUser(User user) {
+        String token = generateJWTForUser(user);
+        return new Cookie(jwtConfig.getHeader(), URLEncoder.encode(token, StandardCharsets.UTF_8));
     }
 
 }
