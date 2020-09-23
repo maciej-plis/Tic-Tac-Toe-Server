@@ -25,19 +25,19 @@ public class GamesManager {
         }
 
         TicTacToeGame newGame = new TicTacToeGame(gameName);
-        games.put(newGame.getName(), newGame);
+        games.put(newGame.getId(), newGame);
         eventPublisher.trackGameEvents(newGame);
         return newGame;
     }
 
-    public TicTacToeGame removeGame(String gameName) {
-        verifyGameExistence(gameName);
-        return games.remove(gameName);
+    public TicTacToeGame removeGame(String gameID) {
+        verifyGameExistence(gameID);
+        return games.remove(gameID);
     }
 
-    public TicTacToeGame getGame(String gameName) {
-        verifyGameExistence(gameName);
-        return games.get(gameName);
+    public TicTacToeGame getGame(String gameID) {
+        verifyGameExistence(gameID);
+        return games.get(gameID);
     }
 
     public Collection<TicTacToeGame> getGames() {
@@ -46,13 +46,13 @@ public class GamesManager {
 
     private void init() {
         for(int i=0; i<15; i++) {
-            createNewGame("gameNr" + i);
+            createNewGame("Game Number " + i);
         }
     }
 
-    private void verifyGameExistence(String gameName) {
-        if(!games.containsKey(gameName)) {
-            throw new GameNotFoundException(String.format("Game %s doesn't exist.", gameName));
+    private void verifyGameExistence(String gameID) {
+        if(!games.containsKey(gameID)) {
+            throw new GameNotFoundException(String.format("Game with id \"%s\" doesn't exist.", gameID));
         }
     }
 }

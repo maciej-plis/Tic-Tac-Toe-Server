@@ -5,6 +5,7 @@ import matthias.tictactoe.game.events.GameEventsFollower;
 import matthias.tictactoe.game.services.GamePlayerManager;
 import matthias.tictactoe.game.states.GameState;
 import matthias.tictactoe.game.states.NotEnoughPlayersGameState;
+import matthias.tictactoe.game.utils.RandomIdGenerator;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.awt.*;
@@ -16,11 +17,13 @@ public class TicTacToeGame {
     private final List<GameEventsFollower> followers = new ArrayList<>();
     private GameState state;
 
+    private final String id;
     private final String name;
 
     private final GamePlayerManager playersManager;
 
     public TicTacToeGame(String name) {
+        this.id = RandomIdGenerator.getBase62Id(10);
         this.name = name;
         this.playersManager = new GamePlayerManager(this::newEvent);
         this.state = new NotEnoughPlayersGameState(this);
@@ -51,7 +54,7 @@ public class TicTacToeGame {
 
     public void newEvent(GameEvent event) {
         for(GameEventsFollower follower : followers) {
-            follower.eventOccurred(this.name, event);
+            follower.eventOccurred(this.id, event);
         }
     }
 
@@ -69,6 +72,10 @@ public class TicTacToeGame {
 
     public String getName() {
         return this.name;
+    }
+
+    public String getId() {
+        return this.id;
     }
 
     private void verifyAccess(String name) {

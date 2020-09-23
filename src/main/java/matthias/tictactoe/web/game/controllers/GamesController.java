@@ -23,13 +23,13 @@ public class GamesController {
     }
 
     @PostMapping("/games")
-    public void createGame(@RequestBody String roomID) {
-        gamesManager.createNewGame(roomID);
+    public void createGame(@RequestBody String name) {
+        gamesManager.createNewGame(name);
     }
 
-    @DeleteMapping("/games")
-    public void removeGame(@RequestBody String roomID) {
-        gamesManager.removeGame(roomID);
+    @DeleteMapping("/games/{gameID}")
+    public void removeGame(@PathVariable String gameID) {
+        gamesManager.removeGame(gameID);
     }
 
     @ExceptionHandler({GameCreationException.class})

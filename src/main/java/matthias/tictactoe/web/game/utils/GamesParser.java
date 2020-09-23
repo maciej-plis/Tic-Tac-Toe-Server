@@ -15,6 +15,7 @@ public class GamesParser {
                     Collection<Player> players = game.getPlayersManager().getPlayers();
 
                     return GameDto.builder()
+                            .id(game.getId())
                             .name(game.getName())
                             .players(
                                 players.stream()
