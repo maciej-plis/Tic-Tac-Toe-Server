@@ -28,6 +28,7 @@ public abstract class GameState {
 
     public Map<String, Object> getGameData() {
         Map<String, Object> gameData = new HashMap<>();
+        gameData.put("name", game.getName());
         gameData.put("players", playersManager.getPlayers());
         gameData.put("state", type);
         return gameData;

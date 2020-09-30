@@ -3,9 +3,9 @@ package matthias.tictactoe.web.game.controllers;
 import lombok.AllArgsConstructor;
 import matthias.tictactoe.game.TicTacToeGame;
 import matthias.tictactoe.game.exceptions.GameException;
-import matthias.tictactoe.web.authentication.utils.ResponseEntityBuilder;
 import matthias.tictactoe.web.game.exceptions.GameNotFoundException;
 import matthias.tictactoe.web.game.services.GamesManager;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,11 +24,7 @@ public class GameController {
         TicTacToeGame game = gamesManager.getGame(gameID);
         game.join(principal.getName());
 
-        return ResponseEntityBuilder
-                .status(200)
-                .addToPayload("success", true)
-                .addToPayload("message", "Room join success")
-                .build();
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/games/{gameID}/leave")
@@ -36,11 +32,7 @@ public class GameController {
         TicTacToeGame game = gamesManager.getGame(gameID);
         game.leave(principal.getName());
 
-        return ResponseEntityBuilder
-                .status(200)
-                .addToPayload("success", true)
-                .addToPayload("message", "Room leave success")
-                .build();
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/games/{gameID}/mark")
@@ -49,11 +41,7 @@ public class GameController {
 
         game.markSquare(principal.getName(), point);
 
-        return ResponseEntityBuilder
-                .status(200)
-                .addToPayload("success", true)
-                .addToPayload("message", String.format("Field x%d y%d has been marked successfully", point.x, point.y))
-                .build();
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/games/{gameID}/rematch")
@@ -62,11 +50,7 @@ public class GameController {
 
         game.rematch(principal.getName());
 
-        return ResponseEntityBuilder
-                .status(200)
-                .addToPayload("success", true)
-                .addToPayload("message", "You are tagged as ready for rematch ")
-                .build();
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/games/{gameID}")
@@ -77,15 +61,11 @@ public class GameController {
 
     @ExceptionHandler({GameException.class})
     public ResponseEntity<?> handleException(Exception e) {
-        return ResponseEntityBuilder
-                .status(200)
-                .addToPayload("success", false)
-                .addToPayload("message", e.getMessage())
-                .build();
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
 
     @ExceptionHandler({GameNotFoundException.class})
     public ResponseEntity<?> handleException(GameNotFoundException e){
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 }
