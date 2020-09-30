@@ -8,8 +8,6 @@ import matthias.tictactoe.web.authentication.model.dtos.UserRegistration;
 import matthias.tictactoe.web.authentication.services.UserService;
 import matthias.tictactoe.web.authentication.utils.JWTUtils;
 import matthias.tictactoe.web.authentication.utils.UserMapper;
-import org.springframework.http.HttpCookie;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
@@ -26,7 +24,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins = "${client.url}", allowCredentials = "true")
+@CrossOrigin(origins = "${client.url}")
 @RequiredArgsConstructor
 public class AuthenticationController {
 
