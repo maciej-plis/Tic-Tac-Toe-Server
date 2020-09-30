@@ -14,7 +14,7 @@ import java.util.Collection;
 
 @AllArgsConstructor
 @RestController
-@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+@CrossOrigin(origins = "${client.url}", allowCredentials = "true")
 public class GamesController {
     private final GamesManager gamesManager;
 

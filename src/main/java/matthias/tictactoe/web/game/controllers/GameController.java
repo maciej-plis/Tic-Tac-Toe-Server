@@ -15,7 +15,7 @@ import java.util.Map;
 
 @AllArgsConstructor
 @RestController
-@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+@CrossOrigin(origins = "${client.url}", allowCredentials = "true")
 public class GameController {
     private final GamesManager gamesManager;
 

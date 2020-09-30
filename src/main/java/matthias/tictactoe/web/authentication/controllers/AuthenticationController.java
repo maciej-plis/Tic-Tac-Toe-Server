@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+@CrossOrigin(origins = "${client.url}", allowCredentials = "true")
 @RequiredArgsConstructor
 public class AuthenticationController {
 
