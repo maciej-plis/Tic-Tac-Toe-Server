@@ -4,6 +4,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import matthias.tictactoe.web.authentication.model.User;
 import matthias.tictactoe.web.configuration.JWTConfig;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
@@ -26,19 +28,14 @@ public class JWTUtils {
                 .setSubject(user.getUsername())
                 .claim("authorities",
                         user.getRoles().stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toList()))
+                                .map(GrantedAuthority::getAuthority)
+                                .collect(Collectors.toList()))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtConfig.getExpirationTime()))
                 .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecretKey().getBytes())
                 .compact();
 
         return jwtConfig.getPrefix() + token;
-    }
-
-    public static Cookie generateJWTCookieForUser(User user) {
-        String token = generateJWTForUser(user);
-        return new Cookie(jwtConfig.getHeader(), URLEncoder.encode(token, StandardCharsets.UTF_8));
     }
 
 }

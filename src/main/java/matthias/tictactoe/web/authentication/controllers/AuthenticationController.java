@@ -8,6 +8,8 @@ import matthias.tictactoe.web.authentication.model.dtos.UserRegistration;
 import matthias.tictactoe.web.authentication.services.UserService;
 import matthias.tictactoe.web.authentication.utils.JWTUtils;
 import matthias.tictactoe.web.authentication.utils.UserMapper;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
@@ -54,9 +56,9 @@ public class AuthenticationController {
             return ResponseEntity.status(401).body("Incorrect username or password");
         }
 
-        response.addCookie(JWTUtils.generateJWTCookieForUser(user));
+        String token = JWTUtils.generateJWTForUser(user);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(token);
     }
 
     private Map<String, String> fieldErrorsToMap(List<FieldError> fieldErrors) {

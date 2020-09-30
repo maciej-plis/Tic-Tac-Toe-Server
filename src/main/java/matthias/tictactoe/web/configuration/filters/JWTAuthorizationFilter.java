@@ -9,15 +9,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class JWTAuthorizationFilter extends OncePerRequestFilter {
@@ -25,21 +20,14 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        List<Cookie> cookies = Arrays.asList(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]));
 
-        Optional<Cookie> authCookieOpt = cookies.stream()
-                .filter(cookie -> cookie.getName().equals(jwtConfig.getHeader()))
-                .findFirst();
+        String authHeader = request.getHeader(jwtConfig.getHeader());
 
-        if(authCookieOpt.isPresent()) {
-            Cookie authCookie = authCookieOpt.get();
+        if(authHeader != null && authHeader.startsWith(jwtConfig.getPrefix())) {
             try {
-                String token = URLDecoder.decode(authCookie.getValue(), StandardCharsets.UTF_8);
-                Claims claims = validateToken(token);
+                Claims claims = validateToken(authHeader);
                 setUpSpringAuthentication(claims);
             } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException e) {
-                authCookie.setMaxAge(0);
-                response.addCookie(authCookie);
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
                 return;
