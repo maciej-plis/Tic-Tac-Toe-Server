@@ -1,7 +1,9 @@
 # Tic-Tac-Toe-Server
-Backend part of my multiplayer tic tac toe game in java. Main technology\
-used to build this project is **spring**. Additionally, im building\
-game [client](https://github.com/maciejplis/Tic-Tac-Toe-Client) (Not available yet) with **angular**.
+Backend part of My multiplayer tic tac toe game in java. Main technology\
+used to build this project is **spring**. Additionally, I have created\
+game [client](https://github.com/maciejplis/Tic-Tac-Toe-Client) in **angular**.
+
+You can see LIVE version [here](https://beautiful-tic-tac-toe.herokuapp.com)!
 
 ## Motivation
 Main goal of this project is to expand my knowledge of spring\
@@ -19,16 +21,11 @@ cleaner code.
   - [X] Multiple rooms
   - [X] Joining room
   - [X] Leaving room
-  - [ ] Updating rooms state
 - Game Room
   - [X] Marking square
   - [X] Ending game
   - [X] Rematch
   - [X] Updating game state
-- Others
-  - [ ] saving user game scores
-  - [ ] player profiles
-  - [ ] leaderboard
 
 ## Used technologies:
 - Spring
