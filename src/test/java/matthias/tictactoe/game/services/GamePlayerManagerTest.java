@@ -1,14 +1,12 @@
 package matthias.tictactoe.game.services;
 
 import matthias.tictactoe.game.events.GameEvent;
-import matthias.tictactoe.game.events.GameEventFactory;
 import matthias.tictactoe.game.exceptions.PlayerInsertionException;
 import matthias.tictactoe.game.exceptions.PlayerRemovalException;
 import matthias.tictactoe.game.model.Player;
 import matthias.tictactoe.game.model.PlayerSymbol;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -19,8 +17,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 class GamePlayerManagerTest {
     private GamePlayerManager gamePlayerManager;
