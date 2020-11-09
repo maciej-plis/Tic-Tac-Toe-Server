@@ -4,14 +4,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import matthias.tictactoe.web.authentication.model.User;
 import matthias.tictactoe.web.configuration.JWTConfig;
-import org.springframework.http.HttpCookie;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.Cookie;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.security.Timestamp;
 import java.util.Date;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -21,8 +17,8 @@ public class JWTUtils {
 
     private static JWTConfig jwtConfig = JWTConfig.getConfig();
 
-    public static String generateJWTForUser(User user) {
-        String token = Jwts
+    public static Object generateJWTForUser(User user) {
+        String accessToken = Jwts
                 .builder()
                 .setId(UUID.randomUUID().toString())
                 .setSubject(user.getUsername())
@@ -35,7 +31,11 @@ public class JWTUtils {
                 .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecretKey().getBytes())
                 .compact();
 
-        return jwtConfig.getPrefix() + token;
+        return new Object() {
+            public String name = user.getUsername();
+            public String token = jwtConfig.getPrefix() + accessToken;
+            public long expire = new Date().getTime() + jwtConfig.getExpirationTime();
+        };
     }
 
 }

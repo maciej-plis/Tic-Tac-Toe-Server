@@ -8,6 +8,7 @@ import matthias.tictactoe.web.authentication.model.dtos.UserRegistration;
 import matthias.tictactoe.web.authentication.services.UserService;
 import matthias.tictactoe.web.authentication.utils.JWTUtils;
 import matthias.tictactoe.web.authentication.utils.UserMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
@@ -32,10 +33,14 @@ public class AuthenticationController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> registerUser(@Valid @RequestBody UserRegistration userRegistration, BindingResult bindingResult) {
+    public ResponseEntity<Object> registerUser(@Valid @RequestBody UserRegistration userRegistration, BindingResult bindingResult) {
 
         if(bindingResult.hasErrors()) {
-            return ResponseEntity.status(422).body(fieldErrorsToMap(bindingResult.getFieldErrors()));
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(new Object() {
+                        public String message = "Please correct the errors and try again";
+                        public Map<String, String> fieldErrors = fieldErrorsToMap(bindingResult.getFieldErrors());
+                    });
         }
 
         User user = UserMapper.mapToUserWithRoles(userRegistration, Role.USER);
@@ -46,17 +51,20 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody UserCredentials userCredentials, HttpServletResponse response) {
+    public ResponseEntity<Object> loginUser(@RequestBody UserCredentials userCredentials, HttpServletResponse response) {
 
         User user = userService.findUserByUsername(userCredentials.getUsername());
 
         if(user == null || !passwordEncoder.matches(userCredentials.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(401).body("Incorrect username or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new Object() {
+                        public String message = "Incorrect username or password";
+                    });
         }
 
-        String token = JWTUtils.generateJWTForUser(user);
+        Object userAuth = JWTUtils.generateJWTForUser(user);
 
-        return ResponseEntity.ok().body(token);
+        return ResponseEntity.ok().body(userAuth);
     }
 
     private Map<String, String> fieldErrorsToMap(List<FieldError> fieldErrors) {
