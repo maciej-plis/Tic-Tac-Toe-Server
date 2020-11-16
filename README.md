@@ -17,6 +17,7 @@ cleaner code.
   - [X] register new user
 - Login
   - [X] login returning user
+  - [ ] guest account
 - Rooms
   - [X] Multiple rooms
   - [X] Joining room
@@ -26,6 +27,7 @@ cleaner code.
   - [X] Ending game
   - [X] Rematch
   - [X] Updating game state
+  - [ ] Spectating
 
 ## Used technologies:
 - Spring
