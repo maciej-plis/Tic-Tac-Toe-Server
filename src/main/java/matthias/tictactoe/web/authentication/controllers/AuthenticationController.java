@@ -13,10 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -66,6 +63,9 @@ public class AuthenticationController {
 
         return ResponseEntity.ok().body(userAuth);
     }
+
+    @GetMapping("/")
+    public boolean isOnline() {return true;}
 
     private Map<String, String> fieldErrorsToMap(List<FieldError> fieldErrors) {
         return fieldErrors
