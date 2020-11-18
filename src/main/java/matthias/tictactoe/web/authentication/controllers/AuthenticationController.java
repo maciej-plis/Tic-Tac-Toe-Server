@@ -5,6 +5,7 @@ import matthias.tictactoe.web.authentication.model.Role;
 import matthias.tictactoe.web.authentication.model.User;
 import matthias.tictactoe.web.authentication.model.dtos.UserCredentials;
 import matthias.tictactoe.web.authentication.model.dtos.UserRegistration;
+import matthias.tictactoe.web.authentication.services.GuestGenerator;
 import matthias.tictactoe.web.authentication.services.UserService;
 import matthias.tictactoe.web.authentication.utils.JWTUtils;
 import matthias.tictactoe.web.authentication.utils.UserMapper;
@@ -28,6 +29,7 @@ public class AuthenticationController {
 
     private final BCryptPasswordEncoder passwordEncoder;
     private final UserService userService;
+    private final GuestGenerator guestGenerator;
 
     @PostMapping("/register")
     public ResponseEntity<Object> registerUser(@Valid @RequestBody UserRegistration userRegistration, BindingResult bindingResult) {
@@ -60,6 +62,22 @@ public class AuthenticationController {
         }
 
         Object userAuth = JWTUtils.generateJWTForUser(user);
+
+        return ResponseEntity.ok().body(userAuth);
+    }
+
+    @GetMapping("/login-guest")
+    public ResponseEntity<Object> loginAsGuest() {
+        User guestUser = guestGenerator.generateGuestUser();
+
+        if(guestUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new Object() {
+                        public String message = "Couldn't authorize guest account";
+                    });
+        }
+
+        Object userAuth = JWTUtils.generateJWTForUser(guestUser);
 
         return ResponseEntity.ok().body(userAuth);
     }
