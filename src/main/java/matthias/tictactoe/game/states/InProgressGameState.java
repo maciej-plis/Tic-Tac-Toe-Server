@@ -4,10 +4,7 @@ import matthias.tictactoe.game.TicTacToeGame;
 import matthias.tictactoe.game.events.GameEventFactory;
 import matthias.tictactoe.game.exceptions.GameException;
 import matthias.tictactoe.game.exceptions.SquareMarkingException;
-import matthias.tictactoe.game.model.ActiveSymbol;
-import matthias.tictactoe.game.model.GameBoard;
-import matthias.tictactoe.game.model.Player;
-import matthias.tictactoe.game.model.StateType;
+import matthias.tictactoe.game.model.*;
 import matthias.tictactoe.game.utils.BoardChecker;
 
 import java.awt.*;
@@ -21,6 +18,12 @@ public class InProgressGameState extends GameState {
         super(game, StateType.IN_PROGRESS);
         board = new GameBoard(game::newEvent);
         active = new ActiveSymbol(game::newEvent);
+    }
+
+    public InProgressGameState(TicTacToeGame game, PlayerSymbol activeSymbol) {
+        super(game, StateType.IN_PROGRESS);
+        board = new GameBoard(game::newEvent);
+        active = new ActiveSymbol(game::newEvent, activeSymbol);
     }
 
     @Override
@@ -51,9 +54,9 @@ public class InProgressGameState extends GameState {
         }
 
         if(BoardChecker.isWin(board)) {
-            game.setState(new FinishedGameState(game, StateType.WIN));
+            game.setState(new FinishedGameState(game, StateType.WIN, active.getSymbol(), board));
         } else if(BoardChecker.isDraw(board)) {
-            game.setState(new FinishedGameState(game, StateType.DRAW));
+            game.setState(new FinishedGameState(game, StateType.DRAW, active.getSymbol(), board));
         } else {
             active.next();
             game.newEvent(GameEventFactory.createActiveSymbolChangedEvent(active.getSymbol()));

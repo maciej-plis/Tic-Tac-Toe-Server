@@ -12,6 +12,13 @@ public class ActiveSymbol {
     public ActiveSymbol(Consumer<GameEvent> eventCallback) {
         this.eventCallback = eventCallback;
         this.symbol = PlayerSymbol.X;
+        eventCallback.accept(GameEventFactory.createActiveSymbolChangedEvent(symbol));
+    }
+
+    public ActiveSymbol(Consumer<GameEvent> eventCallback, PlayerSymbol active) {
+        this.eventCallback = eventCallback;
+        this.symbol = active;
+        this.next();
     }
 
     public PlayerSymbol getSymbol() {
