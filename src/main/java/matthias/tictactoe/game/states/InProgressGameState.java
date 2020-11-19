@@ -11,19 +11,10 @@ import java.awt.*;
 import java.util.Map;
 
 public class InProgressGameState extends GameState {
-    private GameBoard board;
-    private ActiveSymbol active;
 
-    public InProgressGameState(TicTacToeGame game) {
+    protected InProgressGameState(TicTacToeGame game) {
         super(game, StateType.IN_PROGRESS);
-        board = new GameBoard(game::newEvent);
-        active = new ActiveSymbol(game::newEvent);
-    }
-
-    public InProgressGameState(TicTacToeGame game, PlayerSymbol activeSymbol) {
-        super(game, StateType.IN_PROGRESS);
-        board = new GameBoard(game::newEvent);
-        active = new ActiveSymbol(game::newEvent, activeSymbol);
+        board.clear();
     }
 
     @Override
@@ -33,8 +24,7 @@ public class InProgressGameState extends GameState {
 
     @Override
     public void leave(String name) {
-        Player removedPlayer = playersManager.removePlayer(name);
-        game.newEvent(GameEventFactory.createPlayerLeftEvent(removedPlayer));
+        playersManager.removePlayer(name);
         game.setState(new NotEnoughPlayersGameState(game));
     }
 
@@ -48,7 +38,6 @@ public class InProgressGameState extends GameState {
 
         try {
             board.mark(point, player.getSymbol().symbol());
-            game.newEvent(GameEventFactory.createBoardChangedEvent(board.as2DimArray()));
         } catch(SquareMarkingException e) {
             throw new GameException(e.getMessage());
         }
@@ -59,20 +48,11 @@ public class InProgressGameState extends GameState {
             game.setState(new FinishedGameState(game, StateType.DRAW, active.getSymbol(), board));
         } else {
             active.next();
-            game.newEvent(GameEventFactory.createActiveSymbolChangedEvent(active.getSymbol()));
         }
     }
 
     @Override
     public void rematch(String name) {
         throw new GameException("You can vote for rematch after finished game.");
-    }
-
-    @Override
-    public Map<String, Object> getGameData() {
-        Map<String, Object> gameData = super.getGameData();
-        gameData.put("board", board.as2DimArray());
-        gameData.put("activeSymbol", active.getSymbol());
-        return gameData;
     }
 }

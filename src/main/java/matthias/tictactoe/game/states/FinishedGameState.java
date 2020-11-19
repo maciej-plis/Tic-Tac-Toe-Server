@@ -11,14 +11,8 @@ import java.util.Map;
 
 public class FinishedGameState extends GameState {
 
-    private PlayerSymbol lastMove;
-    private GameBoard board;
-
     protected FinishedGameState(TicTacToeGame game, StateType type, PlayerSymbol lastMove, GameBoard board) {
         super(game, type);
-
-        this.lastMove = lastMove;
-        this.board = board;
     }
 
     @Override
@@ -28,14 +22,13 @@ public class FinishedGameState extends GameState {
 
     @Override
     public void leave(String name) {
-        Player removedPlayer = playersManager.removePlayer(name);
-        game.newEvent(GameEventFactory.createPlayerLeftEvent(removedPlayer));
+        playersManager.removePlayer(name);
         game.setState(new NotEnoughPlayersGameState(game));
     }
 
     @Override
     public void mark(String name, Point point) {
-        throw new GameException("Game is not in progress.");
+        throw new GameException("Game hasn't started yet.");
     }
 
     @Override
@@ -48,15 +41,9 @@ public class FinishedGameState extends GameState {
 
         if(PlayerUtils.areEveryoneReadyForRematch(playersManager.getPlayers())) {
             PlayerUtils.untagRematchForEveryone(playersManager.getPlayers());
-            game.setState(new InProgressGameState(game, lastMove));
+            game.setState(new InProgressGameState(game));
+            active.next();
         }
     }
 
-    @Override
-    public Map<String, Object> getGameData() {
-        Map<String, Object> gameData = super.getGameData();
-        gameData.put("board", board.as2DimArray());
-        gameData.put("activeSymbol", lastMove);
-        return gameData;
-    }
 }

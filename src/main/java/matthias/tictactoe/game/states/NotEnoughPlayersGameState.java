@@ -13,14 +13,13 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
-@Scope(scopeName = "prototype")
 public class NotEnoughPlayersGameState extends GameState {
     private Queue<PlayerSymbol> availableSymbols;
 
     public NotEnoughPlayersGameState(TicTacToeGame game) {
         super(game, StateType.NOT_ENOUGH_PLAYERS);
         this.availableSymbols = initAvailableSymbols();
+        board.clear();
     }
 
     @Override
@@ -45,7 +44,7 @@ public class NotEnoughPlayersGameState extends GameState {
 
     @Override
     public void mark(String name, Point point) {
-        throw new GameException("Game is not in progress.");
+        throw new GameException("Game hasn't started yet.");
     }
 
     @Override

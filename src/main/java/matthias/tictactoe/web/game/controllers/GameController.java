@@ -56,7 +56,7 @@ public class GameController {
     @GetMapping("/games/{gameID}")
     public Map<String, Object> getGameData(@PathVariable String gameID) {
         TicTacToeGame game = gamesManager.getGame(gameID);
-        return game.getInitialGameData();
+        return game.getGameData();
     }
 
     @ExceptionHandler({GameException.class})

@@ -1,7 +1,10 @@
 package matthias.tictactoe.game;
 
+import lombok.Getter;
 import matthias.tictactoe.game.events.GameEvent;
 import matthias.tictactoe.game.events.GameEventsFollower;
+import matthias.tictactoe.game.model.ActiveSymbol;
+import matthias.tictactoe.game.model.GameBoard;
 import matthias.tictactoe.game.services.GamePlayerManager;
 import matthias.tictactoe.game.states.GameState;
 import matthias.tictactoe.game.states.NotEnoughPlayersGameState;
@@ -13,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Getter
 public class TicTacToeGame {
     private final List<GameEventsFollower> followers = new ArrayList<>();
     private GameState state;
@@ -21,11 +25,17 @@ public class TicTacToeGame {
     private final String name;
 
     private final GamePlayerManager playersManager;
+    private GameBoard board;
+    private ActiveSymbol active;
 
     public TicTacToeGame(String name) {
         this.id = RandomIdGenerator.getBase62Id(10);
         this.name = name;
+
         this.playersManager = new GamePlayerManager(this::newEvent);
+        this.board = new GameBoard(this::newEvent);
+        this.active = new ActiveSymbol(this::newEvent);
+
         this.state = new NotEnoughPlayersGameState(this);
     }
 
@@ -58,7 +68,7 @@ public class TicTacToeGame {
         }
     }
 
-    public Map<String, Object> getInitialGameData() {
+    public Map<String, Object> getGameData() {
         return state.getGameData();
     }
 
