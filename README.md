@@ -17,17 +17,20 @@ cleaner code.
   - [X] register new user
 - Login
   - [X] login returning user
-  - [ ] guest account
+  - [X] guest account
 - Rooms
   - [X] Multiple rooms
   - [X] Joining room
   - [X] Leaving room
+  - [ ] Create/Remove room
+  - [ ] Sorting rooms
 - Game Room
   - [X] Marking square
   - [X] Ending game
   - [X] Rematch
   - [X] Updating game state
   - [ ] Spectating
+  - [ ] Chat
 
 ## Used technologies:
 - Spring
