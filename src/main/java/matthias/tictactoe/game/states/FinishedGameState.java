@@ -37,10 +37,12 @@ public class FinishedGameState extends GameState {
             throw new GameException("You already requested rematch.");
         }
 
-        playersManager.getPlayer(name).readyForRematch(true);
+        Player player = playersManager.getPlayer(name);
+        player.readyForRematch(true);
+        game.newEvent(GameEventFactory.createPlayerRequestedRematchEvent(player));
 
         if(PlayerUtils.areEveryoneReadyForRematch(playersManager.getPlayers())) {
-            PlayerUtils.untagRematchForEveryone(playersManager.getPlayers());
+            PlayerUtils.untagRematchForEveryone(playersManager.getPlayers(), game::newEvent);
             game.setState(new InProgressGameState(game));
             active.next();
         }

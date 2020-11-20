@@ -13,7 +13,6 @@ public class GameEventWsPublisher implements GameEventsFollower{
 
     public void trackGameEvents(TicTacToeGame game) {
         game.followGameEvents(this);
-        game.getName();
     }
 
     @Override

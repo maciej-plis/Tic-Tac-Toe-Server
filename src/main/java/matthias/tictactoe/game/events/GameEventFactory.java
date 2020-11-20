@@ -41,4 +41,10 @@ public class GameEventFactory {
                 .addToPayload("activeSymbol", activeSymbol)
                 .build();
     }
+    public static GameEvent createPlayerRequestedRematchEvent(Player player) {
+        return GameEvent.builder()
+                .eventType(GameEventType.PLAYER_REQUESTED_REMATCH)
+                .addToPayload("player", player)
+                .build();
+    }
 }

@@ -1,8 +1,11 @@
 package matthias.tictactoe.game.utils;
 
+import matthias.tictactoe.game.events.GameEvent;
+import matthias.tictactoe.game.events.GameEventFactory;
 import matthias.tictactoe.game.model.Player;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 
 public class PlayerUtils {
 
@@ -16,9 +19,10 @@ public class PlayerUtils {
         return true;
     }
 
-    public static void untagRematchForEveryone(Collection<Player> players) {
+    public static void untagRematchForEveryone(Collection<Player> players, Consumer<GameEvent> eventCallback) {
         for(Player player : players) {
             player.readyForRematch(false);
+            eventCallback.accept(GameEventFactory.createPlayerRequestedRematchEvent(player));
         }
     }
 }
