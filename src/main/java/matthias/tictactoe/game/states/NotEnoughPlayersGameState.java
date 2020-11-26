@@ -5,6 +5,7 @@ import matthias.tictactoe.game.exceptions.GameException;
 import matthias.tictactoe.game.model.Player;
 import matthias.tictactoe.game.model.PlayerSymbol;
 import matthias.tictactoe.game.model.StateType;
+import matthias.tictactoe.game.utils.PlayerUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ public class NotEnoughPlayersGameState extends GameState {
     public NotEnoughPlayersGameState(TicTacToeGame game) {
         super(game, StateType.NOT_ENOUGH_PLAYERS);
         this.availableSymbols = initAvailableSymbols();
+        PlayerUtils.resetScoreForEveryone(playersManager.getPlayers(), game::newEvent);
         board.clear();
     }
 

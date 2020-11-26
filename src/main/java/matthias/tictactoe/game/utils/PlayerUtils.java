@@ -25,4 +25,11 @@ public class PlayerUtils {
             eventCallback.accept(GameEventFactory.createPlayerRequestedRematchEvent(player));
         }
     }
+
+    public static void resetScoreForEveryone(Collection<Player> players, Consumer <GameEvent> eventCallback) {
+        for(Player player : players) {
+            player.resetScore();
+            eventCallback.accept(GameEventFactory.createPlayerWonEvent(player));
+        }
+    }
 }

@@ -43,9 +43,11 @@ public class InProgressGameState extends GameState {
         }
 
         if(BoardChecker.isWin(board)) {
-            game.setState(new FinishedGameState(game, StateType.WIN, active.getSymbol(), board));
+            player.win();
+            game.newEvent(GameEventFactory.createPlayerWonEvent(player));
+            game.setState(new FinishedGameState(game, StateType.WIN));
         } else if(BoardChecker.isDraw(board)) {
-            game.setState(new FinishedGameState(game, StateType.DRAW, active.getSymbol(), board));
+            game.setState(new FinishedGameState(game, StateType.DRAW));
         } else {
             active.next();
         }

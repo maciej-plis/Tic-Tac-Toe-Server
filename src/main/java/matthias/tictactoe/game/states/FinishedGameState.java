@@ -7,11 +7,10 @@ import matthias.tictactoe.game.model.*;
 import matthias.tictactoe.game.utils.PlayerUtils;
 
 import java.awt.*;
-import java.util.Map;
 
 public class FinishedGameState extends GameState {
 
-    protected FinishedGameState(TicTacToeGame game, StateType type, PlayerSymbol lastMove, GameBoard board) {
+    protected FinishedGameState(TicTacToeGame game, StateType type) {
         super(game, type);
     }
 

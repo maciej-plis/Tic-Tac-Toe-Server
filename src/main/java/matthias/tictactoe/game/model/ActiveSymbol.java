@@ -27,8 +27,4 @@ public class ActiveSymbol {
         }
         eventCallback.accept(GameEventFactory.createActiveSymbolChangedEvent(symbol));
     }
-
-    public boolean is(PlayerSymbol symbol) {
-        return this.symbol == symbol;
-    }
 }
