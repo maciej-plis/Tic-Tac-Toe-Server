@@ -5,6 +5,8 @@ import matthias.tictactoe.game.events.GameEvent;
 import matthias.tictactoe.game.events.GameEventsFollower;
 import matthias.tictactoe.game.model.ActiveSymbol;
 import matthias.tictactoe.game.model.GameBoard;
+import matthias.tictactoe.game.model.Message;
+import matthias.tictactoe.game.services.ChatService;
 import matthias.tictactoe.game.services.GamePlayerManager;
 import matthias.tictactoe.game.states.GameState;
 import matthias.tictactoe.game.states.NotEnoughPlayersGameState;
@@ -25,6 +27,7 @@ public class TicTacToeGame {
     private final String name;
 
     private final GamePlayerManager playersManager;
+    private final ChatService chat;
     private GameBoard board;
     private ActiveSymbol active;
 
@@ -33,6 +36,7 @@ public class TicTacToeGame {
         this.name = name;
 
         this.playersManager = new GamePlayerManager(this::newEvent);
+        this.chat = new ChatService(this::newEvent);
         this.board = new GameBoard(this::newEvent);
         this.active = new ActiveSymbol(this::newEvent);
 
@@ -58,6 +62,13 @@ public class TicTacToeGame {
         this.state.rematch(name);
     }
 
+    public void sendMessage(String name, String messageContent) {
+        verifyAccess(name);
+
+        Message message = new Message(name, messageContent);
+        chat.newMessage(message);
+    }
+
     public void followGameEvents(GameEventsFollower follower) {
         followers.add(follower);
     }
@@ -69,7 +80,10 @@ public class TicTacToeGame {
     }
 
     public Map<String, Object> getGameData() {
-        return state.getGameData();
+        Map<String, Object> gameData = state.getGameData();
+        gameData.put("messages", chat.getMessages());
+
+        return gameData;
     }
 
     public GamePlayerManager getPlayersManager() {

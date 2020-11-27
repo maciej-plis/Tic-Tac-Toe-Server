@@ -22,6 +22,7 @@ public class NotEnoughPlayersGameState extends GameState {
         this.availableSymbols = initAvailableSymbols();
         PlayerUtils.resetScoreForEveryone(playersManager.getPlayers(), game::newEvent);
         board.clear();
+        game.getChat().clear();
     }
 
     @Override

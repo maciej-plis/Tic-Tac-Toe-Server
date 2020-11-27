@@ -53,6 +53,15 @@ public class GameController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/games/{gameID}/send-message")
+    public ResponseEntity<?> sendMessage(@PathVariable String gameID, Principal principal, @RequestBody String message) {
+        TicTacToeGame game = gamesManager.getGame(gameID);
+
+        game.sendMessage(principal.getName(), message);
+
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/games/{gameID}")
     public Map<String, Object> getGameData(@PathVariable String gameID) {
         TicTacToeGame game = gamesManager.getGame(gameID);

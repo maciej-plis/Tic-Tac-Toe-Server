@@ -1,9 +1,6 @@
 package matthias.tictactoe.game.events;
 
-import matthias.tictactoe.game.model.Player;
-import matthias.tictactoe.game.model.PlayerSymbol;
-import matthias.tictactoe.game.model.StateType;
-import matthias.tictactoe.game.model.Symbol;
+import matthias.tictactoe.game.model.*;
 
 public class GameEventFactory {
 
@@ -53,6 +50,19 @@ public class GameEventFactory {
         return GameEvent.builder()
                 .eventType(GameEventType.PLAYER_WON)
                 .addToPayload("player", player)
+                .build();
+    }
+
+    public static GameEvent createNewMessageEvent(Message message) {
+        return GameEvent.builder()
+                .eventType(GameEventType.NEW_MESSAGE)
+                .addToPayload("message", message)
+                .build();
+    }
+
+    public static GameEvent createClearChatEvent() {
+        return GameEvent.builder()
+                .eventType(GameEventType.CLEAR_CHAT)
                 .build();
     }
 }

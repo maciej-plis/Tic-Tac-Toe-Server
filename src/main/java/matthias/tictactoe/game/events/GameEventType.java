@@ -7,5 +7,7 @@ public enum GameEventType {
     ACTIVE_SYMBOL_CHANGED,
     BOARD_CHANGED,
     PLAYER_REQUESTED_REMATCH,
-    PLAYER_WON
+    PLAYER_WON,
+    NEW_MESSAGE,
+    CLEAR_CHAT;
 }
