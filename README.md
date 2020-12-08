@@ -22,17 +22,15 @@ cleaner code.
   - [X] Multiple rooms
   - [X] Joining room
   - [X] Leaving room
-  - [ ] Create/Remove room
-  - [ ] Sorting rooms
 - Game Room
   - [X] Marking square
   - [X] Ending game
   - [X] Rematch
   - [X] Updating game state
-  - [ ] Spectating
-  - [ ] Chat
+  - [X] Chat
 
 ## Used technologies:
 - Spring
 - JPA | Hibernate
 - Websockets
+- Junit
