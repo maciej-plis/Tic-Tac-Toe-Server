@@ -7,30 +7,33 @@ import matthias.tictactoe.game.model.Player;
 import matthias.tictactoe.game.model.PlayerSymbol;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static matthias.tictactoe.game.events.GameEventType.PLAYER_JOINED;
+import static matthias.tictactoe.game.events.GameEventType.PLAYER_LEFT;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 class GamePlayerManagerTest {
+
     private GamePlayerManager gamePlayerManager;
 
     @Mock
     Consumer<GameEvent> eventCallback;
 
-    private Player insertedPlayer = new Player(PlayerSymbol.X, "someName");
+    private final Player insertedPlayer = new Player(PlayerSymbol.X, "someName");
 
     @BeforeEach
     public void init() {
-        MockitoAnnotations.initMocks(this);
+        initMocks(this);
         this.gamePlayerManager = new GamePlayerManager(eventCallback);
     }
 
@@ -46,7 +49,7 @@ class GamePlayerManagerTest {
     public void newPlayer_publishesPlayerJoinedEvent() {
         gamePlayerManager.addPlayer(insertedPlayer);
 
-        verify(eventCallback).accept(ArgumentMatchers.any(GameEvent.class));
+        verify(eventCallback).accept(argThat(arg -> arg.getType() == PLAYER_JOINED));
     }
 
     @Test
@@ -71,7 +74,7 @@ class GamePlayerManagerTest {
 
         gamePlayerManager.removePlayer(insertedPlayer.getName());
 
-        verify(eventCallback, times(2)).accept(ArgumentMatchers.any(GameEvent.class));
+        verify(eventCallback, times(1)).accept(argThat(arg -> arg.getType() == PLAYER_LEFT));
     }
 
     @Test
@@ -108,7 +111,6 @@ class GamePlayerManagerTest {
 
         Collection<Player> players = gamePlayerManager.getPlayers();
 
-        assertTrue(addedPlayers.containsAll(players) &&
-                players.containsAll(addedPlayers));
+        assertTrue(players.size() == 2 && players.containsAll(addedPlayers));
     }
 }

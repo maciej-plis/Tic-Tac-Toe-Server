@@ -1,0 +1,3 @@
+jwt:
+  expiration: 1d
+  key: 0N0f1Es3thyKqchCWwLTOYkvQpG86iw2
