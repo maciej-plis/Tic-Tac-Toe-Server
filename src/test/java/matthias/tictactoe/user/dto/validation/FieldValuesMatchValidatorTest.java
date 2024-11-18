@@ -13,6 +13,8 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 import java.lang.annotation.Annotation;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -44,7 +46,7 @@ class FieldValuesMatchValidatorTest {
 
         boolean isValid = validator.isValid(annotatedBean, ctx);
 
-        Assertions.assertTrue(isValid);
+        assertTrue(isValid);
     }
 
     @ParameterizedTest
@@ -54,7 +56,7 @@ class FieldValuesMatchValidatorTest {
 
         boolean isValid = validator.isValid(annotatedBean, ctx);
 
-        Assertions.assertFalse(isValid);
+        assertFalse(isValid);
     }
 
     private Object createDummyBean(Object value, Object matchingValue) {

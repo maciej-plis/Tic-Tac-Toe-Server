@@ -1,6 +1,8 @@
 package matthias.tictactoe.tictactoe_game;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import matthias.tictactoe.tictactoe_game.exception.IllegalStateActionException;
 
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -9,6 +11,7 @@ import java.util.Set;
 import static java.util.Collections.synchronizedSet;
 import static java.util.Objects.isNull;
 
+@Getter
 abstract class GameState {
 
     protected final Board board;
@@ -182,7 +185,11 @@ final class Finished extends GameState {
     GameState rematch(PlayerId playerId) {
         if (isNotThisGamePlayer(playerId)) return this;
         playersRematch.add(playerId);
-        return allPlayersRematch() ? new InProgress(this) : this;
+
+        final var cleanState = new GameState(new Board(3), this.players) {
+        };
+
+        return allPlayersRematch() ? new InProgress(cleanState) : this;
     }
 
     private boolean allPlayersRematch() {

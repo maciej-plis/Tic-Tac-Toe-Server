@@ -11,6 +11,8 @@ import org.mockito.Mock;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -34,7 +36,7 @@ class EmailUniquenessValidatorTest {
 
         boolean isValid = validator.isValid(email, null);
 
-        Assertions.assertFalse(isValid);
+        assertFalse(isValid);
     }
 
     @ParameterizedTest
@@ -44,6 +46,6 @@ class EmailUniquenessValidatorTest {
 
         boolean isValid = validator.isValid(email, null);
 
-        Assertions.assertTrue(isValid);
+        assertTrue(isValid);
     }
 }

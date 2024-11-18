@@ -1,5 +1,6 @@
 package matthias.tictactoe.tictactoe_game;
 
+import matthias.tictactoe.tictactoe_game.exception.IllegalStateActionException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,14 +25,13 @@ class FinishedTest {
     void shouldConvertToInProgressWhenAllPlayersRematch() {
         final var finishedState = finishedReadiness();
 
-
         final var result = finishedState
             .rematch(PLAYER_X_ID)
             .rematch(PLAYER_O_ID);
 
         assertTrue(result instanceof InProgress);
         assertEquals(finishedState.players, result.players);
-        assertEquals(finishedState.board, result.board);
+        assertEquals(new Board(3), result.board);
     }
 
     @Test

@@ -6,6 +6,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 class PasswordValidatorTest {
     private PasswordValidator validator;
 
@@ -19,7 +22,7 @@ class PasswordValidatorTest {
     void isValid_forValidPassword_returnsTrue(String password) {
         boolean isValid = validator.isValid(password, null);
 
-        Assertions.assertTrue(isValid);
+        assertTrue(isValid);
     }
 
     @ParameterizedTest
@@ -27,6 +30,6 @@ class PasswordValidatorTest {
     void isValid_forInvalidPassword_returnsFalse(String password) {
         boolean isValid = validator.isValid(password, null);
 
-        Assertions.assertFalse(isValid);
+        assertFalse(isValid);
     }
 }

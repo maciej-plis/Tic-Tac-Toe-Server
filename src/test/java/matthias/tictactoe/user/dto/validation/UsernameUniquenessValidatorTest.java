@@ -15,6 +15,8 @@ import java.util.Optional;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -38,7 +40,7 @@ class UsernameUniquenessValidatorTest {
 
         boolean isValid = validator.isValid(name, null);
 
-        Assertions.assertFalse(isValid);
+        assertFalse(isValid);
     }
 
     @ParameterizedTest
@@ -48,6 +50,6 @@ class UsernameUniquenessValidatorTest {
 
         boolean isValid = validator.isValid(name, null);
 
-        Assertions.assertTrue(isValid);
+        assertTrue(isValid);
     }
 }

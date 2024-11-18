@@ -1,5 +1,6 @@
 package matthias.tictactoe.tictactoe_game;
 
+import matthias.tictactoe.tictactoe_game.exception.IllegalStateActionException;
 import org.junit.jupiter.api.Test;
 
 import static matthias.tictactoe.tictactoe_game.Board.BoardResult.WIN_X;
