@@ -1,5 +1,6 @@
 package matthias.tictactoe.tictactoe_game;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.EnumMap;
@@ -9,6 +10,7 @@ import java.util.Set;
 import static java.util.Collections.synchronizedSet;
 import static java.util.Objects.isNull;
 
+@Getter
 abstract class GameState {
 
     protected final Board board;
