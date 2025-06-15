@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FinishedTest {
 
-    private final static PlayerId PLAYER_X_ID = new PlayerId(1L);
-    private final static PlayerId PLAYER_O_ID = new PlayerId(2L);
+    private final static UserId PLAYER_X_ID = new UserId(1L);
+    private final static UserId PLAYER_O_ID = new UserId(2L);
 
     @Test
     void shouldAddPlayerRematch() {
@@ -39,7 +39,7 @@ class FinishedTest {
         final var finishedState = finishedReadiness()
             .rematch(PLAYER_X_ID);
 
-        final var result = finishedState.rematch(new PlayerId(99L));
+        final var result = finishedState.rematch(new UserId(99L));
 
         assertTrue(result instanceof Finished);
         assertEquals(1, ((Finished) result).playersRematch.size());
@@ -62,7 +62,7 @@ class FinishedTest {
     void shouldIgnoreOtherPlayerLeave() {
         final var finishedState = finishedReadiness();
 
-        final var result = finishedState.leave(new PlayerId(99L));
+        final var result = finishedState.leave(new UserId(99L));
 
         assertTrue(result instanceof Finished);
         assertEquals(result, finishedState);

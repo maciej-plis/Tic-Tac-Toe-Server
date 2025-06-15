@@ -1,11 +1,12 @@
 package matthias.tictactoe.tictactoe_game;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
+@EqualsAndHashCode
 @RequiredArgsConstructor
-class Coordinates {
-    final int x;
-    final int y;
+class UserId {
+    private final Long id;
 }

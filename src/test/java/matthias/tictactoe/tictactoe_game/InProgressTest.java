@@ -8,8 +8,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class InProgressTest {
 
-    private final static PlayerId PLAYER_X_ID = new PlayerId(1L);
-    private final static PlayerId PLAYER_O_ID = new PlayerId(2L);
+    private final static UserId PLAYER_X_ID = new UserId(1L);
+    private final static UserId PLAYER_O_ID = new UserId(2L);
 
     @Test
     void shouldMakePlayerMove() {
@@ -99,7 +99,7 @@ class InProgressTest {
     void shouldIgnoreOtherPlayerLeave() {
         final var inProgressState = inProgress();
 
-        final var result = inProgressState.leave(new PlayerId(99L));
+        final var result = inProgressState.leave(new UserId(99L));
 
         assertTrue(result instanceof InProgress);
         assertEquals(result, inProgressState);

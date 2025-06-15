@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AwaitingPlayerReadinessTest {
 
-    private final static PlayerId PLAYER_X_ID = new PlayerId(1L);
-    private final static PlayerId PLAYER_O_ID = new PlayerId(2L);
+    private final static UserId PLAYER_X_ID = new UserId(1L);
+    private final static UserId PLAYER_O_ID = new UserId(2L);
 
     @Test
     void shouldAddPlayerReady() {
@@ -39,7 +39,7 @@ class AwaitingPlayerReadinessTest {
         final var awaitingPlayerReadinessState = awaitingPlayerReadiness()
             .ready(PLAYER_X_ID);
 
-        final var result = awaitingPlayerReadinessState.ready(new PlayerId(99L));
+        final var result = awaitingPlayerReadinessState.ready(new UserId(99L));
 
         assertTrue(result instanceof AwaitingPlayerReadiness);
         assertEquals(1, ((AwaitingPlayerReadiness) result).playersReady.size());
@@ -62,7 +62,7 @@ class AwaitingPlayerReadinessTest {
         final var awaitingPlayerReadinessState = awaitingPlayerReadiness()
             .ready(PLAYER_X_ID);
 
-        final var result = awaitingPlayerReadinessState.notReady(new PlayerId(99L));
+        final var result = awaitingPlayerReadinessState.notReady(new UserId(99L));
 
         assertTrue(result instanceof AwaitingPlayerReadiness);
         assertEquals(1, ((AwaitingPlayerReadiness) result).playersReady.size());
@@ -85,7 +85,7 @@ class AwaitingPlayerReadinessTest {
     void shouldIgnoreOtherPlayerLeave() {
         final var awaitingPlayerReadinessState = awaitingPlayerReadiness();
 
-        final var result = awaitingPlayerReadinessState.leave(new PlayerId(99L));
+        final var result = awaitingPlayerReadinessState.leave(new UserId(99L));
 
         assertTrue(result instanceof AwaitingPlayerReadiness);
         assertEquals(result, awaitingPlayerReadinessState);

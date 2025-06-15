@@ -4,9 +4,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.UUID;
+
 @Getter
 @EqualsAndHashCode
 @RequiredArgsConstructor
-class PlayerId {
-    private final Long id;
+class GameRoomId {
+    private final UUID id;
 }

@@ -10,31 +10,35 @@ class Game {
     private final GameId gameId = new GameId(randomUUID());
     private GameState gameState = new AwaitingPlayers();
 
-    void join(PlayerId playerId) {
-        gameState = gameState.join(playerId);
+    public void join(UserId userId) {
+        gameState = gameState.join(userId);
     }
 
-    void leave(PlayerId playerId) {
-        gameState = gameState.leave(playerId);
+    public void leave(UserId userId) {
+        gameState = gameState.leave(userId);
     }
 
-    void changeSymbol(PlayerId playerId, Symbol symbol) {
-        gameState = gameState.changeSymbol(playerId, symbol);
+    public void changeSymbol(UserId userId, Symbol symbol) {
+        gameState = gameState.changeSymbol(userId, symbol);
     }
 
-    void ready(PlayerId playerId) {
-        gameState = gameState.ready(playerId);
+    public void ready(UserId userId) {
+        gameState = gameState.ready(userId);
     }
 
-    void notReady(PlayerId playerId) {
-        gameState = gameState.notReady(playerId);
+    public void notReady(UserId userId) {
+        gameState = gameState.notReady(userId);
     }
 
-    void move(PlayerId playerId, Coordinates coords) {
-        gameState = gameState.move(playerId, coords);
+    public void move(UserId userId, Coordinates coords) {
+        gameState = gameState.move(userId, coords);
     }
 
-    void rematch(PlayerId playerId) {
-        gameState = gameState.rematch(playerId);
+    public void rematch(UserId userId) {
+        gameState = gameState.rematch(userId);
+    }
+
+    public boolean hasPlayer(UserId userId) {
+        return this.gameState.isThisGamePlayer(userId);
     }
 }

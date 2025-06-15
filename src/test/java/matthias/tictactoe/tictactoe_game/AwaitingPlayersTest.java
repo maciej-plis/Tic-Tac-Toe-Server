@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AwaitingPlayersTest {
 
-    private final static PlayerId PLAYER_X_ID = new PlayerId(1L);
-    private final static PlayerId PLAYER_O_ID = new PlayerId(2L);
+    private final static UserId PLAYER_X_ID = new UserId(1L);
+    private final static UserId PLAYER_O_ID = new UserId(2L);
 
     @Test
     void shouldAddPlayer() {
@@ -76,7 +76,7 @@ class AwaitingPlayersTest {
     void shouldIgnoreOtherPlayerLeave() {
         final var awaitingPlayerReadinessState = new AwaitingPlayers();
 
-        final var result = awaitingPlayerReadinessState.leave(new PlayerId(99L));
+        final var result = awaitingPlayerReadinessState.leave(new UserId(99L));
 
         assertTrue(result instanceof AwaitingPlayers);
         assertTrue(result.players.isEmpty());

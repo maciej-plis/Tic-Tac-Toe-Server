@@ -15,14 +15,14 @@ import static java.util.Objects.isNull;
 abstract class GameState {
 
     protected final Board board;
-    protected final EnumMap<Symbol, PlayerId> players;
+    protected final EnumMap<Symbol, UserId> players;
     protected Symbol symbolTurn = Symbol.X;
 
     GameState() {
         this(new Board(3), new EnumMap<>(Symbol.class));
     }
 
-    public GameState(Board board, EnumMap<Symbol, PlayerId> players) {
+    public GameState(Board board, EnumMap<Symbol, UserId> players) {
         this.board = board.deepClone();
         this.players = new EnumMap<>(players);
     }
@@ -32,50 +32,50 @@ abstract class GameState {
         this.symbolTurn = gameState.symbolTurn;
     }
 
-    GameState join(PlayerId playerId) {
+    GameState join(UserId userId) {
         throw new IllegalStateActionException();
     }
 
-    GameState leave(PlayerId playerId) {
+    GameState leave(UserId userId) {
         synchronized (players) {
-            if (isNotThisGamePlayer(playerId)) return this;
-            players.remove(Symbol.X, playerId);
-            players.remove(Symbol.O, playerId);
+            if (isNotThisGamePlayer(userId)) return this;
+            players.remove(Symbol.X, userId);
+            players.remove(Symbol.O, userId);
             return this instanceof AwaitingPlayers ? this : new AwaitingPlayers(this);
         }
     }
 
-    GameState changeSymbol(PlayerId playerId, Symbol symbol) {
+    GameState changeSymbol(UserId userId, Symbol symbol) {
         throw new IllegalStateActionException();
     }
 
-    GameState ready(PlayerId playerId) {
+    GameState ready(UserId userId) {
         throw new IllegalStateActionException();
     }
 
-    GameState notReady(PlayerId playerId) {
+    GameState notReady(UserId userId) {
         throw new IllegalStateActionException();
     }
 
-    GameState move(PlayerId playerId, Coordinates coords) {
+    GameState move(UserId userId, Coordinates coords) {
         throw new IllegalStateActionException();
     }
 
-    GameState rematch(PlayerId playerId) {
+    GameState rematch(UserId userId) {
         throw new IllegalStateActionException();
     }
 
-    protected boolean isThisGamePlayer(PlayerId playerId) {
-        return players.containsValue(playerId);
+    protected boolean isThisGamePlayer(UserId userId) {
+        return players.containsValue(userId);
     }
 
-    protected boolean isNotThisGamePlayer(PlayerId playerId) {
-        return !isThisGamePlayer(playerId);
+    protected boolean isNotThisGamePlayer(UserId userId) {
+        return !isThisGamePlayer(userId);
     }
 
-    protected Symbol getPlayerSymbol(PlayerId playerId) {
+    protected Symbol getPlayerSymbol(UserId userId) {
         return players.keySet().stream()
-            .filter(symbol -> players.get(symbol).equals(playerId))
+            .filter(symbol -> players.get(symbol).equals(userId))
             .findAny()
             .orElseThrow(IllegalStateException::new);
     }
@@ -89,10 +89,10 @@ final class AwaitingPlayers extends GameState {
     }
 
     @Override
-    GameState join(PlayerId playerId) {
+    GameState join(UserId userId) {
         synchronized (players) {
-            if (isThisGamePlayer(playerId)) return this;
-            if ((addPlayer(Symbol.X, playerId) || addPlayer(Symbol.O, playerId)) && isGameFull()) {
+            if (isThisGamePlayer(userId)) return this;
+            if ((addPlayer(Symbol.X, userId) || addPlayer(Symbol.O, userId)) && isGameFull()) {
                 return new AwaitingPlayerReadiness(this);
             }
         }
@@ -100,18 +100,18 @@ final class AwaitingPlayers extends GameState {
     }
 
     @Override
-    GameState changeSymbol(PlayerId playerId, Symbol symbol) {
+    GameState changeSymbol(UserId userId, Symbol symbol) {
         synchronized (players) {
-            if (isNotThisGamePlayer(playerId)) return this;
-            players.remove(Symbol.X, playerId);
-            players.remove(Symbol.O, playerId);
-            players.put(symbol, playerId);
+            if (isNotThisGamePlayer(userId)) return this;
+            players.remove(Symbol.X, userId);
+            players.remove(Symbol.O, userId);
+            players.put(symbol, userId);
         }
         return this;
     }
 
-    private boolean addPlayer(Symbol symbol, PlayerId playerId) {
-        return isNull(players.putIfAbsent(symbol, playerId));
+    private boolean addPlayer(Symbol symbol, UserId userId) {
+        return isNull(players.putIfAbsent(symbol, userId));
     }
 
     private boolean isGameFull() {
@@ -121,22 +121,22 @@ final class AwaitingPlayers extends GameState {
 
 final class AwaitingPlayerReadiness extends GameState {
 
-    final Set<PlayerId> playersReady = synchronizedSet(new HashSet<>());
+    final Set<UserId> playersReady = synchronizedSet(new HashSet<>());
 
     AwaitingPlayerReadiness(GameState gameState) {
         super(gameState);
     }
 
     @Override
-    GameState ready(PlayerId playerId) {
-        if (isNotThisGamePlayer(playerId)) return this;
-        playersReady.add(playerId);
+    GameState ready(UserId userId) {
+        if (isNotThisGamePlayer(userId)) return this;
+        playersReady.add(userId);
         return allPlayersReady() ? new InProgress(this) : this;
     }
 
     @Override
-    GameState notReady(PlayerId playerId) {
-        playersReady.remove(playerId);
+    GameState notReady(UserId userId) {
+        playersReady.remove(userId);
         return this;
     }
 
@@ -152,11 +152,11 @@ final class InProgress extends GameState {
     }
 
     @Override
-    GameState move(PlayerId playerId, Coordinates coords) {
+    GameState move(UserId userId, Coordinates coords) {
         final var boardCoords = board.toBoardCoordinates(coords);
-        final var playerSymbol = getPlayerSymbol(playerId);
+        final var playerSymbol = getPlayerSymbol(userId);
         synchronized (board) {
-            if (isNotPlayerTurn(playerId)) return this;
+            if (isNotPlayerTurn(userId)) return this;
             board.set(boardCoords, playerSymbol);
             if (board.hasResult()) return new Finished(this);
             changeSymbolTurn();
@@ -164,8 +164,8 @@ final class InProgress extends GameState {
         return this;
     }
 
-    private boolean isNotPlayerTurn(PlayerId playerId) {
-        return getPlayerSymbol(playerId) != symbolTurn;
+    private boolean isNotPlayerTurn(UserId userId) {
+        return getPlayerSymbol(userId) != symbolTurn;
     }
 
     private void changeSymbolTurn() {
@@ -175,16 +175,16 @@ final class InProgress extends GameState {
 
 final class Finished extends GameState {
 
-    final Set<PlayerId> playersRematch = synchronizedSet(new HashSet<>());
+    final Set<UserId> playersRematch = synchronizedSet(new HashSet<>());
 
     Finished(GameState gameState) {
         super(gameState);
     }
 
     @Override
-    GameState rematch(PlayerId playerId) {
-        if (isNotThisGamePlayer(playerId)) return this;
-        playersRematch.add(playerId);
+    GameState rematch(UserId userId) {
+        if (isNotThisGamePlayer(userId)) return this;
+        playersRematch.add(userId);
 
         final var cleanState = new GameState(new Board(3), this.players) {
         };
