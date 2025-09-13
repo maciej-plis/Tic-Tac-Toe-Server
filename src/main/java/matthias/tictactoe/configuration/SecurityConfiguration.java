@@ -1,56 +1,70 @@
 package matthias.tictactoe.configuration;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.jwt.JwtService;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+class SecurityConfiguration {
 
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.cors().and()
-            .csrf().disable()
-            .formLogin().disable()
-            .addFilterAfter(new BearerTokenAuthenticationFilter(jwtService, userDetailsService), UsernamePasswordAuthenticationFilter.class)
-            .authorizeRequests()
-            .antMatchers(GET, "/").permitAll()
-            .antMatchers(POST, "/login-guest", "/register", "/login").anonymous()
-            .antMatchers("/games/**").authenticated()
-            .antMatchers("/tic-tac-toe/**").permitAll()
-            .anyRequest().denyAll();
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.cors(withDefaults());
+        http.csrf(AbstractHttpConfigurer::disable);
+        http.formLogin(AbstractHttpConfigurer::disable);
+
+        http.addFilterAfter(new BearerTokenAuthenticationFilter(jwtService, userDetailsService), UsernamePasswordAuthenticationFilter.class);
+
+        http.authorizeHttpRequests(auth -> auth
+            .requestMatchers(GET, "/").permitAll()
+            .requestMatchers(POST, "/login-guest", "/register", "/login").anonymous()
+            .requestMatchers("/games/**").authenticated()
+            .requestMatchers("/tic-tac-toe/**").permitAll()
+            .anyRequest().denyAll()
+        );
+
+        return http.build();
     }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService)
-            .passwordEncoder(passwordEncoder);
+    @Bean
+    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+        final var authProvider = new DaoAuthenticationProvider(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+
+        return http.getSharedObject(AuthenticationManagerBuilder.class)
+            .authenticationProvider(authProvider)
+            .build();
     }
 }
 

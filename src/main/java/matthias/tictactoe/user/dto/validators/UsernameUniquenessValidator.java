@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.user.UserFacade;
 import matthias.tictactoe.user.dto.validators.annotations.UniqueUsername;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 @RequiredArgsConstructor
 public class UsernameUniquenessValidator implements ConstraintValidator<UniqueUsername, String> {

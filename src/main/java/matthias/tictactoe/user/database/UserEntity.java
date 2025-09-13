@@ -1,14 +1,17 @@
 package matthias.tictactoe.user.database;
 
-import lombok.*;
-import org.springframework.stereotype.Service;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
 import java.util.Set;
 
-import static javax.persistence.EnumType.STRING;
-import static javax.persistence.FetchType.EAGER;
-import static javax.persistence.GenerationType.AUTO;
+import static jakarta.persistence.EnumType.STRING;
+import static jakarta.persistence.FetchType.EAGER;
+import static jakarta.persistence.GenerationType.AUTO;
+
 
 @Getter
 @AllArgsConstructor

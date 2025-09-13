@@ -6,7 +6,7 @@ import matthias.tictactoe.user.dto.UserDto;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.Optional;
 
 @Validated

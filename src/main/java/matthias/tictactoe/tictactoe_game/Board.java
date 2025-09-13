@@ -2,6 +2,8 @@ package matthias.tictactoe.tictactoe_game;
 
 import lombok.EqualsAndHashCode;
 
+import java.util.Arrays;
+
 import static java.util.Arrays.stream;
 import static matthias.tictactoe.tictactoe_game.Board.BoardResult.*;
 import static matthias.tictactoe.tictactoe_game.Symbol.X;
@@ -14,7 +16,7 @@ class Board {
     private final Symbol[][] board;
 
     private BoardResult result;
-    private int moveCount = 0;
+    private int moveCount;
 
     private Board(int size, Symbol[][] board, BoardResult result, int moveCount) {
         this.size = size;
@@ -31,14 +33,24 @@ class Board {
         this.moveCount = 0;
     }
 
-    void set(BoardCoordinates coord, Symbol symbol) {
-        if (result != null) throw new RuntimeException("Board is filled");
-        if (board[coord.x][coord.y] != null) throw new RuntimeException("Invalid board coordinates");
+    void reset() {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                board[i][j] = null;
+            }
+        }
+        this.result = null;
+        this.moveCount = 0;
+    }
 
-        board[coord.x][coord.y] = symbol;
+    void set(BoardCoordinates coords, Symbol symbol) {
+        if (result != null) throw new RuntimeException("Board is filled");
+        if (board[coords.x][coords.y] != null) throw new RuntimeException("Invalid board coordinates");
+
+        board[coords.x][coords.y] = symbol;
         moveCount++;
 
-        updateResult(coord, symbol);
+        updateResult(coords, symbol);
     }
 
     boolean hasResult() {
@@ -51,10 +63,6 @@ class Board {
 
     int getMoveCount() {
         return moveCount;
-    }
-
-    BoardCoordinates toBoardCoordinates(Coordinates coord) {
-        return new BoardCoordinates(coord.x, coord.y);
     }
 
     BoardCoordinates toBoardCoordinates(int x, int y) {
@@ -70,41 +78,47 @@ class Board {
         );
     }
 
-    private void updateResult(BoardCoordinates coord, Symbol symbol) {
-        if (isWinningHorizontally(coord, symbol) ||
-            isWinningVertically(coord, symbol) ||
-            isWinningDiagonally(coord, symbol) ||
-            isWinningAntiDiagonally(coord, symbol)) {
+    Symbol[][] getInnerBoard() {
+        return Arrays.stream(board)
+            .map(Symbol[]::clone)
+            .toArray(Symbol[][]::new);
+    }
+
+    private void updateResult(BoardCoordinates coords, Symbol symbol) {
+        if (isWinningHorizontally(coords, symbol) ||
+            isWinningVertically(coords, symbol) ||
+            isWinningDiagonally(coords, symbol) ||
+            isWinningAntiDiagonally(coords, symbol)) {
             result = symbol == X ? WIN_X : WIN_O;
         } else if (moveCount == size * size) {
             result = TIE;
         }
     }
 
-    private boolean isWinningHorizontally(BoardCoordinates coord, Symbol symbol) {
+    private boolean isWinningHorizontally(BoardCoordinates coords, Symbol symbol) {
         for (int i = 0; i < size; i++) {
-            if (board[coord.x][i] != symbol) return false;
+            if (board[coords.x][i] != symbol) return false;
         }
         return true;
     }
 
-    private boolean isWinningVertically(BoardCoordinates coord, Symbol symbol) {
+    private boolean isWinningVertically(BoardCoordinates coords, Symbol symbol) {
         for (int i = 0; i < size; i++) {
-            if (board[i][coord.y] != symbol) return false;
+            if (board[i][coords.y] != symbol) return false;
         }
         return true;
     }
 
-    private boolean isWinningDiagonally(BoardCoordinates coord, Symbol symbol) {
-        if (coord.x != coord.y) return false;
+    private boolean isWinningDiagonally(BoardCoordinates coords, Symbol symbol) {
+        if (coords.x != coords.y) return false;
         for (int i = 0; i < size; i++) {
             if (board[i][i] != symbol) return false;
         }
         return true;
     }
 
-    private boolean isWinningAntiDiagonally(BoardCoordinates coord, Symbol symbol) {
-        if (coord.x + coord.y != size - 1) return false;
+    private boolean isWinningAntiDiagonally(BoardCoordinates coords, Symbol symbol) {
+        if (coords.x + coords.y != size - 1) return false;
         for (int i = 0; i < size; i++) {
             if (board[size - 1 - i][i] != symbol) return false;
         }

@@ -1,100 +1,114 @@
 package matthias.tictactoe.tictactoe_game;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
+import matthias.tictactoe.tictactoe_game.command.GameRoomCommand;
+import matthias.tictactoe.tictactoe_game.command.PlayerJoinCommand;
+import matthias.tictactoe.tictactoe_game.command.SpectatorJoinCommand;
+import matthias.tictactoe.tictactoe_game.command.SpectatorLeaveCommand;
+import matthias.tictactoe.tictactoe_game.dto.*;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.function.Consumer;
 
-@Slf4j
-class GameRoom {
+import static java.util.stream.Collectors.toSet;
 
-    @Getter
-    private final GameRoomId roomId = new GameRoomId(UUID.randomUUID());
-    private final Game game = new Game();
-    private final Set<UserId> spectators = ConcurrentHashMap.newKeySet();
-    private final Set<GameRoomListener> listeners = new CopyOnWriteArraySet<>();
+@RequiredArgsConstructor
+public class GameRoom {
 
-    public void joinAsPlayer(UserId userId) {
-        if (isSpectator(userId)) return;
-        leave(userId);
-        game.join(userId);
-        notifyListeners(l -> l.onPlayerJoined(roomId, userId));
-    }
+    private final GameRoomNotifier notifier = new GameRoomNotifier() {
+    };
 
-    public void joinAsSpectator(UserId userId) {
-        if (isPlayer(userId)) return;
-        leave(userId);
-        spectators.add(userId);
-        notifyListeners(l -> l.onSpectatorJoined(roomId, userId));
-    }
+    private final Game game = new Game(notifier);
+    private final Set<Spectator> spectators = new HashSet<>();
 
-    public void leave(UserId userId) {
-        if (isPlayer(userId)) {
-            game.leave(userId);
-            notifyListeners(l -> l.onPlayerLeft(roomId, userId));
-        } else if (isSpectator(userId)) {
-            spectators.remove(userId);
-            notifyListeners(l -> l.onSpectatorLeft(roomId, userId));
+    private final UUID id = UUID.randomUUID();
+    private final String name;
+
+    void resolveCommand(GameRoomCommand cmd) {
+        switch (cmd) {
+            case SpectatorJoinCommand c -> onSpectatorJoin(c);
+            case SpectatorLeaveCommand c -> onSpectatorLeave(c);
+            case PlayerJoinCommand c -> onPlayerJoined(c);
+            default -> game.resolveCommand(cmd);
         }
     }
 
-    public void changeSymbol(UserId userId, Symbol symbol) {
-        if (!isPlayer(userId)) return;
-        game.changeSymbol(userId, symbol);
-        notifyListeners(l -> l.onSymbolChanged(roomId, userId, symbol));
+    boolean hasSpectator(UUID userId) {
+        return spectators.stream().anyMatch(spectator -> spectator.userId().equals(userId));
     }
 
-    public void ready(UserId userId) {
-        if (!isPlayer(userId)) return;
-        game.ready(userId);
-        notifyListeners(l -> l.onPlayerReady(roomId, userId));
+    GameRoomDTO toDTO() {
+        return GameRoomDTO.builder()
+            .players(getPlayers())
+            .spectators(getSpectators())
+            .turn(game.getSymbolTurn() != null ? SymbolDTO.valueOf(game.getSymbolTurn().name()) : null)
+            .gameBoard(getGameBoardDTO())
+            .gameStatus(GameStatusDTO.valueOf(game.getStatus().name()))
+            .build();
     }
 
-    public void notReady(UserId userId) {
-        if (!isPlayer(userId)) return;
-        game.notReady(userId);
-        notifyListeners(l -> l.onPlayerNotReady(roomId, userId));
+    private Set<PlayerDTO> getPlayers() {
+        return game.getPlayers().stream()
+            .map(p -> PlayerDTO.builder()
+                .id(p.userId())
+                .name(p.name())
+                .symbol(SymbolDTO.valueOf(p.symbol().name()))
+                .isReady(game.isPlayerReady(p.userId()))
+                .build())
+            .collect(toSet());
     }
 
-    public void move(UserId userId, Coordinates coords) {
-        if (!isPlayer(userId)) return;
-        game.move(userId, coords);
-        notifyListeners(l -> l.onMoveMade(roomId, userId, coords));
+    private Set<SpectatorDTO> getSpectators() {
+        return spectators.stream()
+            .map(s -> SpectatorDTO.builder()
+                .id(s.userId())
+                .name(s.name())
+                .build())
+            .collect(toSet());
     }
 
-    public void rematch(UserId userId) {
-        if (!isPlayer(userId)) return;
-        game.rematch(userId);
-        notifyListeners(l -> l.onRematchRequested(roomId, userId));
+    private SymbolDTO[][] getGameBoardDTO() {
+        return Arrays.stream(game.getBoard().getInnerBoard())
+            .map(row -> Arrays.stream(row)
+                .map(cell -> cell == null ? null : SymbolDTO.valueOf(cell.name()))
+                .toArray(SymbolDTO[]::new))
+            .toArray(SymbolDTO[][]::new);
     }
 
-    public boolean isPlayer(UserId userId) {
-        return game.hasPlayer(userId);
-    }
-
-    public boolean isSpectator(UserId userId) {
-        return spectators.contains(userId);
-    }
-
-    public void addListener(GameRoomListener listener) {
-        listeners.add(listener);
-    }
-
-    public void removeListener(GameRoomListener listener) {
-        listeners.remove(listener);
-    }
-
-    private void notifyListeners(Consumer<GameRoomListener> notify) {
-        for (var listener : listeners) {
-            try {
-                notify.accept(listener);
-            } catch (Exception ex) {
-                log.error("Exception occurred while notifying listener", ex);
-            }
+    private void onPlayerJoined(PlayerJoinCommand c) {
+        if (hasSpectator(c.userId())) {
+            final var spectator = getSpectatorOrThrow(c.userId());
+            spectators.remove(spectator);
+            game.addPlayer(c.userId());
+            notifier.onSpectatorChangedToPlayer(c.userId());
+        } else {
+            game.resolveCommand(c);
         }
+    }
+
+    private void onSpectatorJoin(SpectatorJoinCommand cmd) {
+        if (game.hasPlayer(cmd.userId())) {
+            game.removePlayer(cmd.userId());
+            spectators.add(new Spectator(cmd.userId(), ""));
+            notifier.onPlayerChangedToSpectator(cmd.userId());
+        } else {
+            spectators.add(new Spectator(cmd.userId(), ""));
+            notifier.onSpectatorJoined(cmd.userId());
+        }
+    }
+
+    private void onSpectatorLeave(SpectatorLeaveCommand cmd) {
+        final var spectator = getSpectatorOrThrow(cmd.userId());
+        spectators.remove(spectator);
+        notifier.onSpectatorLeft(cmd.userId());
+    }
+
+    private Spectator getSpectatorOrThrow(UUID userId) {
+        return spectators.stream()
+            .filter(s -> s.userId().equals(userId))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Spectator not found."));
     }
 }

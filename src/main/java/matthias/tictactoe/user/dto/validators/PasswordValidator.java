@@ -2,8 +2,8 @@ package matthias.tictactoe.user.dto.validators;
 
 import matthias.tictactoe.user.dto.validators.annotations.ValidPassword;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class PasswordValidator implements ConstraintValidator<ValidPassword, String> {
 
