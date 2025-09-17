@@ -65,7 +65,6 @@ class TicTacToeGameTest {
         );
     }
 
-
     @DisplayName("player can be removed from the game")
     @Test
     void playerCanBeRemovedFromTheGame() {
@@ -108,7 +107,7 @@ class TicTacToeGameTest {
     @DisplayName("Game status should not change after first player joins")
     @Test
     void gameStatusShouldNotChangeAfterFirstPlayerJoins() {
-        //When
+        // When
         game.addPlayer(USER_1_ID);
 
         // Then
@@ -172,8 +171,6 @@ class TicTacToeGameTest {
         // Given
         game.addPlayer(USER_1_ID);
         game.addPlayer(USER_2_ID);
-
-        // And
         game.handle(new PlayerReadyCommand(USER_1_ID));
         game.handle(new PlayerReadyCommand(USER_2_ID));
 
@@ -187,8 +184,6 @@ class TicTacToeGameTest {
         // Given
         game.addPlayer(USER_1_ID);
         game.addPlayer(USER_2_ID);
-
-        // And
         game.handle(new PlayerReadyCommand(USER_1_ID));
 
         // When
@@ -218,8 +213,6 @@ class TicTacToeGameTest {
         // Given
         game.addPlayer(USER_1_ID);
         game.addPlayer(USER_2_ID);
-
-        // And
         game.handle(new PlayerReadyCommand(USER_1_ID));
 
         // When
@@ -278,146 +271,210 @@ class TicTacToeGameTest {
     @DisplayName("Game status should change to FINISHED after game is drawn")
     @Test
     void gameStatusShouldChangeToFinishedAfterGameIsDrawn() {
+        // Given
         startGame();
-        // Draw sequence
-        move(USER_1_ID,0,0);
-        move(USER_2_ID,0,1);
-        move(USER_1_ID,0,2);
-        move(USER_2_ID,1,1);
-        move(USER_1_ID,1,0);
-        move(USER_2_ID,1,2);
-        move(USER_1_ID,2,1);
-        move(USER_2_ID,2,0);
-        move(USER_1_ID,2,2); // board full
+        boardIsPlayedWithMoves(
+            """
+                X O X
+                X O O
+                O X .
+                """,
+            Pair.of(USER_1_ID, SymbolDTO.X),
+            Pair.of(USER_2_ID, SymbolDTO.O)
+        );
+
+        // When
+        move(USER_1_ID,2,2);
+
+        // Then
         assertEquals(FINISHED, gameStatus());
         assertNull(game.getDetails().symbolWinner());
     }
 
-    // ---------------- Leaving during / after game ----------------
-
     @DisplayName("Game status should change to WAITING_FOR_PLAYERS when game is in progress and player leaves")
     @Test
     void gameStatusShouldChangeToWaitingForPlayersWhenGameIsInProgressAndPlayerLeaves() {
+        // Given
         startGame();
-        move(USER_1_ID,0,0);
-        move(USER_2_ID,2,2);
+        boardIsPlayedWithMoves(
+            """
+                X . .
+                . . .
+                . . O
+                """,
+            Pair.of(USER_1_ID, SymbolDTO.X),
+            Pair.of(USER_2_ID, SymbolDTO.O)
+        );
+
+        // When
         game.removePlayer(USER_1_ID);
+
+        // Then
         assertEquals(WAITING_FOR_PLAYERS, gameStatus());
     }
 
     @DisplayName("Game status should change to WAITING_FOR_PLAYERS after game is finished and player leaves")
     @Test
     void gameStatusShouldChangeToWaitingForPlayersAfterGameIsFinishedAndPlayerLeaves() {
+        // Given
         startGame();
-        // Quick win user1
-        move(USER_1_ID,0,0);
-        move(USER_2_ID,0,1);
-        move(USER_1_ID,1,0);
-        move(USER_2_ID,1,1);
-        move(USER_1_ID,2,0); // win
+        boardIsPlayedWithMoves(
+            """
+                X O .
+                X O .
+                . . .
+                """,
+            Pair.of(USER_1_ID, SymbolDTO.X),
+            Pair.of(USER_2_ID, SymbolDTO.O)
+        );
+        move(USER_1_ID,2,0);
+
+        // When
         game.removePlayer(USER_2_ID);
+
+        // Then
         assertEquals(WAITING_FOR_PLAYERS, gameStatus());
     }
-
-    // ---------------- Rematch Flow ----------------
 
     @DisplayName("Player can request rematch when game is finished")
     @Test
     void playerCanRequestRematchWhenGameIsFinished() {
+        // Given
         finishGameWithUser1Win();
+
+        // When
         game.handle(new PlayerRequestRematchCommand(USER_1_ID));
+
+        // Then
         gamePlayerRequestedRematch(USER_1_ID);
     }
 
     @DisplayName("Player can cancel rematch request")
     @Test
     void playerCanCancelRematchRequest() {
+        // Given
         finishGameWithUser1Win();
         game.handle(new PlayerRequestRematchCommand(USER_1_ID));
+
+        // When
         game.handle(new PlayerCancelRematchCommand(USER_1_ID));
+
+        // Then
         gameHasNoPlayersRequestingRematch();
     }
 
     @DisplayName("Game status should not change when first player requests rematch")
     @Test
     void gameStatusShouldNotChangeWhenFirstPlayerRequestsRematch() {
+        // Given
         finishGameWithUser1Win();
+
+        // When
         game.handle(new PlayerRequestRematchCommand(USER_1_ID));
+
+        // Then
         assertEquals(FINISHED, gameStatus());
     }
 
     @DisplayName("Game status should change to IN_PROGRESS after second player requests rematch")
     @Test
     void gameStatusShouldChangeToInProgressAfterSecondPlayerRequestsRematch() {
+        // Given
         finishGameWithUser1Win();
         game.handle(new PlayerRequestRematchCommand(USER_1_ID));
+
+        // When
         game.handle(new PlayerRequestRematchCommand(USER_2_ID));
+
+        // Then
         assertEquals(IN_PROGRESS, gameStatus());
     }
-
-    // ---------------- Turn Order ----------------
 
     @DisplayName("Game is started by player who is first in join order at start")
     @Test
     void gameIsStartedByPlayerWhoJoinedFirst() {
+        // Given
         game.addPlayer(USER_1_ID);
         game.addPlayer(USER_2_ID);
         game.removePlayer(USER_1_ID);
-        game.addPlayer(USER_1_ID); // order now USER_2, USER_1
+        game.addPlayer(USER_1_ID);
+
+        // When
         game.handle(new PlayerReadyCommand(USER_2_ID));
         game.handle(new PlayerReadyCommand(USER_1_ID));
+
+        // Then
         assertEquals(IN_PROGRESS, gameStatus());
-        assertThrows(IllegalPlayerMoveException.class, () -> move(USER_1_ID,0,0)); // USER_2 should start
+        assertThrows(IllegalPlayerMoveException.class, () -> move(USER_1_ID,0,0));
     }
 
     @DisplayName("Player starting game changes with each rematch")
     @Test
     void playerStartingGameChangesWithEachRematch() {
-        startGame(); // USER_1 starts
+        // Given
+        startGame();
         assertThrows(IllegalPlayerMoveException.class, () -> move(USER_2_ID,0,0));
-        // Finish first game (user1 win)
-        move(USER_1_ID,0,0);
-        move(USER_2_ID,1,0);
-        move(USER_1_ID,0,1);
-        move(USER_2_ID,1,1);
-        move(USER_1_ID,0,2); // win
-        // Rematch 1 -> USER_2 should start
+
+        boardIsPlayedWithMoves(
+            """
+                X X .
+                O O .
+                . . .
+                """,
+            Pair.of(USER_1_ID, SymbolDTO.X),
+            Pair.of(USER_2_ID, SymbolDTO.O)
+        );
+        move(USER_1_ID,0,2);
+
         game.handle(new PlayerRequestRematchCommand(USER_1_ID));
         game.handle(new PlayerRequestRematchCommand(USER_2_ID));
-        assertThrows(IllegalPlayerMoveException.class, () -> move(USER_1_ID,0,0));
-        // Finish second game (user2 win)
-        move(USER_2_ID,0,0);
-        move(USER_1_ID,0,1);
-        move(USER_2_ID,1,0);
-        move(USER_1_ID,1,1);
-        move(USER_2_ID,2,0); // win
-        // Rematch 2 -> USER_1 should start again
+
+        boardIsPlayedWithMoves(
+            """
+                O X .
+                O X .
+                . . .
+                """,
+            Pair.of(USER_2_ID, SymbolDTO.O),
+            Pair.of(USER_1_ID, SymbolDTO.X)
+        );
+        move(USER_2_ID,2,0);
+
         game.handle(new PlayerRequestRematchCommand(USER_1_ID));
         game.handle(new PlayerRequestRematchCommand(USER_2_ID));
+
+        // Expect
         assertThrows(IllegalPlayerMoveException.class, () -> move(USER_2_ID,0,0));
     }
-
-    // ---------------- Invalid Moves ----------------
 
     @DisplayName("Player cannot move before game starts")
     @Test
     void playerCannotMoveBeforeGameStarts() {
+        // Given
         game.addPlayer(USER_1_ID);
         game.addPlayer(USER_2_ID);
+
+        // Expect
         assertThrows(IllegalGameActionException.class, () -> move(USER_1_ID,0,0));
     }
 
     @DisplayName("Player cannot move when not their turn")
     @Test
     void playerCannotMoveWhenNotPlayersTurn() {
+        // Given
         startGame();
+
+        // Expect
         assertThrows(IllegalPlayerMoveException.class, () -> move(USER_2_ID,0,0));
     }
 
     @DisplayName("Player cannot move outside board")
     @Test
     void playerCannotMoveOutsideBoard() {
+        // Given
         startGame();
+
+        // Expect
         assertThrows(IllegalPlayerMoveException.class, () -> move(USER_1_ID,3,0));
         assertThrows(IllegalPlayerMoveException.class, () -> move(USER_1_ID,-1,0));
     }
@@ -425,12 +482,13 @@ class TicTacToeGameTest {
     @DisplayName("Player cannot move on already taken cell")
     @Test
     void playerCannotMoveOnTakenCell() {
+        // Given
         startGame();
         move(USER_1_ID,0,0);
+
+        // Expect
         assertThrows(IllegalPlayerMoveException.class, () -> move(USER_2_ID,0,0));
     }
-
-    // ---------------- Helpers (added) ----------------
 
     private void startGame() {
         game.addPlayer(USER_1_ID);
@@ -442,10 +500,15 @@ class TicTacToeGameTest {
 
     private void finishGameWithUser1Win() {
         startGame();
-        move(USER_1_ID,0,0);
-        move(USER_2_ID,0,1);
-        move(USER_1_ID,1,0);
-        move(USER_2_ID,1,1);
+        boardIsPlayedWithMoves(
+            """
+                X O .
+                X O .
+                . . .
+                """,
+            Pair.of(USER_1_ID, SymbolDTO.X),
+            Pair.of(USER_2_ID, SymbolDTO.O)
+        );
         move(USER_1_ID,2,0);
         assertEquals(FINISHED, gameStatus());
     }
