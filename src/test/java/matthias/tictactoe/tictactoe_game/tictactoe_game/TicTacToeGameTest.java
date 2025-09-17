@@ -2,11 +2,17 @@ package matthias.tictactoe.tictactoe_game.tictactoe_game;
 
 import matthias.tictactoe.shared.event.Event;
 import matthias.tictactoe.tictactoe_game.tictactoe_game.command.PlayerMoveCommand;
+import matthias.tictactoe.tictactoe_game.tictactoe_game.command.PlayerReadyCommand;
+import matthias.tictactoe.tictactoe_game.tictactoe_game.command.PlayerNotReadyCommand;
+import matthias.tictactoe.tictactoe_game.tictactoe_game.command.PlayerRequestRematchCommand;
+import matthias.tictactoe.tictactoe_game.tictactoe_game.command.PlayerCancelRematchCommand;
 import matthias.tictactoe.tictactoe_game.tictactoe_game.dto.GameStatusDTO;
 import matthias.tictactoe.tictactoe_game.tictactoe_game.dto.PlayerDTO;
 import matthias.tictactoe.tictactoe_game.tictactoe_game.dto.SymbolDTO;
 import matthias.tictactoe.tictactoe_game.tictactoe_game.event.PlayerJoinedEvent;
 import matthias.tictactoe.tictactoe_game.tictactoe_game.event.PlayerLeftEvent;
+import matthias.tictactoe.tictactoe_game.tictactoe_game.exception.IllegalGameActionException;
+import matthias.tictactoe.tictactoe_game.tictactoe_game.exception.IllegalPlayerMoveException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,9 +20,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import static matthias.tictactoe.tictactoe_game.tictactoe_game.dto.GameStatusDTO.*;
+import static matthias.tictactoe.tictactoe_game.tictactoe_game.dto.GameStatusDTO.FINISHED;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TicTacToeGameTest {
@@ -96,532 +105,379 @@ class TicTacToeGameTest {
         assertThrows(RuntimeException.class, () -> game.addPlayer(USER_3_ID));
     }
 
-//    @DisplayName("User can switch from player to spectator")
-//    @Test
-//    void userCanSwitchFromPlayerToSpectator() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new SpectatorJoinCommand(gameRoom1Id, USER_1_ID));
-//
-//        // Then
-//        assertTrue(gameHasNoPlayers(gameRoom1Id));
-//        assertTrue(gameHasSpectator(gameRoom1Id, USER_1_ID));
-//    }
-//
-//    @DisplayName("User can switch from spectator to player")
-//    @Test
-//    void userCanSwitchFromSpectatorToPlayer() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new SpectatorJoinCommand(gameRoom1Id, USER_1_ID));
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//
-//        // Then
-//        assertTrue(gameHasNoSpectators(gameRoom1Id));
-//        assertTrue(gameHasPlayer(gameRoom1Id, USER_1_ID));
-//    }
-//
-//    @DisplayName("Game status should not change after first player joins")
-//    @Test
-//    void gameStatusShouldNotChangeAfterFirstPlayerJoins() {
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//
-//        // Then
-//        assertEquals(WAITING_FOR_PLAYERS, gameStatus(gameRoom1Id));
-//    }
-//
-//    @DisplayName("Game status changes to WAITING_FOR_PLAYERS_READY after second player joins")
-//    @Test
-//    void gameStatusChangesToWaitingForPlayersReadyAfterSecondPlayerJoins() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // Then
-//        assertEquals(WAITING_FOR_PLAYERS_READY, gameStatus(gameRoom1Id));
-//    }
-//
-//    @DisplayName("Game status changes to WAITING_FOR_PLAYERS after both players leave")
-//    @Test
-//    void gameStatusChangesToWaitingForPlayersAfterPlayerLeaves() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerLeaveCommand(gameRoom1Id, USER_1_ID));
-//
-//        // Then
-//        assertEquals(WAITING_FOR_PLAYERS, gameStatus(gameRoom1Id));
-//    }
-//
-//    @DisplayName("Game status changes to WAITING_FOR_PLAYERS after player switches to spectator")
-//    @Test
-//    void gameStatusChangesToWaitingForPlayersAfterPlayerSwitchToSpectator() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new SpectatorJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // Then
-//        assertEquals(WAITING_FOR_PLAYERS, gameStatus(gameRoom1Id));
-//    }
-//
-//    @DisplayName("Player can be set ready")
-//    @Test
-//    void playerCanBeSetReady() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//
-//        // Then
-//        assertTrue(gamePlayerIsReady(gameRoom1Id, USER_1_ID));
-//    }
-//
-//    @DisplayName("Player cannot be set ready when game is waiting for players")
-//    @Test
-//    void playerCannotBeSetReadyWhenGameIsWaitingForPlayers() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//
-//        // Expect
-//        assertThrows(RuntimeException.class, () -> {
-//            ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//        });
-//    }
-//
-//    @DisplayName("Player cannot be set ready when game is in progress")
-//    @Test
-//    void playerCannotBeSetReadyWhenGameIsInProgress() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_2_ID));
-//
-//        // Expect
-//        assertThrows(RuntimeException.class, () -> {
-//            ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//        });
-//    }
-//
-//    @DisplayName("Player can be unset ready")
-//    @Test
-//    void playerCanBeUnsetReady() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerNotReadyCommand(gameRoom1Id, USER_1_ID));
-//
-//        // Then
-//        assertTrue(gameHasNoPlayersReady(gameRoom1Id));
-//    }
-//
-//    @DisplayName("Game status should not change after first player is ready")
-//    @Test
-//    void gameStatusShouldNotChangeAfterFirstPlayerIsReady() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//
-//        // Then
-//        assertEquals(WAITING_FOR_PLAYERS_READY, gameStatus(gameRoom1Id));
-//    }
-//
-//    @DisplayName("Game status should change to IN_PROGRESS after second player is ready")
-//    @Test
-//    void gameStatusShouldChangeToInProgressAfterSecondPlayerIsReady() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_2_ID));
-//
-//        // Then
-//        assertEquals(IN_PROGRESS, gameStatus(gameRoom1Id));
-//    }
-//
-//    @DisplayName("Game status should change to FINISHED after game is won by user 1")
-//    @Test
-//    void gameStatusShouldChangeToFinishedAfterGameIsWonByUser1() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        boardIsPlayedWithMoves(
-//            Pair.of(USER_1_ID, 'X'),
-//            Pair.of(USER_2_ID, 'O'),
-//            """
-//                O O X
-//                O O X
-//                X X -
-//                """
-//        );
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerMoveCommand(gameRoom1Id, USER_1_ID, 2, 2));
-//
-//        // Then
-//        assertEquals(FINISHED, gameStatus(gameRoom1Id));
-//    }
-//
-//    @DisplayName("Game status should change to FINISHED after game is won by user 2")
-//    @Test
-//    void gameStatusShouldChangeToFinishedAfterGameIsWonByUser2() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        boardIsPlayedWithMoves(
-//            Pair.of(USER_1_ID, 'X'),
-//            Pair.of(USER_2_ID, 'O'),
-//            """
-//                - X O
-//                X - O
-//                - X -
-//                """
-//        );
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerMoveCommand(gameRoom1Id, USER_2_ID, 2, 2));
-//
-//        // Then
-//        assertEquals(FINISHED, gameStatus(gameRoom1Id));
-//    }
-//
-//    @DisplayName("Game status should change to FINISHED after game is drawn")
-//    @Test
-//    void gameStatusShouldChangeToFinishedAfterGameIsDrawn() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        boardIsPlayedWithMoves(
-//            Pair.of(USER_1_ID, 'X'),
-//            Pair.of(USER_2_ID, 'O'),
-//            """
-//                X O X
-//                X - O
-//                O X O
-//                """
-//        );
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerMoveCommand(gameRoom1Id, USER_1_ID, 1, 1));
-//
-//        // Then
-//        assertEquals(FINISHED, gameStatus(gameRoom1Id));
-//    }
-//
-//    @DisplayName("Game status should change to WAITING_FOR_PLAYERS when game is in progress and player leaves")
-//    @Test
-//    void gameStatusShouldChangeToWaitingForPlayersWhenGameIsInProgressAndPlayerLeaves() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        boardIsPlayedWithMoves(
-//            Pair.of(USER_1_ID, 'X'),
-//            Pair.of(USER_2_ID, 'O'),
-//            """
-//                X - -
-//                - - -
-//                - - O
-//                """
-//        );
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerLeaveCommand(gameRoom1Id, USER_1_ID));
-//
-//        // Then
-//        assertEquals(WAITING_FOR_PLAYERS, gameStatus(gameRoom1Id));
-//    }
-//
-//    @DisplayName("Game status should change to WAITING_FOR_PLAYERS when game is in progress and player leaves")
-//    @Test
-//    void gameStatusShouldChangeToWaitingForPlayersAfterGameIsFinishedAndPlayerLeaves() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        boardIsPlayedWithMoves(
-//            Pair.of(USER_1_ID, 'X'),
-//            Pair.of(USER_2_ID, 'O'),
-//            """
-//                X O -
-//                - X O
-//                - - X
-//                """
-//        );
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerLeaveCommand(gameRoom1Id, USER_2_ID));
-//
-//        // Then
-//        assertEquals(WAITING_FOR_PLAYERS, gameStatus(gameRoom1Id));
-//    }
-//
-//    @DisplayName("Player can request rematch")
-//    @Test
-//    void playerCanRequestRematchWhenGameIsFinished() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        boardIsPlayedWithMoves(
-//            Pair.of(USER_1_ID, 'X'),
-//            Pair.of(USER_2_ID, 'O'),
-//            """
-//                X O -
-//                - X O
-//                - - X
-//                """
-//        );
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerRequestRematchCommand(gameRoom1Id, USER_1_ID));
-//
-//        // Then
-//        assertTrue(gamePlayerIsReady(gameRoom1Id, USER_1_ID));
-//    }
-//
-//    @DisplayName("Player can cancel rematch request")
-//    @Test
-//    void playerCanCancelRematchRequest() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        boardIsPlayedWithMoves(
-//            Pair.of(USER_1_ID, 'X'),
-//            Pair.of(USER_2_ID, 'O'),
-//            """
-//                X O -
-//                - X O
-//                - - X
-//                """
-//        );
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerCancelRematchCommand(gameRoom1Id, USER_1_ID));
-//
-//        // Then
-//        assertTrue(gameHasNoPlayersReady(gameRoom1Id));
-//    }
-//
-//    @DisplayName("Game status should not change when first player requests rematch")
-//    @Test
-//    void gameStatusShouldNotChangeWhenFirstPlayerRequestsRematch() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        boardIsPlayedWithMoves(
-//            Pair.of(USER_1_ID, 'X'),
-//            Pair.of(USER_2_ID, 'O'),
-//            """
-//                X O -
-//                - X O
-//                - - X
-//                """
-//        );
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerRequestRematchCommand(gameRoom1Id, USER_1_ID));
-//
-//        // Then
-//        assertEquals(FINISHED, gameStatus(gameRoom1Id));
-//    }
-//
-//    @DisplayName("Game status should change to IN_PROGRESS after second player requests rematch")
-//    @Test
-//    void gameStatusShouldChangeToInProgressAfterSecondPlayerRequestsRematch() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        boardIsPlayedWithMoves(
-//            Pair.of(USER_1_ID, 'X'),
-//            Pair.of(USER_2_ID, 'O'),
-//            """
-//                X O -
-//                - X O
-//                - - X
-//                """
-//        );
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerRequestRematchCommand(gameRoom1Id, USER_1_ID));
-//
-//        // When
-//        ticTacToeGameService.resolveCommand(new PlayerRequestRematchCommand(gameRoom1Id, USER_2_ID));
-//
-//        // Then
-//        assertEquals(IN_PROGRESS, gameStatus(gameRoom1Id));
-//    }
-//
-//    @DisplayName("Game is started by player who joined first")
-//    @Test
-//    void gameIsStartedByPlayerWhoJoinedFirst() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerLeaveCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_2_ID));
-//
-//        // Expect
-//        assertThrows(RuntimeException.class, () -> {
-//            ticTacToeGameService.resolveCommand(new PlayerMoveCommand(gameRoom1Id, USER_1_ID, 0, 0));
-//        });
-//    }
-//
-//    @DisplayName("Player starting game changes with each rematch")
-//    @Test
-//    void playerStartingGameChangesWithEachRematch() {
-//        // Given
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerJoinCommand(gameRoom1Id, USER_2_ID));
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerReadyCommand(gameRoom1Id, USER_2_ID));
-//
-//        // Expect
-//        assertThrows(RuntimeException.class, () -> {
-//            ticTacToeGameService.resolveCommand(new PlayerMoveCommand(gameRoom1Id, USER_2_ID, 0, 0));
-//        });
-//
-//        // Then
-//        boardIsPlayedWithMoves(
-//            Pair.of(USER_1_ID, 'X'),
-//            Pair.of(USER_2_ID, 'O'),
-//            """
-//                X O -
-//                - X O
-//                - - X
-//                """
-//        );
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerRequestRematchCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerRequestRematchCommand(gameRoom1Id, USER_2_ID));
-//
-//        // Expect
-//        assertThrows(RuntimeException.class, () -> {
-//            ticTacToeGameService.resolveCommand(new PlayerMoveCommand(gameRoom1Id, USER_1_ID, 0, 0));
-//        });
-//
-//        // Then
-//        boardIsPlayedWithMoves(
-//            Pair.of(USER_2_ID, 'O'),
-//            Pair.of(USER_1_ID, 'X'),
-//            """
-//                O - -
-//                O - X
-//                O - X
-//                """
-//        );
-//
-//        // And
-//        ticTacToeGameService.resolveCommand(new PlayerRequestRematchCommand(gameRoom1Id, USER_1_ID));
-//        ticTacToeGameService.resolveCommand(new PlayerRequestRematchCommand(gameRoom1Id, USER_2_ID));
-//
-//        // Expect
-//        assertThrows(RuntimeException.class, () -> {
-//            ticTacToeGameService.resolveCommand(new PlayerMoveCommand(gameRoom1Id, USER_2_ID, 0, 0));
-//        });
-//    }
+    @DisplayName("Game status should not change after first player joins")
+    @Test
+    void gameStatusShouldNotChangeAfterFirstPlayerJoins() {
+        //When
+        game.addPlayer(USER_1_ID);
+
+        // Then
+        assertEquals(WAITING_FOR_PLAYERS, gameStatus());
+    }
+
+    @DisplayName("Game status changes to WAITING_FOR_PLAYERS_READY after second player joins")
+    @Test
+    void gameStatusChangesToWaitingForPlayersReadyAfterSecondPlayerJoins() {
+        // Given
+        game.addPlayer(USER_1_ID);
+
+        // When
+        game.addPlayer(USER_2_ID);
+
+        // Then
+        assertEquals(WAITING_FOR_PLAYERS_READY, gameStatus());
+    }
+
+    @DisplayName("Game status changes to WAITING_FOR_PLAYERS after player leaves before ready phase completes")
+    @Test
+    void gameStatusChangesToWaitingForPlayersAfterPlayerLeaves() {
+        // Given
+        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_2_ID);
+
+        // When
+        game.removePlayer(USER_1_ID);
+
+        // Then
+        assertEquals(WAITING_FOR_PLAYERS, gameStatus());
+    }
+
+    @DisplayName("Player can be set ready")
+    @Test
+    void playerCanBeSetReady() {
+        // Given
+        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_2_ID);
+
+        // When
+        game.handle(new PlayerReadyCommand(USER_1_ID));
+
+        // Then
+        gamePlayerIsReady(USER_1_ID);
+    }
+
+    @DisplayName("Player cannot be set ready when game is waiting for players")
+    @Test
+    void playerCannotBeSetReadyWhenGameIsWaitingForPlayers() {
+        // Given
+        game.addPlayer(USER_1_ID);
+
+        // Expect
+        assertThrows(IllegalGameActionException.class, () -> game.handle(new PlayerReadyCommand(USER_1_ID)));
+    }
+
+    @DisplayName("Player cannot be set ready when game is in progress")
+    @Test
+    void playerCannotBeSetReadyWhenGameIsInProgress() {
+        // Given
+        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_2_ID);
+
+        // And
+        game.handle(new PlayerReadyCommand(USER_1_ID));
+        game.handle(new PlayerReadyCommand(USER_2_ID));
+
+        // Expect
+        assertThrows(IllegalGameActionException.class, () -> game.handle(new PlayerReadyCommand(USER_1_ID)));
+    }
+
+    @DisplayName("Player can be unset ready")
+    @Test
+    void playerCanBeUnsetReady() {
+        // Given
+        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_2_ID);
+
+        // And
+        game.handle(new PlayerReadyCommand(USER_1_ID));
+
+        // When
+        game.handle(new PlayerNotReadyCommand(USER_1_ID));
+
+        // Then
+        gameHasNoPlayersReady();
+    }
+
+    @DisplayName("Game status should not change after first player is ready")
+    @Test
+    void gameStatusShouldNotChangeAfterFirstPlayerIsReady() {
+        // Given
+        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_2_ID);
+
+        // When
+        game.handle(new PlayerReadyCommand(USER_1_ID));
+
+        // Then
+        assertEquals(WAITING_FOR_PLAYERS_READY, gameStatus());
+    }
+
+    @DisplayName("Game status should change to IN_PROGRESS after second player is ready")
+    @Test
+    void gameStatusShouldChangeToInProgressAfterSecondPlayerIsReady() {
+        // Given
+        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_2_ID);
+
+        // And
+        game.handle(new PlayerReadyCommand(USER_1_ID));
+
+        // When
+        game.handle(new PlayerReadyCommand(USER_2_ID));
+
+        // Then
+        assertEquals(IN_PROGRESS, gameStatus());
+    }
+
+    @DisplayName("Game status should change to FINISHED after game is won by user 1")
+    @Test
+    void gameStatusShouldChangeToFinishedAfterGameIsWonByUser1() {
+        // Given
+        startGame();
+        boardIsPlayedWithMoves(
+            """
+                O . X
+                O . X
+                . . .
+                """,
+            Pair.of(USER_1_ID, SymbolDTO.X),
+            Pair.of(USER_2_ID, SymbolDTO.O)
+        );
+
+        // When
+        move(USER_1_ID,2,2);
+
+        // Then
+        assertEquals(FINISHED, gameStatus());
+        assertEquals(SymbolDTO.X, game.getDetails().symbolWinner());
+    }
+
+    @DisplayName("Game status should change to FINISHED after game is won by user 2")
+    @Test
+    void gameStatusShouldChangeToFinishedAfterGameIsWonByUser2() {
+        // Given
+        startGame();
+        boardIsPlayedWithMoves(
+            """
+                X . O
+                X . O
+                . X .
+                """,
+            Pair.of(USER_1_ID, SymbolDTO.X),
+            Pair.of(USER_2_ID, SymbolDTO.O)
+        );
+
+        // When
+        move(USER_2_ID,2,2);
+
+        // Then
+        assertEquals(FINISHED, gameStatus());
+        assertEquals(SymbolDTO.O, game.getDetails().symbolWinner());
+    }
+
+    @DisplayName("Game status should change to FINISHED after game is drawn")
+    @Test
+    void gameStatusShouldChangeToFinishedAfterGameIsDrawn() {
+        startGame();
+        // Draw sequence
+        move(USER_1_ID,0,0);
+        move(USER_2_ID,0,1);
+        move(USER_1_ID,0,2);
+        move(USER_2_ID,1,1);
+        move(USER_1_ID,1,0);
+        move(USER_2_ID,1,2);
+        move(USER_1_ID,2,1);
+        move(USER_2_ID,2,0);
+        move(USER_1_ID,2,2); // board full
+        assertEquals(FINISHED, gameStatus());
+        assertNull(game.getDetails().symbolWinner());
+    }
+
+    // ---------------- Leaving during / after game ----------------
+
+    @DisplayName("Game status should change to WAITING_FOR_PLAYERS when game is in progress and player leaves")
+    @Test
+    void gameStatusShouldChangeToWaitingForPlayersWhenGameIsInProgressAndPlayerLeaves() {
+        startGame();
+        move(USER_1_ID,0,0);
+        move(USER_2_ID,2,2);
+        game.removePlayer(USER_1_ID);
+        assertEquals(WAITING_FOR_PLAYERS, gameStatus());
+    }
+
+    @DisplayName("Game status should change to WAITING_FOR_PLAYERS after game is finished and player leaves")
+    @Test
+    void gameStatusShouldChangeToWaitingForPlayersAfterGameIsFinishedAndPlayerLeaves() {
+        startGame();
+        // Quick win user1
+        move(USER_1_ID,0,0);
+        move(USER_2_ID,0,1);
+        move(USER_1_ID,1,0);
+        move(USER_2_ID,1,1);
+        move(USER_1_ID,2,0); // win
+        game.removePlayer(USER_2_ID);
+        assertEquals(WAITING_FOR_PLAYERS, gameStatus());
+    }
+
+    // ---------------- Rematch Flow ----------------
+
+    @DisplayName("Player can request rematch when game is finished")
+    @Test
+    void playerCanRequestRematchWhenGameIsFinished() {
+        finishGameWithUser1Win();
+        game.handle(new PlayerRequestRematchCommand(USER_1_ID));
+        gamePlayerRequestedRematch(USER_1_ID);
+    }
+
+    @DisplayName("Player can cancel rematch request")
+    @Test
+    void playerCanCancelRematchRequest() {
+        finishGameWithUser1Win();
+        game.handle(new PlayerRequestRematchCommand(USER_1_ID));
+        game.handle(new PlayerCancelRematchCommand(USER_1_ID));
+        gameHasNoPlayersRequestingRematch();
+    }
+
+    @DisplayName("Game status should not change when first player requests rematch")
+    @Test
+    void gameStatusShouldNotChangeWhenFirstPlayerRequestsRematch() {
+        finishGameWithUser1Win();
+        game.handle(new PlayerRequestRematchCommand(USER_1_ID));
+        assertEquals(FINISHED, gameStatus());
+    }
+
+    @DisplayName("Game status should change to IN_PROGRESS after second player requests rematch")
+    @Test
+    void gameStatusShouldChangeToInProgressAfterSecondPlayerRequestsRematch() {
+        finishGameWithUser1Win();
+        game.handle(new PlayerRequestRematchCommand(USER_1_ID));
+        game.handle(new PlayerRequestRematchCommand(USER_2_ID));
+        assertEquals(IN_PROGRESS, gameStatus());
+    }
+
+    // ---------------- Turn Order ----------------
+
+    @DisplayName("Game is started by player who is first in join order at start")
+    @Test
+    void gameIsStartedByPlayerWhoJoinedFirst() {
+        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_2_ID);
+        game.removePlayer(USER_1_ID);
+        game.addPlayer(USER_1_ID); // order now USER_2, USER_1
+        game.handle(new PlayerReadyCommand(USER_2_ID));
+        game.handle(new PlayerReadyCommand(USER_1_ID));
+        assertEquals(IN_PROGRESS, gameStatus());
+        assertThrows(IllegalPlayerMoveException.class, () -> move(USER_1_ID,0,0)); // USER_2 should start
+    }
+
+    @DisplayName("Player starting game changes with each rematch")
+    @Test
+    void playerStartingGameChangesWithEachRematch() {
+        startGame(); // USER_1 starts
+        assertThrows(IllegalPlayerMoveException.class, () -> move(USER_2_ID,0,0));
+        // Finish first game (user1 win)
+        move(USER_1_ID,0,0);
+        move(USER_2_ID,1,0);
+        move(USER_1_ID,0,1);
+        move(USER_2_ID,1,1);
+        move(USER_1_ID,0,2); // win
+        // Rematch 1 -> USER_2 should start
+        game.handle(new PlayerRequestRematchCommand(USER_1_ID));
+        game.handle(new PlayerRequestRematchCommand(USER_2_ID));
+        assertThrows(IllegalPlayerMoveException.class, () -> move(USER_1_ID,0,0));
+        // Finish second game (user2 win)
+        move(USER_2_ID,0,0);
+        move(USER_1_ID,0,1);
+        move(USER_2_ID,1,0);
+        move(USER_1_ID,1,1);
+        move(USER_2_ID,2,0); // win
+        // Rematch 2 -> USER_1 should start again
+        game.handle(new PlayerRequestRematchCommand(USER_1_ID));
+        game.handle(new PlayerRequestRematchCommand(USER_2_ID));
+        assertThrows(IllegalPlayerMoveException.class, () -> move(USER_2_ID,0,0));
+    }
+
+    // ---------------- Invalid Moves ----------------
+
+    @DisplayName("Player cannot move before game starts")
+    @Test
+    void playerCannotMoveBeforeGameStarts() {
+        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_2_ID);
+        assertThrows(IllegalGameActionException.class, () -> move(USER_1_ID,0,0));
+    }
+
+    @DisplayName("Player cannot move when not their turn")
+    @Test
+    void playerCannotMoveWhenNotPlayersTurn() {
+        startGame();
+        assertThrows(IllegalPlayerMoveException.class, () -> move(USER_2_ID,0,0));
+    }
+
+    @DisplayName("Player cannot move outside board")
+    @Test
+    void playerCannotMoveOutsideBoard() {
+        startGame();
+        assertThrows(IllegalPlayerMoveException.class, () -> move(USER_1_ID,3,0));
+        assertThrows(IllegalPlayerMoveException.class, () -> move(USER_1_ID,-1,0));
+    }
+
+    @DisplayName("Player cannot move on already taken cell")
+    @Test
+    void playerCannotMoveOnTakenCell() {
+        startGame();
+        move(USER_1_ID,0,0);
+        assertThrows(IllegalPlayerMoveException.class, () -> move(USER_2_ID,0,0));
+    }
+
+    // ---------------- Helpers (added) ----------------
+
+    private void startGame() {
+        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_2_ID);
+        game.handle(new PlayerReadyCommand(USER_1_ID));
+        game.handle(new PlayerReadyCommand(USER_2_ID));
+        assertEquals(IN_PROGRESS, gameStatus());
+    }
+
+    private void finishGameWithUser1Win() {
+        startGame();
+        move(USER_1_ID,0,0);
+        move(USER_2_ID,0,1);
+        move(USER_1_ID,1,0);
+        move(USER_2_ID,1,1);
+        move(USER_1_ID,2,0);
+        assertEquals(FINISHED, gameStatus());
+    }
+
+    private void move(UUID userId, int row, int col) {
+        game.handle(new PlayerMoveCommand(userId, row, col));
+    }
+
+    private void gamePlayerRequestedRematch(UUID userId) {
+        var player = getPlayer(userId);
+        assertTrue(player != null && player.requestedRematch());
+    }
+
+    private void gameHasNoPlayersRequestingRematch() {
+        assertTrue(game.getDetails().players().stream().noneMatch(PlayerDTO::requestedRematch));
+    }
 
     private void gameHasPlayer(UUID userId) {
         assertNotNull(getPlayer(userId));
     }
 
-    private boolean gamePlayerIsReady(UUID userId) {
+    private void gamePlayerIsReady(UUID userId) {
         var player = getPlayer(userId);
-        return player.isReady();
+        assertTrue(player != null && player.isReady());
     }
 
     private void gameHasNoPlayers() {
         assertTrue(game.getDetails().players().isEmpty());
     }
 
-    private boolean gameHasNoPlayersReady() {
-        return game.getDetails().players().stream().noneMatch(PlayerDTO::isReady);
+    private void gameHasNoPlayersReady() {
+        assertTrue(game.getDetails().players().stream().noneMatch(PlayerDTO::isReady));
     }
 
     private GameStatusDTO gameStatus() {
@@ -663,6 +519,7 @@ class TicTacToeGameTest {
         for (int row = 0; row < boardPattern.size(); row++) {
             for (int col = 0; col < boardPattern.get(row).length; col++) {
                 final var cell = boardPattern.get(row)[col];
+                if(Objects.equals(cell, ".")) continue;
                 if (player1.getRight().equals(SymbolDTO.valueOf(cell))) {
                     player1Moves.add(Pair.of(row, col));
                 } else if (player2.getRight().equals(SymbolDTO.valueOf(cell))) {
@@ -678,7 +535,7 @@ class TicTacToeGameTest {
             }
             if (i < player2Moves.size()) {
                 final var move = player2Moves.get(i);
-                game.handle(new PlayerMoveCommand(player1.getLeft(), move.getLeft(), move.getRight()));
+                game.handle(new PlayerMoveCommand(player2.getLeft(), move.getLeft(), move.getRight()));
             }
         }
     }

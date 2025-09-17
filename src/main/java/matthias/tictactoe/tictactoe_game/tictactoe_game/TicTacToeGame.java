@@ -56,7 +56,7 @@ class TicTacToeGame implements Game {
             .gameStatus(GameStatusDTO.valueOf(status.name()))
             .players(getPlayersDTO())
             .board(getBoardDTO())
-            .symbolTurn(playerTurn != null ? SymbolDTO.valueOf(playerTurn.name()) : null)
+            .symbolTurn(playerTurn != null ? SymbolDTO.valueOf(playerTurn.symbol().name()) : null)
             .symbolWinner(board.getResult() == WIN_X ? SymbolDTO.X : board.getResult() == WIN_O ? SymbolDTO.O : null)
             .build();
     }
