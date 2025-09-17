@@ -18,7 +18,7 @@ class GuestAuthenticationService {
     public TokenDto registerGuest() {
         final var userId = userFacade.createGuestUser();
         return userFacade.findUserById(userId)
-            .map(UserDto::getUsername)
+            .map(UserDto::username)
             .map(jwtService::generateJWT)
             .orElseThrow(IllegalStateException::new);
     }

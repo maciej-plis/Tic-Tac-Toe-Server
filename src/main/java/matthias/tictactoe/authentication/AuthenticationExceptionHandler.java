@@ -1,6 +1,6 @@
 package matthias.tictactoe.authentication;
 
-import matthias.tictactoe.user.UserNotFoundException;
+import matthias.tictactoe.user.exception.UserNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -32,9 +32,9 @@ class UserMapper {
 
     public UserDto toDto(User user) {
         return UserDto.builder()
-            .username(user.getUsername())
-            .email(user.getEmail())
-            .roles(toDtos(user.getRoles()))
+            .username(user.username())
+            .email(user.email())
+            .roles(toDtos(user.roles()))
             .build();
     }
 
@@ -49,10 +49,10 @@ class UserMapper {
     public UserEntity toEntity(User user) {
         return UserEntity.builder()
             .type(USER)
-            .username(user.getUsername())
-            .email(user.getEmail())
-            .password(user.getPassword())
-            .roles(toEntity(user.getRoles()))
+            .username(user.username())
+            .email(user.email())
+            .password(user.password())
+            .roles(toEntity(user.roles()))
             .build();
     }
 
@@ -67,7 +67,7 @@ class UserMapper {
     public UserEntity toEntity(GuestUser guestUser) {
         return UserEntity.builder()
             .type(GUEST)
-            .username(guestUser.getName())
+            .username(guestUser.name())
             .build();
     }
 }

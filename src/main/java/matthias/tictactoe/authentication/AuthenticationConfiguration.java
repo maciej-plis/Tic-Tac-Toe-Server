@@ -1,7 +1,7 @@
 package matthias.tictactoe.authentication;
 
 import matthias.tictactoe.user.UserFacade;
-import matthias.tictactoe.user.UserNotFoundException;
+import matthias.tictactoe.user.exception.UserNotFoundException;
 import matthias.tictactoe.user.dto.UserDto;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,9 +24,9 @@ class AuthenticationConfiguration {
 
     private UserDetails toUserDetails(UserDto user) {
         return new User(
-            user.getUsername(),
+            user.username(),
             "",
-            user.getRoles().stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role)).collect(toList())
+            user.roles().stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role)).collect(toList())
         );
     }
 }

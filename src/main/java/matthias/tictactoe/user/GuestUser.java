@@ -1,10 +1,9 @@
 package matthias.tictactoe.user;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Builder;
 
-@Getter
-@RequiredArgsConstructor
-class GuestUser {
-    private final String name;
+@Builder
+record GuestUser(
+    String name
+) {
 }

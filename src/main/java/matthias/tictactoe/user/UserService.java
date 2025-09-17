@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static matthias.tictactoe.user.User.Role.USER;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
 
 @Service
 @RequiredArgsConstructor
@@ -57,14 +58,14 @@ class UserService {
 
     private User buildUser(CreateUserRequest request) {
         return new User(
-            request.getUsername(),
-            request.getEmail(),
-            passwordEncoder.encode(request.getPassword()),
+            request.username(),
+            request.email(),
+            passwordEncoder.encode(request.password()),
             Set.of(USER)
         );
     }
 
     private GuestUser buildGuestUser() {
-        return new GuestUser("Guest_" + RandomStringUtils.random(6, "0123456789")); // TODO
+        return new GuestUser("Guest_" + insecure().next(6, "0123456789")); // TODO
     }
 }

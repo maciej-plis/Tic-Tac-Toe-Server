@@ -23,7 +23,7 @@ class UserAuthenticationService {
 
     public TokenDto loginUser(LoginUserRequest request) {
         return userFacade.findUserByUsername(request.getUsername())
-            .map(UserDto::getUsername)
+            .map(UserDto::username)
             .map(jwtService::generateJWT)
             .orElseThrow(AuthenticationFailedException::new);
     }
