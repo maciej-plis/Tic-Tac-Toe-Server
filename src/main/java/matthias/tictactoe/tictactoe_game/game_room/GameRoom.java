@@ -4,13 +4,20 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.shared.command.Command;
 import matthias.tictactoe.shared.command.CommandHandler;
+import matthias.tictactoe.shared.event.Event;
 import matthias.tictactoe.tictactoe_game.Game;
-import matthias.tictactoe.tictactoe_game.game_room.command.*;
+import matthias.tictactoe.tictactoe_game.game_room.command.PlayerJoinCommand;
+import matthias.tictactoe.tictactoe_game.game_room.command.PlayerLeaveCommand;
+import matthias.tictactoe.tictactoe_game.game_room.command.SpectatorJoinCommand;
+import matthias.tictactoe.tictactoe_game.game_room.command.SpectatorLeaveCommand;
 import matthias.tictactoe.tictactoe_game.game_room.dto.BasicGameRoomInfoDTO;
 import matthias.tictactoe.tictactoe_game.game_room.dto.DetailedGameRoomInfoDTO;
 import matthias.tictactoe.tictactoe_game.game_room.dto.SpectatorDTO;
 import matthias.tictactoe.tictactoe_game.game_room.event.*;
+import matthias.tictactoe.tictactoe_game.game_room.exception.GameRoomAccessExeption;
+import matthias.tictactoe.tictactoe_game.game_room.exception.GameRoomSpectatorNotFoundException;
 import matthias.tictactoe.tictactoe_game.game_room.port.GameRoomMessagePublisher;
+import matthias.tictactoe.tictactoe_game.tictactoe_game.command.GameCommand;
 
 import java.util.HashSet;
 import java.util.List;
@@ -30,9 +37,7 @@ class GameRoom implements CommandHandler {
     @Getter
     private final String name;
 
-    private final Game game = createTicTacToeGame(event -> {
-    });
-    //    private final Game game = createTicTacToeGame(event -> messagePublisher.publish(id, event));
+    private final Game game = createTicTacToeGame(this::publishGameEvent);
     private final Set<Spectator> spectators = new HashSet<>();
 
     @Override
@@ -43,8 +48,8 @@ class GameRoom implements CommandHandler {
             case SpectatorLeaveCommand c -> handle(c, this::onSpectatorLeave);
             case PlayerJoinCommand c -> handle(c, this::onPlayerJoin);
             case PlayerLeaveCommand c -> handle(c, this::onPlayerLeave);
-            case GameRoomCommand<T> c -> handle(c, this::handleGameCommand);
-            default -> throw new RuntimeException("Unknown command.");
+            case GameCommand<T> c -> handle(c, this::handleGameCommand);
+            default -> throw new IllegalArgumentException("Unknown command " + cmd.getClass().getSimpleName() + " was passed to GameRoom.");
         };
     }
 
@@ -59,7 +64,7 @@ class GameRoom implements CommandHandler {
 
     public DetailedGameRoomInfoDTO getDetailedGameRoomInfo(UUID userId) {
         if (!game.hasPlayer(userId) && !hasSpectator(userId)) {
-            throw new RuntimeException("User '" + userId + "' has no access to game room details '" + id + "'.");
+            throw new GameRoomAccessExeption("User '" + userId + "' has no access to game room details '" + id + "'.");
         }
 
         return DetailedGameRoomInfoDTO.builder()
@@ -112,9 +117,9 @@ class GameRoom implements CommandHandler {
         messagePublisher.publish(id, new SpectatorLeftEvent(cmd.userId(), ""));
     }
 
-    private <T> T handleGameCommand(GameRoomCommand<T> cmd) {
+    private <T> T handleGameCommand(GameCommand<T> cmd) {
         if (!game.hasPlayer(cmd.userId())) {
-            throw new RuntimeException("User '" + cmd.userId() + "' cannot run commands in game room '" + id + "'.");
+            throw new GameRoomAccessExeption("User '" + cmd.userId() + "' cannot run commands in game room '" + id + "'.");
         }
 
         return game.handle(cmd);
@@ -124,10 +129,14 @@ class GameRoom implements CommandHandler {
         return spectators.stream()
             .filter(s -> s.userId().equals(userId))
             .findAny()
-            .orElseThrow(() -> new RuntimeException("Spectator not found."));
+            .orElseThrow(() -> new GameRoomSpectatorNotFoundException("Couldn't find spectator with userId: " + userId));
     }
 
     private boolean hasSpectator(UUID userId) {
         return spectators.stream().anyMatch(s -> s.userId().equals(userId));
+    }
+
+    private void publishGameEvent(Event event) {
+        messagePublisher.publish(id, event);
     }
 }

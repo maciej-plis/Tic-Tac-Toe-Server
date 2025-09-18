@@ -35,7 +35,7 @@ public class UserEntity {
 
     @Enumerated(STRING)
     @ElementCollection(fetch = EAGER)
-    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "id"))
+    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "userId"))
     private Set<Role> roles;
 
     public enum Type {

@@ -46,7 +46,7 @@ class TicTacToeGame implements Game {
             case PlayerMoveCommand c -> handle(c, this::onPlayerMove);
             case PlayerRequestRematchCommand c -> handle(c, this::onPlayerRematch);
             case PlayerCancelRematchCommand c -> handle(c, this::onPlayerNotRematch);
-            default -> throw new IllegalStateException("Unknown command " + cmd.getClass().getSimpleName() + " was passed to TicTacToeGame.");
+            default -> throw new IllegalArgumentException("Unknown command " + cmd.getClass().getSimpleName() + " was passed to TicTacToeGame.");
         };
     }
 

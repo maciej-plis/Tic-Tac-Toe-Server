@@ -25,7 +25,7 @@ public class CreateGameRoomUseCase implements FunctionUseCase<CreateGameRoomComm
         final var gameRoom = new GameRoom(messagePublisher, cmd.gameRoomName());
 
         log.info("Adding player to created game room: {}", cmd.userId());
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), cmd.userId()));
+        gameRoom.handle(new PlayerJoinCommand(cmd.userId()));
 
         log.info("Saving created game room");
         gameRoomManager.save(gameRoom);
