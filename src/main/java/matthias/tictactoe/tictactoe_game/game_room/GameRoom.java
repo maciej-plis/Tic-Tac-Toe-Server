@@ -137,6 +137,8 @@ class GameRoom implements CommandHandler {
     }
 
     private void publishGameEvent(Event event) {
+        if(event instanceof matthias.tictactoe.tictactoe_game.tictactoe_game.event.PlayerJoinedEvent) return; // Swallow event as it's handled by game room
+        if(event instanceof matthias.tictactoe.tictactoe_game.tictactoe_game.event.PlayerLeftEvent) return; // Swallow event as it's handled by game room
         messagePublisher.publish(id, event);
     }
 }

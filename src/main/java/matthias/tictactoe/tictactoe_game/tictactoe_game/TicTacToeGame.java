@@ -71,7 +71,7 @@ class TicTacToeGame implements Game {
     @Override
     public Optional<PlayerDTO> findPlayer(UUID userId) {
         return getPlayers().stream()
-            .filter(p -> p.id().equals(userId))
+            .filter(p -> p.userId().equals(userId))
             .findAny();
     }
 
@@ -100,6 +100,8 @@ class TicTacToeGame implements Game {
 
         players.remove(player);
         eventConsumer.accept(new PlayerLeftEvent(player.userId(), SymbolDTO.valueOf(player.symbol().name())));
+
+        if (status == WAITING_FOR_PLAYERS) return;
 
         status = WAITING_FOR_PLAYERS;
         eventConsumer.accept(new WaitingForPlayersToJoinEvent());

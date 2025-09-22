@@ -6,7 +6,7 @@ import java.util.UUID;
 
 @Builder
 public record PlayerDTO(
-    UUID id,
+    UUID userId,
     String name
 ) {
 }

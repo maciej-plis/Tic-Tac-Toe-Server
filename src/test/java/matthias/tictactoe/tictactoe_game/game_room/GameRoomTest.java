@@ -5,14 +5,9 @@ import matthias.tictactoe.tictactoe_game.game_room.command.PlayerLeaveCommand;
 import matthias.tictactoe.tictactoe_game.game_room.command.SpectatorJoinCommand;
 import matthias.tictactoe.tictactoe_game.game_room.command.SpectatorLeaveCommand;
 import matthias.tictactoe.tictactoe_game.game_room.dto.DetailedGameRoomInfoDTO;
+import matthias.tictactoe.tictactoe_game.game_room.dto.PlayerDTO;
 import matthias.tictactoe.tictactoe_game.game_room.dto.SpectatorDTO;
-import matthias.tictactoe.tictactoe_game.game_room.event.PlayerChangedToSpectatorEvent;
-import matthias.tictactoe.tictactoe_game.game_room.event.PlayerJoinedEvent;
-import matthias.tictactoe.tictactoe_game.game_room.event.PlayerLeftEvent;
-import matthias.tictactoe.tictactoe_game.game_room.event.SpectatorChangedToPlayerEvent;
-import matthias.tictactoe.tictactoe_game.game_room.event.SpectatorJoinedEvent;
-import matthias.tictactoe.tictactoe_game.game_room.event.SpectatorLeftEvent;
-import matthias.tictactoe.tictactoe_game.game_room.port.GameRoomMessagePublisher;
+import matthias.tictactoe.tictactoe_game.game_room.event.*;
 import matthias.tictactoe.tictactoe_game.tictactoe_game.command.PlayerReadyCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GameRoomTest {
@@ -38,8 +34,7 @@ class GameRoomTest {
     @BeforeEach
     void init() {
         publishedMessages = new ArrayList<>();
-        final GameRoomMessagePublisher publisher = (roomId, message) -> publishedMessages.add(message);
-        gameRoom = new GameRoom(publisher, "Test Room");
+        gameRoom = new GameRoom((roomId, message) -> publishedMessages.add(message), "Test Room");
     }
 
     @DisplayName("Spectator can join the room")
@@ -49,10 +44,17 @@ class GameRoomTest {
         gameRoom.handle(new SpectatorJoinCommand(USER_1_ID));
 
         // Then
-        assertTrue(gameRoom.getSpectators().stream().anyMatch(s -> s.userId().equals(USER_1_ID)));
+        gameRoomHasSpectator(USER_1_ID);
+    }
+
+    @DisplayName("When spectator joins the room, the SpectatorJoinedEvent is published")
+    @Test
+    void whenSpectatorJoinsTheRoomEventIsPublished() {
+        // When
+        gameRoom.handle(new SpectatorJoinCommand(USER_1_ID));
+
+        // Then
         messageIsPublished(SpectatorJoinedEvent.class, e -> USER_1_ID.equals(e.userId()));
-        assertEquals(0, gameRoom.getBasicGameRoomInfo().playersCount());
-        assertEquals(1, gameRoom.getBasicGameRoomInfo().spectatorsCount());
     }
 
     @DisplayName("Spectator can leave the room")
@@ -65,7 +67,19 @@ class GameRoomTest {
         gameRoom.handle(new SpectatorLeaveCommand(USER_1_ID));
 
         // Then
-        assertTrue(gameRoom.getSpectators().isEmpty());
+        gameRoomHasNoSpectators();
+    }
+
+    @DisplayName("When spectator leaves the room, the SpectatorLeftEvent is published")
+    @Test
+    void whenSpectatorLeavesTheRoomEventIsPublished() {
+        // Given
+        gameRoom.handle(new SpectatorJoinCommand(USER_1_ID));
+
+        // When
+        gameRoom.handle(new SpectatorLeaveCommand(USER_1_ID));
+
+        // Then
         messageIsPublished(SpectatorLeftEvent.class, e -> USER_1_ID.equals(e.userId()));
     }
 
@@ -76,10 +90,18 @@ class GameRoomTest {
         gameRoom.handle(new PlayerJoinCommand(USER_1_ID));
 
         // Then
-        assertEquals(1, gameRoom.getBasicGameRoomInfo().playersCount());
-        assertEquals(0, gameRoom.getBasicGameRoomInfo().spectatorsCount());
+        gameRoomHasPlayer(USER_1_ID);
+    }
+
+    @DisplayName("When Player joins the room, the PlayerJoinedEvent is published")
+    @Test
+    void whenPlayerJoinsRoomPlayerJoinedEventIsPublished() {
+        // When
+        gameRoom.handle(new PlayerJoinCommand(USER_1_ID));
+
+        // Then
+        assertEquals(1, publishedMessages.size());
         messageIsPublished(PlayerJoinedEvent.class, e -> USER_1_ID.equals(e.userId()));
-        assertNotNull(gameRoom.getDetailedGameRoomInfo(USER_1_ID));
     }
 
     @DisplayName("Player can leave the room")
@@ -92,7 +114,20 @@ class GameRoomTest {
         gameRoom.handle(new PlayerLeaveCommand(USER_1_ID));
 
         // Then
-        assertEquals(0, gameRoom.getBasicGameRoomInfo().playersCount());
+        gameRoomHasNoPlayers();
+    }
+
+    @DisplayName("When Player leaves the room, the PlayerLeftEvent is published")
+    @Test
+    void whenPlayerLeavesRoomPlayerLeftEventIsPublished() {
+        // Given
+        gameRoom.handle(new PlayerJoinCommand(USER_1_ID));
+
+        // When
+        gameRoom.handle(new PlayerLeaveCommand(USER_1_ID));
+
+        // Then
+        assertEquals(2, publishedMessages.size());
         messageIsPublished(PlayerLeftEvent.class, e -> USER_1_ID.equals(e.userId()));
     }
 
@@ -106,8 +141,21 @@ class GameRoomTest {
         gameRoom.handle(new PlayerJoinCommand(USER_1_ID));
 
         // Then
-        assertTrue(gameRoom.getSpectators().stream().noneMatch(s -> s.userId().equals(USER_1_ID)));
-        assertEquals(1, gameRoom.getBasicGameRoomInfo().playersCount());
+        gameRoomHasNoSpectators();
+        gameRoomHasPlayer(USER_1_ID);
+    }
+
+    @DisplayName("When Spectator switches to Player event is published")
+    @Test
+    void whenSpectatorSwitchesToPlayerEventIsPublished() {
+        // Given
+        gameRoom.handle(new SpectatorJoinCommand(USER_1_ID));
+
+        // When
+        gameRoom.handle(new PlayerJoinCommand(USER_1_ID));
+
+        // Then
+        assertEquals(2, publishedMessages.size());
         messageIsPublished(SpectatorChangedToPlayerEvent.class, e -> USER_1_ID.equals(e.userId()));
     }
 
@@ -121,8 +169,21 @@ class GameRoomTest {
         gameRoom.handle(new SpectatorJoinCommand(USER_1_ID));
 
         // Then
-        assertEquals(0, gameRoom.getBasicGameRoomInfo().playersCount());
-        assertTrue(gameRoom.getSpectators().stream().anyMatch(s -> s.userId().equals(USER_1_ID)));
+        gameRoomHasNoPlayers();
+        gameRoomHasSpectator(USER_1_ID);
+    }
+
+    @DisplayName("When Player switches to Spectator event is published")
+    @Test
+    void whenPlayerSwitchesToSpectatorEventIsPublished() {
+        // Given
+        gameRoom.handle(new PlayerJoinCommand(USER_1_ID));
+
+        // When
+        gameRoom.handle(new SpectatorJoinCommand(USER_1_ID));
+
+        // Then
+        assertEquals(2, publishedMessages.size());
         messageIsPublished(PlayerChangedToSpectatorEvent.class, e -> USER_1_ID.equals(e.userId()));
     }
 
@@ -136,11 +197,11 @@ class GameRoomTest {
         final DetailedGameRoomInfoDTO details = gameRoom.getDetailedGameRoomInfo(USER_1_ID);
 
         // Then
+        assertNotNull(details.gameDetails());
         assertEquals(gameRoom.getId(), details.gameRoomId());
         assertEquals("Test Room", details.gameRoomName());
-        assertNotNull(details.gameDetails());
-        assertTrue(details.players().stream().anyMatch(p -> p.id().equals(USER_1_ID)));
-        assertTrue(details.spectators().isEmpty());
+        assertEquals(details.players().stream().map(PlayerDTO::userId).toList(), List.of(USER_1_ID));
+        assertEquals(details.spectators(), emptyList());
     }
 
     @DisplayName("Detailed room info is accessible for spectators")
@@ -153,11 +214,11 @@ class GameRoomTest {
         final DetailedGameRoomInfoDTO details = gameRoom.getDetailedGameRoomInfo(USER_1_ID);
 
         // Then
+        assertNotNull(details.gameDetails());
         assertEquals(gameRoom.getId(), details.gameRoomId());
         assertEquals("Test Room", details.gameRoomName());
-        assertNotNull(details.gameDetails());
-        assertTrue(details.players().isEmpty());
-        assertTrue(details.spectators().stream().map(SpectatorDTO::userId).anyMatch(USER_1_ID::equals));
+        assertEquals(details.players(), emptyList());
+        assertEquals(details.spectators().stream().map(SpectatorDTO::userId).toList(), List.of(USER_1_ID));
     }
 
     @DisplayName("Detailed room info is not accessible for outsiders")
@@ -185,6 +246,37 @@ class GameRoomTest {
 
         // Expect
         assertThrows(RuntimeException.class, () -> gameRoom.handle(new PlayerReadyCommand(USER_3_ID)));
+    }
+
+    private void gameRoomHasSpectator(UUID userId) {
+        assertNotNull(getSpectator(userId));
+    }
+
+    private void gameRoomHasNoSpectators() {
+        assertTrue(gameRoom.getSpectators().isEmpty());
+    }
+
+    private SpectatorDTO getSpectator(UUID userId) {
+        return gameRoom.getSpectators().stream()
+            .filter(s -> s.userId().equals(userId))
+            .findAny()
+            .orElse(null);
+    }
+
+    private void gameRoomHasPlayer(UUID userId) {
+        assertNotNull(getPlayer(userId));
+    }
+
+    private void gameRoomHasNoPlayers() {
+        assertEquals(0, gameRoom.getBasicGameRoomInfo().playersCount());
+    }
+
+    private PlayerDTO getPlayer(UUID userId) {
+        return gameRoom.getDetailedGameRoomInfo(userId)
+            .players().stream()
+            .filter(p -> p.userId().equals(userId))
+            .findAny()
+            .orElse(null);
     }
 
     private <T> void messageIsPublished(Class<T> eventClass, Predicate<T> predicate) {
