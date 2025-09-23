@@ -3,10 +3,11 @@ package matthias.tictactoe.user.dto;
 import lombok.Builder;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Builder
 public record UserDto(
-    long id,
+    UUID id,
     String username,
     String email,
     Set<Role> roles

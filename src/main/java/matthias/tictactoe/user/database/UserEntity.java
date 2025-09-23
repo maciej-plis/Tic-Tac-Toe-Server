@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.Set;
+import java.util.UUID;
 
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.EAGER;
@@ -22,8 +23,7 @@ import static jakarta.persistence.GenerationType.AUTO;
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = AUTO)
-    private Long id;
+    private UUID id = UUID.randomUUID();
 
     private Type type;
 
@@ -35,7 +35,7 @@ public class UserEntity {
 
     @Enumerated(STRING)
     @ElementCollection(fetch = EAGER)
-    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "userId"))
+    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user"))
     private Set<Role> roles;
 
     public enum Type {

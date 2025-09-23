@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface Game extends CommandHandler {
     List<PlayerDTO> getPlayers();
     Optional<PlayerDTO> findPlayer(UUID userId);
-    void addPlayer(UUID userId);
+    void addPlayer(UUID userId, String username);
     void removePlayer(UUID userId);
     boolean hasPlayer(UUID userId);
     GameDetails getDetails();

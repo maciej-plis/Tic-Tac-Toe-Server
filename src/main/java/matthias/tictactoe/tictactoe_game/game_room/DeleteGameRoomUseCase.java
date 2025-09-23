@@ -21,11 +21,11 @@ public class DeleteGameRoomUseCase implements ConsumerUseCase<DeleteGameRoomComm
         log.info("Deleting game room with command: {}", cmd);
 
         final var gameRoom = gameRoomManager.findById(cmd.gameRoomId()).orElseThrow(() -> {
-            log.info("Game room with userId '{}' not found", cmd.gameRoomId());
+            log.info("Game room with user '{}' not found", cmd.gameRoomId());
             return new RuntimeException("Game room not found");
         });
 
-        log.info("Deleting game room with userId '{}'", gameRoom.getId());
+        log.info("Deleting game room with user '{}'", gameRoom.getId());
         gameRoomManager.deleteById(gameRoom.getId());
     }
 

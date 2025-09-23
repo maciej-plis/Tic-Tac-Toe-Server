@@ -52,7 +52,7 @@ public class GamesManager {
 
     private void verifyGameExistence(String gameID) {
         if(!games.containsKey(gameID)) {
-            throw new GameNotFoundException(String.format("Game with userId \"%s\" doesn't exist.", gameID));
+            throw new GameNotFoundException(String.format("Game with user \"%s\" doesn't exist.", gameID));
         }
     }
 }

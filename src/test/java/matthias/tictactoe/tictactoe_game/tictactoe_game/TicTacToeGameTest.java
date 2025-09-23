@@ -1,11 +1,7 @@
 package matthias.tictactoe.tictactoe_game.tictactoe_game;
 
 import matthias.tictactoe.shared.event.Event;
-import matthias.tictactoe.tictactoe_game.tictactoe_game.command.PlayerMoveCommand;
-import matthias.tictactoe.tictactoe_game.tictactoe_game.command.PlayerReadyCommand;
-import matthias.tictactoe.tictactoe_game.tictactoe_game.command.PlayerNotReadyCommand;
-import matthias.tictactoe.tictactoe_game.tictactoe_game.command.PlayerRequestRematchCommand;
-import matthias.tictactoe.tictactoe_game.tictactoe_game.command.PlayerCancelRematchCommand;
+import matthias.tictactoe.tictactoe_game.tictactoe_game.command.*;
 import matthias.tictactoe.tictactoe_game.tictactoe_game.dto.GameStatusDTO;
 import matthias.tictactoe.tictactoe_game.tictactoe_game.dto.PlayerDTO;
 import matthias.tictactoe.tictactoe_game.tictactoe_game.dto.SymbolDTO;
@@ -25,7 +21,6 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 import static matthias.tictactoe.tictactoe_game.tictactoe_game.dto.GameStatusDTO.*;
-import static matthias.tictactoe.tictactoe_game.tictactoe_game.dto.GameStatusDTO.FINISHED;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TicTacToeGameTest {
@@ -47,7 +42,7 @@ class TicTacToeGameTest {
     @Test
     void playerCanBeAddedToTheGame() {
         // When
-        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_1_ID, "User 1");
 
         // Then
         gameHasPlayer(USER_1_ID);
@@ -57,7 +52,7 @@ class TicTacToeGameTest {
     @Test
     void whenPlayerIsAddedToTheGamePlayerJoinedEventIsEmitted() {
         // When
-        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_1_ID, "User 1");
 
         // Then
         eventIsEmitted(PlayerJoinedEvent.class, e ->
@@ -69,7 +64,7 @@ class TicTacToeGameTest {
     @Test
     void playerCanBeRemovedFromTheGame() {
         // Given
-        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_1_ID, "User 1");
 
         // When
         game.removePlayer(USER_1_ID);
@@ -82,7 +77,7 @@ class TicTacToeGameTest {
     @Test
     void whenPlayerIsRemovedFromTheGamePlayerLeftEventIsEmitted() {
         // Given
-        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_1_ID, "User 1");
 
         // When
         game.removePlayer(USER_1_ID);
@@ -97,18 +92,18 @@ class TicTacToeGameTest {
     @Test
     void userCannotBeAddedToTheGameWhenItsFull() {
         // Given
-        game.addPlayer(USER_1_ID);
-        game.addPlayer(USER_2_ID);
+        game.addPlayer(USER_1_ID, "User 1");
+        game.addPlayer(USER_2_ID, "User 2");
 
         // Expect
-        assertThrows(RuntimeException.class, () -> game.addPlayer(USER_3_ID));
+        assertThrows(RuntimeException.class, () -> game.addPlayer(USER_3_ID, "User 3"));
     }
 
     @DisplayName("Game status should not change after first player joins")
     @Test
     void gameStatusShouldNotChangeAfterFirstPlayerJoins() {
         // When
-        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_1_ID, "User 1");
 
         // Then
         assertEquals(WAITING_FOR_PLAYERS, gameStatus());
@@ -118,10 +113,10 @@ class TicTacToeGameTest {
     @Test
     void gameStatusChangesToWaitingForPlayersReadyAfterSecondPlayerJoins() {
         // Given
-        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_1_ID, "User 1");
 
         // When
-        game.addPlayer(USER_2_ID);
+        game.addPlayer(USER_2_ID, "User 2");
 
         // Then
         assertEquals(WAITING_FOR_PLAYERS_READY, gameStatus());
@@ -131,8 +126,8 @@ class TicTacToeGameTest {
     @Test
     void gameStatusChangesToWaitingForPlayersAfterPlayerLeaves() {
         // Given
-        game.addPlayer(USER_1_ID);
-        game.addPlayer(USER_2_ID);
+        game.addPlayer(USER_1_ID, "User 1");
+        game.addPlayer(USER_2_ID, "User 2");
 
         // When
         game.removePlayer(USER_1_ID);
@@ -145,8 +140,8 @@ class TicTacToeGameTest {
     @Test
     void playerCanBeSetReady() {
         // Given
-        game.addPlayer(USER_1_ID);
-        game.addPlayer(USER_2_ID);
+        game.addPlayer(USER_1_ID, "User 1");
+        game.addPlayer(USER_2_ID, "User 2");
 
         // When
         game.handle(new PlayerReadyCommand(USER_1_ID));
@@ -159,7 +154,7 @@ class TicTacToeGameTest {
     @Test
     void playerCannotBeSetReadyWhenGameIsWaitingForPlayers() {
         // Given
-        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_1_ID, "User 1");
 
         // Expect
         assertThrows(IllegalGameActionException.class, () -> game.handle(new PlayerReadyCommand(USER_1_ID)));
@@ -169,8 +164,8 @@ class TicTacToeGameTest {
     @Test
     void playerCannotBeSetReadyWhenGameIsInProgress() {
         // Given
-        game.addPlayer(USER_1_ID);
-        game.addPlayer(USER_2_ID);
+        game.addPlayer(USER_1_ID, "User 1");
+        game.addPlayer(USER_2_ID, "User 2");
         game.handle(new PlayerReadyCommand(USER_1_ID));
         game.handle(new PlayerReadyCommand(USER_2_ID));
 
@@ -182,8 +177,8 @@ class TicTacToeGameTest {
     @Test
     void playerCanBeUnsetReady() {
         // Given
-        game.addPlayer(USER_1_ID);
-        game.addPlayer(USER_2_ID);
+        game.addPlayer(USER_1_ID, "User 1");
+        game.addPlayer(USER_2_ID, "User 2");
         game.handle(new PlayerReadyCommand(USER_1_ID));
 
         // When
@@ -197,8 +192,8 @@ class TicTacToeGameTest {
     @Test
     void gameStatusShouldNotChangeAfterFirstPlayerIsReady() {
         // Given
-        game.addPlayer(USER_1_ID);
-        game.addPlayer(USER_2_ID);
+        game.addPlayer(USER_1_ID, "User 1");
+        game.addPlayer(USER_2_ID, "User 2");
 
         // When
         game.handle(new PlayerReadyCommand(USER_1_ID));
@@ -211,8 +206,8 @@ class TicTacToeGameTest {
     @Test
     void gameStatusShouldChangeToInProgressAfterSecondPlayerIsReady() {
         // Given
-        game.addPlayer(USER_1_ID);
-        game.addPlayer(USER_2_ID);
+        game.addPlayer(USER_1_ID, "User 1");
+        game.addPlayer(USER_2_ID, "User 2");
         game.handle(new PlayerReadyCommand(USER_1_ID));
 
         // When
@@ -394,10 +389,10 @@ class TicTacToeGameTest {
     @Test
     void gameIsStartedByPlayerWhoJoinedFirst() {
         // Given
-        game.addPlayer(USER_1_ID);
-        game.addPlayer(USER_2_ID);
+        game.addPlayer(USER_1_ID, "User 1");
+        game.addPlayer(USER_2_ID, "User 2");
         game.removePlayer(USER_1_ID);
-        game.addPlayer(USER_1_ID);
+        game.addPlayer(USER_1_ID, "User 1");
 
         // When
         game.handle(new PlayerReadyCommand(USER_2_ID));
@@ -451,8 +446,8 @@ class TicTacToeGameTest {
     @Test
     void playerCannotMoveBeforeGameStarts() {
         // Given
-        game.addPlayer(USER_1_ID);
-        game.addPlayer(USER_2_ID);
+        game.addPlayer(USER_1_ID, "User 1");
+        game.addPlayer(USER_2_ID, "User 2");
 
         // Expect
         assertThrows(IllegalGameActionException.class, () -> move(USER_1_ID,0,0));
@@ -491,8 +486,8 @@ class TicTacToeGameTest {
     }
 
     private void startGame() {
-        game.addPlayer(USER_1_ID);
-        game.addPlayer(USER_2_ID);
+        game.addPlayer(USER_1_ID, "User 1");
+        game.addPlayer(USER_2_ID, "User 2");
         game.handle(new PlayerReadyCommand(USER_1_ID));
         game.handle(new PlayerReadyCommand(USER_2_ID));
         assertEquals(IN_PROGRESS, gameStatus());

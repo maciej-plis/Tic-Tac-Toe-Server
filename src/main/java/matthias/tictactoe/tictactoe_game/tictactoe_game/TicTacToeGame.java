@@ -76,7 +76,7 @@ class TicTacToeGame implements Game {
     }
 
     @Override
-    public void addPlayer(UUID userId) {
+    public void addPlayer(UUID userId, String username) {
         if (status != WAITING_FOR_PLAYERS) throw new IllegalGameActionException("Game is not in phase allowing to add players.");
 
         final var takenSymbols = players.stream().map(TicTacToePlayer::symbol).collect(toSet());
@@ -85,7 +85,7 @@ class TicTacToeGame implements Game {
             .findFirst()
             .orElseThrow(() -> new GameIsFullException("Player cannot be added to the game because it is full."));
 
-        players.add(new TicTacToePlayer(userId, "", symbol));
+        players.add(new TicTacToePlayer(userId, username, symbol));
         eventConsumer.accept(new PlayerJoinedEvent(userId, SymbolDTO.valueOf(symbol.name())));
 
         if (players.size() == TicTacToeSymbol.values().length) {
@@ -158,7 +158,7 @@ class TicTacToeGame implements Game {
         if (status != IN_PROGRESS) throw new IllegalGameActionException("Player cannot make move because game is not in progress.");
 
         final var player = getPlayerOrThrow(cmd.userId());
-        if (player != playerTurn) throw new IllegalPlayerMoveException("It's not the turn of player with userId: " + cmd.userId());
+        if (player != playerTurn) throw new IllegalPlayerMoveException("It's not the turn of player with user: " + cmd.userId());
 
         if (!board.isValidBoardCoordinates(cmd.row(), cmd.col())) {
             throw new IllegalPlayerMoveException("Player move coordinates (" + cmd.row() + ", " + cmd.col() + ") are not valid.");
@@ -211,7 +211,7 @@ class TicTacToeGame implements Game {
         return players.stream()
             .filter(p -> p.userId().equals(userId))
             .findAny()
-            .orElseThrow(() -> new GamePlayerNotFoundException("Couldn't find player with userId: " + userId));
+            .orElseThrow(() -> new GamePlayerNotFoundException("Couldn't find player with user: " + userId));
     }
 
     private List<matthias.tictactoe.tictactoe_game.tictactoe_game.dto.PlayerDTO> getPlayersDTO() {

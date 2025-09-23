@@ -5,7 +5,6 @@ import matthias.tictactoe.shared.event.Event;
 import java.util.UUID;
 
 public record PlayerLeftEvent(
-    UUID userId,
-    String userName
+    UUID userId
 ) implements Event {
 }

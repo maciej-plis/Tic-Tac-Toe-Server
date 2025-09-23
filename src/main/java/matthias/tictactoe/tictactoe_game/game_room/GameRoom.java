@@ -86,35 +86,36 @@ class GameRoom implements CommandHandler {
         if (hasSpectator(cmd.userId())) {
             final var spectator = getSpectatorOrThrow(cmd.userId());
             spectators.remove(spectator);
-            game.addPlayer(cmd.userId());
-            messagePublisher.publish(id, new SpectatorChangedToPlayerEvent(cmd.userId(), ""));
+            game.addPlayer(cmd.userId(), cmd.user().username());
+            messagePublisher.publish(id, new SpectatorChangedToPlayerEvent(cmd.userId(), cmd.user().username()));
         } else {
-            game.addPlayer(cmd.userId());
-            messagePublisher.publish(id, new PlayerJoinedEvent(cmd.userId(), ""));
+            game.addPlayer(cmd.userId(), cmd.user().username());
+            messagePublisher.publish(id, new PlayerJoinedEvent(cmd.userId(), cmd.user().username()));
 
         }
     }
 
     private void onPlayerLeave(PlayerLeaveCommand cmd) {
         game.removePlayer(cmd.userId());
-        messagePublisher.publish(id, new PlayerLeftEvent(cmd.userId(), ""));
+        messagePublisher.publish(id, new PlayerLeftEvent(cmd.userId()));
     }
 
     private void onSpectatorJoin(SpectatorJoinCommand cmd) {
-        if (game.hasPlayer(cmd.userId())) {
-            game.removePlayer(cmd.userId());
-            spectators.add(new Spectator(cmd.userId(), ""));
-            messagePublisher.publish(id, new PlayerChangedToSpectatorEvent(cmd.userId(), ""));
+        final var spectator = new Spectator(cmd.user().id(), cmd.user().username());
+        if (game.hasPlayer(cmd.user().id())) {
+            game.removePlayer(cmd.user().id());
+            spectators.add(spectator);
+            messagePublisher.publish(id, new PlayerChangedToSpectatorEvent(cmd.user().id(), cmd.user().username()));
         } else {
-            spectators.add(new Spectator(cmd.userId(), ""));
-            messagePublisher.publish(id, new SpectatorJoinedEvent(cmd.userId(), ""));
+            spectators.add(spectator);
+            messagePublisher.publish(id, new SpectatorJoinedEvent(cmd.user().id(), cmd.user().username()));
         }
     }
 
     private void onSpectatorLeave(SpectatorLeaveCommand cmd) {
         final var spectator = getSpectatorOrThrow(cmd.userId());
         spectators.remove(spectator);
-        messagePublisher.publish(id, new SpectatorLeftEvent(cmd.userId(), ""));
+        messagePublisher.publish(id, new SpectatorLeftEvent(cmd.userId()));
     }
 
     private <T> T handleGameCommand(GameCommand<T> cmd) {
@@ -129,7 +130,7 @@ class GameRoom implements CommandHandler {
         return spectators.stream()
             .filter(s -> s.userId().equals(userId))
             .findAny()
-            .orElseThrow(() -> new GameRoomSpectatorNotFoundException("Couldn't find spectator with userId: " + userId));
+            .orElseThrow(() -> new GameRoomSpectatorNotFoundException("Couldn't find spectator with user: " + userId));
     }
 
     private boolean hasSpectator(UUID userId) {
@@ -137,8 +138,8 @@ class GameRoom implements CommandHandler {
     }
 
     private void publishGameEvent(Event event) {
-        if(event instanceof matthias.tictactoe.tictactoe_game.tictactoe_game.event.PlayerJoinedEvent) return; // Swallow event as it's handled by game room
-        if(event instanceof matthias.tictactoe.tictactoe_game.tictactoe_game.event.PlayerLeftEvent) return; // Swallow event as it's handled by game room
+        if (event instanceof matthias.tictactoe.tictactoe_game.tictactoe_game.event.PlayerJoinedEvent) return; // Swallow event as it's handled by game room
+        if (event instanceof matthias.tictactoe.tictactoe_game.tictactoe_game.event.PlayerLeftEvent) return; // Swallow event as it's handled by game room
         messagePublisher.publish(id, event);
     }
 }

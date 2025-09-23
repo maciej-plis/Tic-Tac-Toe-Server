@@ -3,12 +3,12 @@ package matthias.tictactoe.user;
 import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.user.database.UserRepository;
 import matthias.tictactoe.user.dto.CreateUserRequest;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static matthias.tictactoe.user.User.Role.USER;
 import static org.apache.commons.lang3.RandomStringUtils.insecure;
@@ -21,7 +21,7 @@ class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
-    public Optional<User> findUserById(long id) {
+    public Optional<User> findUserById(UUID id) {
         return userRepository.findById(id)
             .map(userMapper::toDomain);
     }
@@ -44,13 +44,13 @@ class UserService {
         return !userRepository.existsByEmail(email);
     }
 
-    long createUser(CreateUserRequest request) {
+    UUID createUser(CreateUserRequest request) {
         final var user = buildUser(request);
         final var userEntity = userRepository.save(userMapper.toEntity(user));
         return userEntity.getId();
     }
 
-    public long createGuestUser() {
+    public UUID createGuestUser() {
         final var guestUser = buildGuestUser();
         final var userEntity = userRepository.save(userMapper.toEntity(guestUser));
         return userEntity.getId();
