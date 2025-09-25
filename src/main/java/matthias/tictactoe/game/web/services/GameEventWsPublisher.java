@@ -17,6 +17,6 @@ public class GameEventWsPublisher implements GameEventsFollower{
 
     @Override
     public void eventOccurred(String gameId, GameEvent event) {
-        template.convertAndSend("/topic/games/" + gameId, event);
+        template.convertAndSend("/topics/games/" + gameId, event);
     }
 }
