@@ -40,18 +40,17 @@ class SecurityConfiguration {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.cors(withDefaults());
+        http.cors(AbstractHttpConfigurer::disable);
         http.csrf(AbstractHttpConfigurer::disable);
         http.formLogin(AbstractHttpConfigurer::disable);
 
         http.addFilterAfter(new BearerTokenAuthenticationFilter(jwtService, userDetailsService), UsernamePasswordAuthenticationFilter.class);
 
         http.authorizeHttpRequests(auth -> auth
-            .requestMatchers(GET, "/").permitAll()
             .requestMatchers(POST, "/login-guest", "/register", "/login").anonymous()
-            .requestMatchers("/games/**").authenticated()
+            .requestMatchers(GET, "/").permitAll()
             .requestMatchers("/tic-tac-toe/**").permitAll()
-            .anyRequest().denyAll()
+            .anyRequest().permitAll()
         );
 
         return http.build();

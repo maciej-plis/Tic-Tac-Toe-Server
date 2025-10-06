@@ -4,7 +4,8 @@ import matthias.tictactoe.shared.command.Command;
 
 import java.util.UUID;
 
-public interface GameRoomCommand<T> extends Command<T> {
-    UUID userId();
-    UUID gameRoomId();
+public record CreateGameRoomCommand(
+    UUID userId,
+    String name
+) implements Command<UUID> {
 }

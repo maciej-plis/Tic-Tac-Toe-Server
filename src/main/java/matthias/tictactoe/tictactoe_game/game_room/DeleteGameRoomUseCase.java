@@ -3,18 +3,18 @@ package matthias.tictactoe.tictactoe_game.game_room;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import matthias.tictactoe.shared.usecase.ConsumerUseCase;
+import matthias.tictactoe.tictactoe_game.game_room.command.DeleteGameRoomCommand;
+import matthias.tictactoe.tictactoe_game.game_room.event.GameRoomDeletedEvent;
+import matthias.tictactoe.tictactoe_game.game_room.port.GameRoomMessagePublisher;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
-
-import static matthias.tictactoe.tictactoe_game.game_room.DeleteGameRoomUseCase.DeleteGameRoomCommand;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class DeleteGameRoomUseCase implements ConsumerUseCase<DeleteGameRoomCommand> {
+class DeleteGameRoomUseCase implements ConsumerUseCase<DeleteGameRoomCommand> {
 
     private final GameRoomManager gameRoomManager;
+    private final GameRoomMessagePublisher messagePublisher;
 
     @Override
     public void accept(DeleteGameRoomCommand cmd) {
@@ -27,11 +27,7 @@ public class DeleteGameRoomUseCase implements ConsumerUseCase<DeleteGameRoomComm
 
         log.info("Deleting game room with user '{}'", gameRoom.getId());
         gameRoomManager.deleteById(gameRoom.getId());
-    }
 
-    public record DeleteGameRoomCommand(
-        UUID userId,
-        UUID gameRoomId
-    ) {
+        messagePublisher.publish(new GameRoomDeletedEvent(gameRoom.getId()));
     }
 }

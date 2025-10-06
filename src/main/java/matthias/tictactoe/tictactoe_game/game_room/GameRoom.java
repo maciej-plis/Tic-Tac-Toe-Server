@@ -1,15 +1,13 @@
 package matthias.tictactoe.tictactoe_game.game_room;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import matthias.tictactoe.shared.command.Command;
 import matthias.tictactoe.shared.command.CommandHandler;
 import matthias.tictactoe.shared.event.Event;
 import matthias.tictactoe.tictactoe_game.Game;
-import matthias.tictactoe.tictactoe_game.game_room.command.PlayerJoinCommand;
-import matthias.tictactoe.tictactoe_game.game_room.command.PlayerLeaveCommand;
-import matthias.tictactoe.tictactoe_game.game_room.command.SpectatorJoinCommand;
-import matthias.tictactoe.tictactoe_game.game_room.command.SpectatorLeaveCommand;
+import matthias.tictactoe.tictactoe_game.game_room.command.*;
 import matthias.tictactoe.tictactoe_game.game_room.dto.BasicGameRoomInfoDTO;
 import matthias.tictactoe.tictactoe_game.game_room.dto.DetailedGameRoomInfoDTO;
 import matthias.tictactoe.tictactoe_game.game_room.dto.SpectatorDTO;
@@ -26,7 +24,7 @@ import java.util.UUID;
 
 import static matthias.tictactoe.tictactoe_game.tictactoe_game.TicTacToeGameFactory.createTicTacToeGame;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 class GameRoom implements CommandHandler {
 
     private final GameRoomMessagePublisher messagePublisher;
@@ -35,7 +33,7 @@ class GameRoom implements CommandHandler {
     private final UUID id = UUID.randomUUID();
 
     @Getter
-    private final String name;
+    private String name;
 
     private final Game game = createTicTacToeGame(this::publishGameEvent);
     private final Set<Spectator> spectators = new HashSet<>();
@@ -44,6 +42,7 @@ class GameRoom implements CommandHandler {
     @SuppressWarnings("unchecked")
     public <T> T handle(Command<T> cmd) {
         return (T) switch (cmd) {
+            case UpdateGameRoomCommand c -> handle(c, this::updateDetails);
             case SpectatorJoinCommand c -> handle(c, this::onSpectatorJoin);
             case SpectatorLeaveCommand c -> handle(c, this::onSpectatorLeave);
             case PlayerJoinCommand c -> handle(c, this::onPlayerJoin);
@@ -80,6 +79,23 @@ class GameRoom implements CommandHandler {
         return spectators.stream()
             .map(s -> new SpectatorDTO(s.userId(), s.name()))
             .toList();
+    }
+
+    public boolean isOwner(UUID userId) {
+        return game.getPlayers().stream()
+            .findFirst()
+            .map(p -> p.userId().equals(userId))
+            .orElse(false);
+    }
+
+    private void updateDetails(UpdateGameRoomCommand cmd) {
+        if(!isOwner(cmd.userId())) {
+            throw new GameRoomAccessExeption("User '" + cmd.userId() + "' is not allowed to update game room '" + id + "'.");
+        }
+
+        this.name = cmd.name();
+
+        messagePublisher.publish(id, new GameRoomUpdatedEvent(id, name));
     }
 
     private void onPlayerJoin(PlayerJoinCommand cmd) {

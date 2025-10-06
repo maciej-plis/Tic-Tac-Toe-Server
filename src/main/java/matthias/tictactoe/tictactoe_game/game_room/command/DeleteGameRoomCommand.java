@@ -2,8 +2,8 @@ package matthias.tictactoe.tictactoe_game.game_room.command;
 
 import java.util.UUID;
 
-public record SpectatorLeaveCommand(
-    UUID gameRoomId,
-    UUID userId
+public record DeleteGameRoomCommand(
+    UUID userId,
+    UUID gameRoomId
 ) implements GameRoomCommand<Void> {
 }

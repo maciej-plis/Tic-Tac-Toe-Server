@@ -5,6 +5,7 @@ import matthias.tictactoe.user.dto.UserDto;
 import java.util.UUID;
 
 public record SpectatorJoinCommand(
+    UUID gameRoomId,
     UserDto user
 ) implements GameRoomCommand<Void> {
 

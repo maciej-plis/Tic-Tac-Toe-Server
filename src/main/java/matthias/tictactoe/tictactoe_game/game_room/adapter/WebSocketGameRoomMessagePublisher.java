@@ -17,7 +17,12 @@ class WebSocketGameRoomMessagePublisher implements GameRoomMessagePublisher {
     private final SimpMessagingTemplate template;
 
     @Override
+    public void publish(Serializable message) {
+        template.convertAndSend("/topics/game-rooms", message);
+    }
+
+    @Override
     public void publish(UUID gameRoomId, Serializable message) {
-        template.convertAndSend("/topics/game-room/" + gameRoomId, message);
+        template.convertAndSend("/topics/game-rooms/" + gameRoomId, message);
     }
 }
