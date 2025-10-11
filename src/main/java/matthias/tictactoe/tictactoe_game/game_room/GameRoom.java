@@ -16,10 +16,7 @@ import matthias.tictactoe.tictactoe_game.game_room.port.GameRoomMessagePublisher
 import matthias.tictactoe.tictactoe_game.tictactoe_game.command.GameCommand;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static matthias.tictactoe.tictactoe_game.tictactoe_game.TicTacToeGameFactory.createTicTacToeGame;
 
@@ -34,7 +31,7 @@ class GameRoom implements CommandHandler {
     private String name;
 
     @Getter
-    private final UUID ownerId;
+    private final LinkedHashSet<UUID> ownerQueue = new LinkedHashSet<>();
 
     @Getter
     private final Instant creationDate = Instant.now();
@@ -47,10 +44,9 @@ class GameRoom implements CommandHandler {
     private final Game game = createTicTacToeGame(this::publishGameEvent);
     private final Set<Spectator> spectators = new HashSet<>();
 
-    public GameRoom(GameRoomMessagePublisher messagePublisher, String name, UUID ownerId, boolean spectatingEnabled) {
+    public GameRoom(GameRoomMessagePublisher messagePublisher, String name, boolean spectatingEnabled) {
         this.messagePublisher = messagePublisher;
         this.name = name;
-        this.ownerId = ownerId;
         this.spectatingEnabled = spectatingEnabled;
     }
 
@@ -88,7 +84,6 @@ class GameRoom implements CommandHandler {
         return DetailedGameRoomInfoDTO.builder()
             .gameRoomId(id)
             .gameRoomName(name)
-            .ownerId(ownerId)
             .creationDate(creationDate)
             .spectatingEnabled(spectatingEnabled)
             .players(game.getPlayers())
@@ -103,8 +98,12 @@ class GameRoom implements CommandHandler {
             .toList();
     }
 
+    public UUID getOwnerId() {
+        return ownerQueue.getFirst();
+    }
+
     public boolean isOwner(UUID userId) {
-        return ownerId.equals(userId);
+        return getOwnerId().equals(userId);
     }
 
     private void updateDetails(UpdateGameRoomCommand cmd) {
@@ -127,15 +126,18 @@ class GameRoom implements CommandHandler {
             game.addPlayer(cmd.userId(), cmd.user().username());
             messagePublisher.publish(id, new SpectatorChangedToPlayerEvent(cmd.userId(), cmd.user().username()));
         } else {
+            ownerQueue.add(cmd.userId());
             game.addPlayer(cmd.userId(), cmd.user().username());
             messagePublisher.publish(id, new PlayerJoinedEvent(cmd.userId(), cmd.user().username()));
-
         }
     }
 
     private void onPlayerLeave(PlayerLeaveCommand cmd) {
-        game.removePlayer(cmd.userId());
-        messagePublisher.publish(id, new PlayerLeftEvent(cmd.userId()));
+        if (game.hasPlayer(cmd.userId())) {
+            game.removePlayer(cmd.userId());
+            ownerQueue.remove(cmd.userId());
+            messagePublisher.publish(id, new PlayerLeftEvent(cmd.userId()));
+        }
     }
 
     private void onSpectatorJoin(SpectatorJoinCommand cmd) {
@@ -151,15 +153,18 @@ class GameRoom implements CommandHandler {
             spectators.add(spectator);
             messagePublisher.publish(id, new PlayerChangedToSpectatorEvent(cmd.user().id(), cmd.user().username()));
         } else {
+            ownerQueue.add(cmd.userId());
             spectators.add(spectator);
             messagePublisher.publish(id, new SpectatorJoinedEvent(cmd.user().id(), cmd.user().username()));
         }
     }
 
     private void onSpectatorLeave(SpectatorLeaveCommand cmd) {
-        final var spectator = getSpectatorOrThrow(cmd.userId());
-        spectators.remove(spectator);
-        messagePublisher.publish(id, new SpectatorLeftEvent(cmd.userId()));
+        if (hasSpectator(cmd.userId())) {
+            ownerQueue.remove(cmd.userId());
+            spectators.remove(getSpectatorOrThrow(cmd.userId()));
+            messagePublisher.publish(id, new SpectatorLeftEvent(cmd.userId()));
+        }
     }
 
     public void kickUser(KickUserCommand cmd) {
@@ -168,10 +173,13 @@ class GameRoom implements CommandHandler {
         }
 
         if (hasSpectator(cmd.userId())) {
+            ownerQueue.remove(cmd.userId());
             spectators.remove(getSpectatorOrThrow(cmd.userId()));
             messagePublisher.publish(id, new UserKickedEvent(cmd.userId()));
         }
+
         if (game.hasPlayer(cmd.userId())) {
+            ownerQueue.remove(cmd.userId());
             game.removePlayer(cmd.userId());
             messagePublisher.publish(id, new UserKickedEvent(cmd.userId()));
         }
@@ -182,8 +190,15 @@ class GameRoom implements CommandHandler {
             throw new GameRoomAccessExeption("User '" + cmd.actorId() + "' is not an owner of game room '" + id + "'.");
         }
 
-        if (hasSpectator(cmd.userId())) spectators.remove(getSpectatorOrThrow(cmd.userId()));
-        if (game.hasPlayer(cmd.userId())) game.removePlayer(cmd.userId());
+        if (hasSpectator(cmd.userId())) {
+            ownerQueue.remove(cmd.userId());
+            spectators.remove(getSpectatorOrThrow(cmd.userId()));
+        }
+
+        if (game.hasPlayer(cmd.userId())) {
+            ownerQueue.remove(cmd.userId());
+            game.removePlayer(cmd.userId());
+        }
 
         if (bannedUsers.add(cmd.userId())) {
             messagePublisher.publish(id, new UserBannedEvent(cmd.userId()));
@@ -191,7 +206,7 @@ class GameRoom implements CommandHandler {
     }
 
     private void unbanUser(UnbanUserCommand cmd) {
-        if (!cmd.actorId().equals(ownerId)) {
+        if (!cmd.actorId().equals(getOwnerId())) {
             throw new GameRoomAccessExeption("User '" + cmd.actorId() + "' is not an owner of game room '" + id + "'.");
         }
 

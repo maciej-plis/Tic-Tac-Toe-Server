@@ -54,7 +54,7 @@ class GameRoomTest {
     @BeforeEach
     void init() {
         testMessagePublisher = new GameRoomTestMessagePublisher();
-        gameRoom = new GameRoom(testMessagePublisher, "Test Room", USER_1.id(), true);
+        gameRoom = new GameRoom(testMessagePublisher, "Test Room", true);
     }
 
     @DisplayName("Spectator can join the room")
@@ -272,6 +272,7 @@ class GameRoomTest {
     @Test
     void ownerCanBanPlayer() {
         // Given
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
         gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2));
 
         // When
@@ -286,6 +287,7 @@ class GameRoomTest {
     @Test
     void ownerCanBanSpectator() {
         // Given
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
         gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_2));
 
         // When
@@ -300,13 +302,14 @@ class GameRoomTest {
     @Test
     void ownerCanKickPlayer() {
         // Given
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
         gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2));
 
         // When
         gameRoom.handle(new KickUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
 
         // Then
-        gameRoomHasNoPlayers();
+        gameRoomHasNoPlayer(USER_2.id());
         gameRoomMessageIsPublished(UserKickedEvent.class, gameRoom.getId(), e -> USER_2.id().equals(e.userId()));
     }
 
@@ -314,6 +317,7 @@ class GameRoomTest {
     @Test
     void ownerCanKickSpectator() {
         // Given
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
         gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_2));
 
         // When
@@ -328,6 +332,7 @@ class GameRoomTest {
     @Test
     void nonOwnerCannotBanOrKickUsers() {
         // Given
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
         gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2));
 
         // Expect
@@ -339,7 +344,7 @@ class GameRoomTest {
     @Test
     void spectatorCannotJoinWhenDisabled() {
         // Given
-        gameRoom = new GameRoom(testMessagePublisher, "No Spectators Room", USER_1.id(), false);
+        gameRoom = new GameRoom(testMessagePublisher, "No Spectators Room", false);
 
         // Expect
         assertThrows(GameRoomAccessExeption.class, () -> gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_2)));
@@ -349,7 +354,7 @@ class GameRoomTest {
     @Test
     void ownerCanUpdateSpectatorOption() {
         //Given
-        gameRoom = new GameRoom(testMessagePublisher, "Room", USER_1.id(), true);
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
 
         // When
         gameRoom.handle(new UpdateGameRoomCommand(gameRoom.getId(), USER_1.id(), null, false));
@@ -369,7 +374,7 @@ class GameRoomTest {
     @Test
     void nonOwnerCannotUpdateSpectatorOption() {
         // Given
-        gameRoom = new GameRoom(testMessagePublisher, "Room", USER_1.id(), true);
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
 
         // Expect
         assertThrows(GameRoomAccessExeption.class, () -> gameRoom.handle(new UpdateGameRoomCommand(gameRoom.getId(), USER_2.id(), null, false)));
@@ -379,6 +384,7 @@ class GameRoomTest {
     @Test
     void ownerCanUnbanUserAndUserCanRejoin() {
         // Given
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
         gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2));
         gameRoom.handle(new BanUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
 
@@ -394,6 +400,7 @@ class GameRoomTest {
     @Test
     void nonOwnerCannotUnbanUser() {
         // Given
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
         gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2));
         gameRoom.handle(new BanUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
 
@@ -405,6 +412,7 @@ class GameRoomTest {
     @Test
     void banDoesNotPublishEventIfUserAlreadyBanned() {
         // Given
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
         gameRoom.handle(new BanUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
 
         // When
@@ -421,6 +429,9 @@ class GameRoomTest {
     @DisplayName("Kick does not publish event if user is not present")
     @Test
     void kickDoesNotPublishEventIfUserNotPresent() {
+        // Given
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
+
         // When
         gameRoom.handle(new KickUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
 
@@ -436,6 +447,7 @@ class GameRoomTest {
     @Test
     void unbanDoesNotPublishEventIfUserNotBanned() {
         // Given
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
         gameRoom.handle(new UnbanUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
 
         // Then
@@ -448,6 +460,10 @@ class GameRoomTest {
 
     private void gameRoomHasSpectator(UUID userId) {
         assertNotNull(getSpectator(userId));
+    }
+
+    private void gameRoomHasNoSpectator(UUID userId) {
+        assertNull(getSpectator(userId));
     }
 
     private void gameRoomHasNoSpectators() {
@@ -465,12 +481,16 @@ class GameRoomTest {
         assertNotNull(getPlayer(userId));
     }
 
+    private void gameRoomHasNoPlayer(UUID userId) {
+        assertNull(getPlayer(userId));
+    }
+
     private void gameRoomHasNoPlayers() {
         assertEquals(0, gameRoom.getBasicGameRoomInfo().playersCount());
     }
 
     private PlayerDTO getPlayer(UUID userId) {
-        return gameRoom.getDetailedGameRoomInfo(userId)
+        return gameRoom.getDetailedGameRoomInfo(gameRoom.getOwnerId())
             .players().stream()
             .filter(p -> p.userId().equals(userId))
             .findAny()
