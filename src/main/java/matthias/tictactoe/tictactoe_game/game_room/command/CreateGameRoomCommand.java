@@ -6,6 +6,7 @@ import java.util.UUID;
 
 public record CreateGameRoomCommand(
     UUID userId,
-    String name
+    String name,
+    boolean spectatingEnabled
 ) implements Command<UUID> {
 }

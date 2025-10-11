@@ -2,6 +2,7 @@ package matthias.tictactoe.tictactoe_game.game_room;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import matthias.tictactoe.tictactoe_game.game_room.exception.GameRoomNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -20,6 +21,10 @@ class GameRoomManager {
 
     void save(GameRoom gameRoom) {
         gameRooms.put(gameRoom.getId(), gameRoom);
+    }
+
+    GameRoom getById(UUID gameRoomId) {
+        return findById(gameRoomId).orElseThrow(() -> new GameRoomNotFoundException("Game room with id '" + gameRoomId + "' not found"));
     }
 
     Optional<GameRoom> findById(UUID gameRoomId) {

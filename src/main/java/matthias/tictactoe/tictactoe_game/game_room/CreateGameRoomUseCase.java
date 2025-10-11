@@ -24,7 +24,7 @@ class CreateGameRoomUseCase implements FunctionUseCase<CreateGameRoomCommand, UU
     @Override
     public UUID apply(CreateGameRoomCommand cmd) {
         log.info("Creating game room with command: {}", cmd);
-        final var gameRoom = new GameRoom(messagePublisher, cmd.name());
+        final var gameRoom = new GameRoom(messagePublisher, cmd.name(), cmd.userId(), cmd.spectatingEnabled());
 
         final var user = userFacade.getUserOrThrow(cmd.userId());
 

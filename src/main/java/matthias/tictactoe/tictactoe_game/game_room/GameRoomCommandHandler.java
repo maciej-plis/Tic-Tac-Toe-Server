@@ -7,7 +7,6 @@ import matthias.tictactoe.shared.command.CommandHandler;
 import matthias.tictactoe.tictactoe_game.game_room.command.CreateGameRoomCommand;
 import matthias.tictactoe.tictactoe_game.game_room.command.DeleteGameRoomCommand;
 import matthias.tictactoe.tictactoe_game.game_room.command.GameRoomCommand;
-import matthias.tictactoe.tictactoe_game.game_room.exception.GameRoomNotFoundException;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -33,8 +32,6 @@ public class GameRoomCommandHandler implements CommandHandler {
 
     private <T> T handleGameRoomCommand(GameRoomCommand<T> cmd) {
         log.info("Handling game room command: {}", cmd);
-        return manager.findById(cmd.gameRoomId())
-            .orElseThrow(() -> new GameRoomNotFoundException("Game room with id '" + cmd.gameRoomId() + "' not found"))
-            .handle(cmd);
+        return manager.getById(cmd.gameRoomId()).handle(cmd);
     }
 }

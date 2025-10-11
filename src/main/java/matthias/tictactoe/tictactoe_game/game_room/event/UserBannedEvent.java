@@ -4,9 +4,7 @@ import matthias.tictactoe.shared.event.Event;
 
 import java.util.UUID;
 
-public record GameRoomUpdatedEvent(
-    UUID gameRoomId,
-    String gameRoomName,
-    boolean spectatingEnabled
+public record UserBannedEvent(
+    UUID userId
 ) implements Event {
 }
