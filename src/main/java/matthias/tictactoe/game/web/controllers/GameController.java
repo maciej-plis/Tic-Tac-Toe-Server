@@ -17,6 +17,7 @@ import java.util.Map;
 @RestController
 @CrossOrigin(origins = "${client.url}")
 public class GameController {
+
     private final GamesManager gamesManager;
 
     @PostMapping("/games/{gameID}/join")

@@ -5,10 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import matthias.tictactoe.tictactoe_game.game_room.exception.GameRoomNotFoundException;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
 
@@ -21,6 +19,15 @@ class GameRoomManager {
 
     void save(GameRoom gameRoom) {
         gameRooms.put(gameRoom.getId(), gameRoom);
+    }
+
+    List<GameRoom> getAll() {
+        return new ArrayList<>(gameRooms.values());
+    }
+    List<GameRoom> getAll(Function<GameRoom, Boolean> filter) {
+        return gameRooms.values().stream()
+            .filter(filter::apply)
+            .toList();
     }
 
     GameRoom getById(UUID gameRoomId) {

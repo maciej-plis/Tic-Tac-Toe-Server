@@ -77,7 +77,7 @@ class GameRoom implements CommandHandler {
     }
 
     public DetailedGameRoomInfoDTO getDetailedGameRoomInfo(UUID userId) {
-        if (!game.hasPlayer(userId) && !hasSpectator(userId)) {
+        if (!isPlayerOrSpectator(userId)) {
             throw new GameRoomAccessExeption("User '" + userId + "' has no access to game room details '" + id + "'.");
         }
 
@@ -104,6 +104,10 @@ class GameRoom implements CommandHandler {
 
     public boolean isOwner(UUID userId) {
         return getOwnerId().equals(userId);
+    }
+
+    public boolean isPlayerOrSpectator(UUID userId) {
+        return game.hasPlayer(userId) || hasSpectator(userId);
     }
 
     private void updateDetails(UpdateGameRoomCommand cmd) {
