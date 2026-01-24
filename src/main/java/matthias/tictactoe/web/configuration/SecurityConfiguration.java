@@ -30,7 +30,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/register", "/login").permitAll()
                 .antMatchers("/games/**").authenticated()
                 .antMatchers("/tic-tac-toe/**").permitAll()
-                .anyRequest().denyAll()
+                .anyRequest().permitAll()
                 .and()
             .formLogin().disable();
     }
