@@ -1,6 +1,6 @@
 package matthias.tictactoe.authentication;
 
-import matthias.tictactoe.authentication.dto.RegisterUserRequest;
+import matthias.tictactoe.authentication.request.RegisterUserRequest;
 import matthias.tictactoe.user.dto.CreateUserRequest;
 import org.springframework.stereotype.Component;
 

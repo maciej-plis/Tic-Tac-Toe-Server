@@ -1,15 +1,9 @@
 package matthias.tictactoe.tictactoe_game.game_room.command;
 
-import matthias.tictactoe.user.dto.UserDto;
-
 import java.util.UUID;
 
 public record SpectatorJoinCommand(
     UUID gameRoomId,
-    UserDto user
+    UUID userId
 ) implements GameRoomCommand<Void> {
-
-    public UUID userId() {
-        return user.id();
-    }
 }

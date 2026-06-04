@@ -14,6 +14,7 @@ import matthias.tictactoe.tictactoe_game.game_room.exception.GameRoomAccessExept
 import matthias.tictactoe.tictactoe_game.game_room.exception.GameRoomSpectatorNotFoundException;
 import matthias.tictactoe.tictactoe_game.game_room.port.GameRoomMessagePublisher;
 import matthias.tictactoe.tictactoe_game.tictactoe_game.command.GameCommand;
+import matthias.tictactoe.user.UserFacade;
 
 import java.time.Instant;
 import java.util.*;
@@ -23,6 +24,7 @@ import static matthias.tictactoe.tictactoe_game.tictactoe_game.TicTacToeGameFact
 class GameRoom implements CommandHandler {
 
     private final GameRoomMessagePublisher messagePublisher;
+    private final UserFacade userFacade;
 
     @Getter
     private final UUID id = UUID.randomUUID();
@@ -44,8 +46,14 @@ class GameRoom implements CommandHandler {
     private final Game game = createTicTacToeGame(this::publishGameEvent);
     private final Set<Spectator> spectators = new HashSet<>();
 
-    public GameRoom(GameRoomMessagePublisher messagePublisher, String name, boolean spectatingEnabled) {
+    public GameRoom(
+        GameRoomMessagePublisher messagePublisher,
+        UserFacade userFacade,
+        String name,
+        boolean spectatingEnabled
+    ) {
         this.messagePublisher = messagePublisher;
+        this.userFacade = userFacade;
         this.name = name;
         this.spectatingEnabled = spectatingEnabled;
     }
@@ -122,17 +130,18 @@ class GameRoom implements CommandHandler {
     }
 
     private void onPlayerJoin(PlayerJoinCommand cmd) {
-        if (bannedUsers.contains(cmd.userId())) {
+        final var user = userFacade.getUserOrThrow(cmd.userId());
+        if (bannedUsers.contains(user.id())) {
             throw new GameRoomAccessExeption("User '" + cmd.userId() + "' is banned from this game room.");
-        } else if (hasSpectator(cmd.userId())) {
+        } else if (hasSpectator(user.id())) {
             final var spectator = getSpectatorOrThrow(cmd.userId());
             spectators.remove(spectator);
-            game.addPlayer(cmd.userId(), cmd.user().username());
-            messagePublisher.publish(id, new SpectatorChangedToPlayerEvent(cmd.userId(), cmd.user().username()));
+            game.addPlayer(cmd.userId(), user.username());
+            messagePublisher.publish(id, new SpectatorChangedToPlayerEvent(cmd.userId(), user.username()));
         } else {
             ownerQueue.add(cmd.userId());
-            game.addPlayer(cmd.userId(), cmd.user().username());
-            messagePublisher.publish(id, new PlayerJoinedEvent(cmd.userId(), cmd.user().username()));
+            game.addPlayer(cmd.userId(), user.username());
+            messagePublisher.publish(id, new PlayerJoinedEvent(cmd.userId(), user.username()));
         }
     }
 
@@ -151,15 +160,16 @@ class GameRoom implements CommandHandler {
             throw new GameRoomAccessExeption("User '" + cmd.userId() + "' is banned from this game room.");
         }
 
-        final var spectator = new Spectator(cmd.user().id(), cmd.user().username());
-        if (game.hasPlayer(cmd.user().id())) {
-            game.removePlayer(cmd.user().id());
+        final var user = userFacade.getUserOrThrow(cmd.userId());
+        final var spectator = new Spectator(user.id(), user.username());
+        if (game.hasPlayer(user.id())) {
+            game.removePlayer(user.id());
             spectators.add(spectator);
-            messagePublisher.publish(id, new PlayerChangedToSpectatorEvent(cmd.user().id(), cmd.user().username()));
+            messagePublisher.publish(id, new PlayerChangedToSpectatorEvent(user.id(), user.username()));
         } else {
             ownerQueue.add(cmd.userId());
             spectators.add(spectator);
-            messagePublisher.publish(id, new SpectatorJoinedEvent(cmd.user().id(), cmd.user().username()));
+            messagePublisher.publish(id, new SpectatorJoinedEvent(user.id(), user.username()));
         }
     }
 

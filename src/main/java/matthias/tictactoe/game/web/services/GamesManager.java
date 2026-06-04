@@ -21,7 +21,7 @@ public class GamesManager {
 
     public TicTacToeGame createNewGame(String gameName) {
         if(games.containsKey(gameName)) {
-            throw new GameCreationException(String.format("Game name %s is already in use.", gameName));
+            throw new GameCreationException(String.format("Game gameRoomName %s is already in use.", gameName));
         }
 
         TicTacToeGame newGame = new TicTacToeGame(gameName);

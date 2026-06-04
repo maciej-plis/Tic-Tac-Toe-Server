@@ -1,0 +1,524 @@
+openapi: 3.1.2
+
+info:
+  title: Tic-Tac-Toe
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /auth/login:
+    post:
+      summary: Login into your account
+      tags: [ "Authentication" ]
+
+  /auth/register:
+    post:
+      summary: Register new account
+      tags: [ "Authentication" ]
+
+  /auth/reset-password:
+    post:
+      summary: Send e-mail to reset account password
+      tags: [ "Authentication" ]
+
+  /game-rooms:
+    post:
+      summary: Create game room
+      tags: [ "Game Rooms" ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGameRoomRequest"
+      responses:
+        200:
+          description: Success response with ID of created game room
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+        400:
+          description: Error response when request to create game room is invalid
+          $ref: "#/components/responses/ProblemResponse"
+        401:
+          description: Error response when user is not logged in
+          $ref: "#/components/responses/ProblemResponse"
+        409:
+          description: Error response when game room gameRoomName is already taken
+          $ref: "#/components/responses/ProblemResponse"
+    get:
+      summary: Search game rooms
+      tags: [ "Game Rooms" ]
+      parameters:
+        - $ref: "#/components/parameters/pageNumber"
+        - $ref: "#/components/parameters/pageSize"
+        - $ref: "#/components/parameters/sortSpec"
+        - $ref: "#/components/parameters/filterSpec"
+      responses:
+        200:
+          description: Success response with page of matched game rooms
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                  content:
+                    discriminator:
+                      propertyName: game
+                      mapping:
+                        TIC_TAC_TOE: "#/components/schemas/TicTacToeGameRoomDTO"
+                        OTHER: "#/components/schemas/OtherGameRoomDTO"
+                    oneOf:
+                      - $ref: "#/components/schemas/TicTacToeGameRoomDTO"
+                      - $ref: "#/components/schemas/OtherGameRoomDTO"
+        400:
+          description: Error response when request to search game rooms is invalid
+          $ref: "#/components/responses/ProblemResponse"
+        401:
+          description: Error response when user is not logged in
+          $ref: "#/components/responses/ProblemResponse"
+
+  /game-rooms/:gameRoomId:
+    get:
+      summary: Get game room details
+      tags: [ "Game Room" ]
+      parameters:
+        - name: gameRoomId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Success response with found game room
+          content:
+            application/json:
+              schema:
+                discriminator:
+                  propertyName: game
+                  mapping:
+                    TIC_TAC_TOE: "#/components/schemas/TicTacToeGameRoomDTO"
+                    OTHER: "#/components/schemas/OtherGameRoomDTO"
+                oneOf:
+                  - $ref: "#/components/schemas/TicTacToeGameRoomDTO"
+                  - $ref: "#/components/schemas/OtherGameRoomDTO"
+        400:
+          description: Error response when request to find game room is invalid
+          $ref: "#/components/responses/ProblemResponse"
+        401:
+          description: Error response when user is not logged in
+          $ref: "#/components/responses/ProblemResponse"
+        404:
+          description: Error response when game room couldn't be found
+          $ref: "#/components/responses/ProblemResponse"
+    put:
+      summary: Update game room
+      tags: [ "Game Room Management" ]
+      parameters:
+        - name: gameRoomId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGameRoomRequest"
+      responses:
+        204:
+          description: Success response meaning that game room was updated
+          $ref: "#/components/responses/EmptyResponse"
+        400:
+          description: Error response when request to find game room is invalid
+          $ref: "#/components/responses/ProblemResponse"
+        401:
+          description: Error response when user is not logged in
+          $ref: "#/components/responses/ProblemResponse"
+        403:
+          description: Error response when user is not a owner of game room
+          $ref: "#/components/responses/ProblemResponse"
+        404:
+          description: Error response when game room couldn't be found
+          $ref: "#/components/responses/ProblemResponse"
+    delete:
+      summary: Delete game room
+      tags: [ "Game Room Management" ]
+      parameters:
+        - name: gameRoomId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Success response meaning that game room was deleted
+          $ref: "#/components/responses/EmptyResponse"
+        400:
+          description: Error response when request to delete game room is invalid
+          $ref: "#/components/responses/ProblemResponse"
+        401:
+          description: Error response when user is not logged in
+          $ref: "#/components/responses/ProblemResponse"
+        403:
+          description: Error response when user is not a owner of game room
+          $ref: "#/components/responses/ProblemResponse"
+        404:
+          description: Error response when game room to delete couldn't be found
+          $ref: "#/components/responses/ProblemResponse"
+  
+  /game-rooms/:gameRoomId/join:
+    post:
+      summary: Join a game room
+      tags: [ "Game Room" ]
+      parameters:
+        - name: gameRoomId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GameRoomJoinRequest"
+      responses:
+        204:
+          description: Success response meaning that you joined game room
+          $ref: "#/components/responses/EmptyResponse"
+        400:
+          description: Error response when request to join game room is invalid
+          $ref: "#/components/responses/ProblemResponse"
+        401:
+          description: Error response when user is not logged in
+          $ref: "#/components/responses/ProblemResponse"
+        403:
+          description: Error response when user doesn't have access to game room
+          $ref: "#/components/responses/ProblemResponse"
+        404:
+          description: Error response when game room to delete couldn't be found
+          $ref: "#/components/responses/ProblemResponse"
+  
+  /game-rooms/:gameRoomId/leave:
+    post:
+      summary: Leave a game room
+      tags: [ "Game Room" ]
+      parameters:
+        - name: gameRoomId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Success response meaning that you left game room
+          $ref: "#/components/responses/EmptyResponse"
+        400:
+          description: Error response when request to leave game room is invalid
+          $ref: "#/components/responses/ProblemResponse"
+        401:
+          description: Error response when user is not logged in
+          $ref: "#/components/responses/ProblemResponse"
+        404:
+          description: Error response when game room to delete couldn't be found
+          $ref: "#/components/responses/ProblemResponse"
+
+  /game-rooms/:gameRoomId/kick-user:
+    post:
+      summary: Kick user from a game room
+      tags: [ "Game Room Management" ]
+      parameters:
+        - name: gameRoomId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GameRoomKickUserRequest"
+      responses:
+        204:
+          description: Success response when user was kicked
+          $ref: "#/components/responses/EmptyResponse"
+        400:
+          description: Error response when request to kick user from a game room is invalid
+          $ref: "#/components/responses/ProblemResponse"
+        401:
+          description: Error response when user is not logged in
+          $ref: "#/components/responses/ProblemResponse"
+        403:
+          description: Error response when user is not a owner of game room
+          $ref: "#/components/responses/ProblemResponse"
+        404:
+          description: Error response when game room couldn't be found
+          $ref: "#/components/responses/ProblemResponse"
+
+  /game-rooms/:gameRoomId/ban-user:
+    post:
+      summary: Ban user in a game room
+      tags: [ "Game Room Management" ]
+      parameters:
+        - name: gameRoomId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GameRoomBanUserRequest"
+      responses:
+        204:
+          description: Success response when user was banned
+          $ref: "#/components/responses/EmptyResponse"
+        400:
+          description: Error response when request to ban user in a game room is invalid
+          $ref: "#/components/responses/ProblemResponse"
+        401:
+          description: Error response when user is not logged in
+          $ref: "#/components/responses/ProblemResponse"
+        403:
+          description: Error response when user is not a owner of game room
+          $ref: "#/components/responses/ProblemResponse"
+        404:
+          description: Error response when game room couldn't be found
+          $ref: "#/components/responses/ProblemResponse"
+
+  /game-rooms/:gameRoomId/unban-user:
+    post:
+      summary: Unban user in a game room
+      tags: [ "Game Room Management" ]
+      parameters:
+        - name: gameRoomId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GameRoomUnbanUserRequest"
+      responses:
+        204:
+          description: Success response when user was unbanned
+          $ref: "#/components/responses/EmptyResponse"
+        400:
+          description: Error response when request to unban user in a game room is invalid
+          $ref: "#/components/responses/ProblemResponse"
+        401:
+          description: Error response when user is not logged in
+          $ref: "#/components/responses/ProblemResponse"
+        403:
+          description: Error response when user is not a owner of game room
+          $ref: "#/components/responses/ProblemResponse"
+        404:
+          description: Error response when game room couldn't be found
+          $ref: "#/components/responses/ProblemResponse"
+
+components:
+  parameters:
+    pageNumber:
+      name: page
+      in: query
+      description: Page number to be returned
+      required: false
+      schema:
+        type: integer
+      example: 5
+    pageSize:
+      name: pageSize
+      in: query
+      description: Page size to be returned
+      required: false
+      schema:
+        type: integer
+        maximum: 500
+      example: 50
+    sortSpec:
+      name: sort
+      in: query
+      description: |
+        Sorting specification in RSQL format. 
+        For more details and syntax reference refer to 'https://github.com/perplexhub/rsql-jpa-specification#rsql-syntax-reference'
+      required: false
+      schema:
+        type: string
+      example: "age,asc;gameRoomName.desc"
+    filterSpec:
+      name: filter
+      in: query
+      description: |
+        Filtering specification in RSQL format. 
+        For more details and syntax reference refer to 'https://github.com/perplexhub/rsql-jpa-specification#rsql-syntax-reference'
+      required: false
+      schema:
+        type: string
+      example: "age=bt=(20,30);gameRoomName=='my-gameRoomName'"
+
+  responses:
+    EmptyResponse:
+      description: Response with no content
+    ProblemResponse:
+      description: Response with error description according to RFC 9457
+      content:
+        application/problem+json:
+          schema:
+            properties:
+              type:
+                type: string
+              title:
+                type: string
+              status:
+                type: integer
+              detail:
+                type: string
+              instance:
+                type: string
+
+  schemas:
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+    BaseGameRoom:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        game:
+          type: string
+          enum:
+            - TIC_TAC_TOE
+            - OTHER
+      required:
+        - id
+        - name
+        - game
+    TicTacToeGameRoomDetails:
+      type: object
+      properties:
+        something:
+          type: string
+      required:
+        - something
+    OtherGameRoomDetails:
+      type: object
+      properties:
+        somethingElse:
+          type: string
+      required:
+        - somethingElse
+    TicTacToeGameRoomDTO:
+      allOf:
+        - $ref: "#/components/schemas/BaseGameRoom"
+        - type: object
+          properties:
+            gameDetails:
+              $ref: "#/components/schemas/TicTacToeGameRoomDetails"
+          required:
+            - gameDetails
+    OtherGameRoomDTO:
+      allOf:
+        - $ref: "#/components/schemas/BaseGameRoom"
+        - type: object
+          properties:
+            gameDetails:
+              $ref: "#/components/schemas/OtherGameRoomDetails"
+          required:
+            - gameDetails
+    CreateGameRoomRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        game:
+          type: string
+          enum:
+            - TIC_TAC_TOE
+            - OTHER
+        password:
+          type: [ "null", string ]
+        spectatingEnabled:
+          type: [ "null", boolean ]
+          default: true
+      required:
+        - name
+        - game
+    UpdateGameRoomRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        game:
+          type: string
+          enum:
+            - TIC_TAC_TOE
+            - OTHER
+      required:
+        - name
+        - game
+    GameRoomJoinRequest:
+      type: object
+      properties:
+        role:
+          type: string
+          enum:
+            - PLAYER
+            - SPECTATOR
+        gameRoomPassword:
+          type: [ "null", string ]
+      required:
+        - role
+    GameRoomKickUserRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+      required:
+        - userId
+    GameRoomBanUserRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+      required:
+        - userId
+    GameRoomUnbanUserRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+      required:
+        - userId

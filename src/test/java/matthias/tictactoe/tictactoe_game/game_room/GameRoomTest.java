@@ -8,10 +8,12 @@ import matthias.tictactoe.tictactoe_game.game_room.event.*;
 import matthias.tictactoe.tictactoe_game.game_room.exception.GameRoomAccessExeption;
 import matthias.tictactoe.tictactoe_game.game_room.port.GameRoomMessagePublisher;
 import matthias.tictactoe.tictactoe_game.tictactoe_game.command.PlayerReadyCommand;
+import matthias.tictactoe.user.UserFacade;
 import matthias.tictactoe.user.dto.UserDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.io.Serializable;
 import java.util.*;
@@ -49,19 +51,25 @@ class GameRoomTest {
     private static final UserDto USER_3 = new UserDto(UUID.randomUUID(), "user-3", "user-3@mail.com", emptySet());
 
     private GameRoomTestMessagePublisher testMessagePublisher;
+    private UserFacade userFacade;
     private GameRoom gameRoom;
 
     @BeforeEach
     void init() {
         testMessagePublisher = new GameRoomTestMessagePublisher();
-        gameRoom = new GameRoom(testMessagePublisher, "Test Room", true);
+        userFacade = Mockito.mock(UserFacade.class);
+        gameRoom = new GameRoom(testMessagePublisher, userFacade, "Test Room", true);
+
+        Mockito.when(userFacade.getUserOrThrow(USER_1.id())).thenReturn(USER_1);
+        Mockito.when(userFacade.getUserOrThrow(USER_2.id())).thenReturn(USER_2);
+        Mockito.when(userFacade.getUserOrThrow(USER_3.id())).thenReturn(USER_3);
     }
 
     @DisplayName("Spectator can join the room")
     @Test
     void spectatorCanJoinTheRoom() {
         // When
-        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // Then
         gameRoomHasSpectator(USER_1.id());
@@ -71,7 +79,7 @@ class GameRoomTest {
     @Test
     void whenSpectatorJoinsTheRoomEventIsPublished() {
         // When
-        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // Then
         gameRoomMessageIsPublished(SpectatorJoinedEvent.class, gameRoom.getId(), e -> USER_1.id().equals(e.userId()));
@@ -81,7 +89,7 @@ class GameRoomTest {
     @Test
     void spectatorCanLeaveTheRoom() {
         // Given
-        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // When
         gameRoom.handle(new SpectatorLeaveCommand(gameRoom.getId(), USER_1.id()));
@@ -94,7 +102,7 @@ class GameRoomTest {
     @Test
     void whenSpectatorLeavesTheRoomEventIsPublished() {
         // Given
-        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // When
         gameRoom.handle(new SpectatorLeaveCommand(gameRoom.getId(), USER_1.id()));
@@ -107,7 +115,7 @@ class GameRoomTest {
     @Test
     void playerCanJoinTheRoom() {
         // When
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // Then
         gameRoomHasPlayer(USER_1.id());
@@ -117,7 +125,7 @@ class GameRoomTest {
     @Test
     void whenPlayerJoinsRoomPlayerJoinedEventIsPublished() {
         // When
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // Then
         assertEquals(1, testMessagePublisher.getRoomMessages(gameRoom.getId()).size());
@@ -128,7 +136,7 @@ class GameRoomTest {
     @Test
     void playerCanLeaveTheRoom() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // When
         gameRoom.handle(new PlayerLeaveCommand(gameRoom.getId(), USER_1.id()));
@@ -141,7 +149,7 @@ class GameRoomTest {
     @Test
     void whenPlayerLeavesRoomPlayerLeftEventIsPublished() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // When
         gameRoom.handle(new PlayerLeaveCommand(gameRoom.getId(), USER_1.id()));
@@ -155,10 +163,10 @@ class GameRoomTest {
     @Test
     void spectatorCanSwitchToPlayer() {
         // Given
-        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // When
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // Then
         gameRoomHasNoSpectators();
@@ -169,10 +177,10 @@ class GameRoomTest {
     @Test
     void whenSpectatorSwitchesToPlayerEventIsPublished() {
         // Given
-        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // When
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // Then
         assertEquals(2, testMessagePublisher.getRoomMessages(gameRoom.getId()).size());
@@ -183,10 +191,10 @@ class GameRoomTest {
     @Test
     void playerCanSwitchToSpectator() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // When
-        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // Then
         gameRoomHasNoPlayers();
@@ -197,10 +205,10 @@ class GameRoomTest {
     @Test
     void whenPlayerSwitchesToSpectatorEventIsPublished() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // When
-        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // Then
         assertEquals(2, testMessagePublisher.getRoomMessages(gameRoom.getId()).size());
@@ -211,7 +219,7 @@ class GameRoomTest {
     @Test
     void detailedRoomInfoAccessibleForPlayers() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // When
         final DetailedGameRoomInfoDTO details = gameRoom.getDetailedGameRoomInfo(USER_1.id());
@@ -228,7 +236,7 @@ class GameRoomTest {
     @Test
     void detailedRoomInfoAccessibleForSpectators() {
         // Given
-        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // When
         final DetailedGameRoomInfoDTO details = gameRoom.getDetailedGameRoomInfo(USER_1.id());
@@ -252,8 +260,8 @@ class GameRoomTest {
     @Test
     void onlyPlayersCanExecuteGameCommands() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2.id()));
 
         // When
         assertDoesNotThrow(() -> gameRoom.handle(new PlayerReadyCommand(USER_1.id())));
@@ -262,7 +270,7 @@ class GameRoomTest {
         assertThrows(RuntimeException.class, () -> gameRoom.handle(new PlayerReadyCommand(USER_3.id())));
 
         // Given
-        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_3));
+        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_3.id()));
 
         // Expect
         assertThrows(RuntimeException.class, () -> gameRoom.handle(new PlayerReadyCommand(USER_3.id())));
@@ -272,14 +280,14 @@ class GameRoomTest {
     @Test
     void ownerCanBanPlayer() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2.id()));
 
         // When
         gameRoom.handle(new BanUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
 
         // Then
-        assertThrows(GameRoomAccessExeption.class, () -> gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2)));
+        assertThrows(GameRoomAccessExeption.class, () -> gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2.id())));
         gameRoomMessageIsPublished(UserBannedEvent.class, gameRoom.getId(), e -> USER_2.id().equals(e.userId()));
     }
 
@@ -287,14 +295,14 @@ class GameRoomTest {
     @Test
     void ownerCanBanSpectator() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
-        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_2));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
+        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_2.id()));
 
         // When
         gameRoom.handle(new BanUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
 
         // Then
-        assertThrows(GameRoomAccessExeption.class, () -> gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_2)));
+        assertThrows(GameRoomAccessExeption.class, () -> gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_2.id())));
         gameRoomMessageIsPublished(UserBannedEvent.class, gameRoom.getId(), e -> USER_2.id().equals(e.userId()));
     }
 
@@ -302,8 +310,8 @@ class GameRoomTest {
     @Test
     void ownerCanKickPlayer() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2.id()));
 
         // When
         gameRoom.handle(new KickUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
@@ -317,8 +325,8 @@ class GameRoomTest {
     @Test
     void ownerCanKickSpectator() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
-        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_2));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
+        gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_2.id()));
 
         // When
         gameRoom.handle(new KickUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
@@ -332,8 +340,8 @@ class GameRoomTest {
     @Test
     void nonOwnerCannotBanOrKickUsers() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2.id()));
 
         // Expect
         assertThrows(GameRoomAccessExeption.class, () -> gameRoom.handle(new BanUserCommand(gameRoom.getId(), USER_2.id(), USER_1.id())));
@@ -344,29 +352,29 @@ class GameRoomTest {
     @Test
     void spectatorCannotJoinWhenDisabled() {
         // Given
-        gameRoom = new GameRoom(testMessagePublisher, "No Spectators Room", false);
+        gameRoom = new GameRoom(testMessagePublisher, userFacade, "No Spectators Room", false);
 
         // Expect
-        assertThrows(GameRoomAccessExeption.class, () -> gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_2)));
+        assertThrows(GameRoomAccessExeption.class, () -> gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_2.id())));
     }
 
     @DisplayName("Owner can enable/disable spectators via update")
     @Test
     void ownerCanUpdateSpectatorOption() {
         //Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // When
         gameRoom.handle(new UpdateGameRoomCommand(gameRoom.getId(), USER_1.id(), null, false));
 
         // Then
-        assertThrows(GameRoomAccessExeption.class, () -> gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_2)));
+        assertThrows(GameRoomAccessExeption.class, () -> gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_2.id())));
 
         // When
         gameRoom.handle(new UpdateGameRoomCommand(gameRoom.getId(), USER_1.id(), null, true));
 
         // Then
-        assertDoesNotThrow(() -> gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_2)));
+        assertDoesNotThrow(() -> gameRoom.handle(new SpectatorJoinCommand(gameRoom.getId(), USER_2.id())));
         gameRoomHasSpectator(USER_2.id());
     }
 
@@ -374,7 +382,7 @@ class GameRoomTest {
     @Test
     void nonOwnerCannotUpdateSpectatorOption() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // Expect
         assertThrows(GameRoomAccessExeption.class, () -> gameRoom.handle(new UpdateGameRoomCommand(gameRoom.getId(), USER_2.id(), null, false)));
@@ -384,15 +392,15 @@ class GameRoomTest {
     @Test
     void ownerCanUnbanUserAndUserCanRejoin() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2.id()));
         gameRoom.handle(new BanUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
 
         // When
         gameRoom.handle(new UnbanUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
 
         // Then
-        assertDoesNotThrow(() -> gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2)));
+        assertDoesNotThrow(() -> gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2.id())));
         gameRoomMessageIsPublished(UserUnbannedEvent.class, gameRoom.getId(), e -> e.userId().equals(USER_2.id()));
     }
 
@@ -400,8 +408,8 @@ class GameRoomTest {
     @Test
     void nonOwnerCannotUnbanUser() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_2.id()));
         gameRoom.handle(new BanUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
 
         // Expect
@@ -412,7 +420,7 @@ class GameRoomTest {
     @Test
     void banDoesNotPublishEventIfUserAlreadyBanned() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
         gameRoom.handle(new BanUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
 
         // When
@@ -430,7 +438,7 @@ class GameRoomTest {
     @Test
     void kickDoesNotPublishEventIfUserNotPresent() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
 
         // When
         gameRoom.handle(new KickUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
@@ -447,7 +455,7 @@ class GameRoomTest {
     @Test
     void unbanDoesNotPublishEventIfUserNotBanned() {
         // Given
-        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1));
+        gameRoom.handle(new PlayerJoinCommand(gameRoom.getId(), USER_1.id()));
         gameRoom.handle(new UnbanUserCommand(gameRoom.getId(), USER_1.id(), USER_2.id()));
 
         // Then

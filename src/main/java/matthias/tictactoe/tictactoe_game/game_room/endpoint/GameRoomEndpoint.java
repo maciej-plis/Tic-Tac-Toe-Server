@@ -7,20 +7,24 @@ import matthias.tictactoe.shared.AuthenticatedUserProvider;
 import matthias.tictactoe.tictactoe_game.game_room.GameRoomCommandHandler;
 import matthias.tictactoe.tictactoe_game.game_room.GameRoomQueryService;
 import matthias.tictactoe.tictactoe_game.game_room.command.CreateGameRoomCommand;
+import matthias.tictactoe.tictactoe_game.game_room.command.DeleteGameRoomCommand;
 import matthias.tictactoe.tictactoe_game.game_room.command.PlayerJoinCommand;
+import matthias.tictactoe.tictactoe_game.game_room.command.UpdateGameRoomCommand;
 import matthias.tictactoe.tictactoe_game.game_room.endpoint.dto.BasicGameRoomDto;
 import matthias.tictactoe.tictactoe_game.game_room.endpoint.dto.GameRoomDto;
+import matthias.tictactoe.tictactoe_game.game_room.endpoint.request.CreateGameRoomRequest;
+import matthias.tictactoe.tictactoe_game.game_room.endpoint.request.UpdateGameRoomRequest;
 import matthias.tictactoe.tictactoe_game.game_room.exception.GameRoomNotFoundException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.ResponseEntity.noContent;
 import static org.springframework.http.ResponseEntity.ok;
 
 @Slf4j
@@ -37,7 +41,9 @@ class GameRoomEndpoint {
         Pageable pageable,
         String gameRoomNameQuery
     ) {
-        return ok(new PagedModel<>(gameRoomQueryService.searchGameRooms(pageable, gameRoomNameQuery)));
+        final var gameRooms = new PagedModel<>(gameRoomQueryService.searchGameRooms(pageable, gameRoomNameQuery));
+//        return ok(gameRooms);
+        return ok(null);
     }
 
     @GetMapping("/game-rooms/{gameRoomId}")
@@ -45,8 +51,10 @@ class GameRoomEndpoint {
         @PathVariable UUID gameRoomId
     ) {
         try {
-            return ok(gameRoomQueryService.getGameRoomById(gameRoomId));
-        } catch(GameRoomNotFoundException ex) {
+            final var gameRoom = gameRoomQueryService.getGameRoomById(gameRoomId);
+//            return ok(gameRoom);
+            return ok(null);
+        } catch (GameRoomNotFoundException ex) {
             throw new ErrorResponseException(NOT_FOUND, ex);
         }
     }
@@ -72,15 +80,39 @@ class GameRoomEndpoint {
             gameRoomId,
             authenticatedUserProvider.getAuthenticatedUser().id()
         ));
+        return noContent().build();
     }
 
-//    @PutMapping("/game-rooms/{gameRoomId}")
-//    public void updateGameRoom(@PathVariable UUID gameRoomId, @RequestBody UpdateGameRoomCommand cmd) {
-//
-//    }
+    @PutMapping("/game-rooms/{gameRoomId}")
+    public ResponseEntity<Void> updateGameRoom(
+        @PathVariable UUID gameRoomId,
+        @RequestBody UpdateGameRoomRequest request
+    ) {
+        try {
+            gameRoomCommandHandler.handle(new UpdateGameRoomCommand(
+                gameRoomId,
+                authenticatedUserProvider.getAuthenticatedUser().id(),
+                request.gameRoomName(),
+                request.spectatingEnabled()
+            ));
+            return noContent().build();
+        } catch (GameRoomNotFoundException ex) {
+            throw new ErrorResponseException(NOT_FOUND, ex);
+        }
+    }
 
-//    @DeleteMapping("/game-rooms/{gameRoomId}")
-//    public void deleteGameRoom(@PathVariable UUID gameRoomId) {
-//
-//    }
+    @DeleteMapping("/game-rooms/{gameRoomId}")
+    public ResponseEntity<Void> deleteGameRoom(
+        @PathVariable UUID gameRoomId
+    ) {
+        try {
+            gameRoomCommandHandler.handle(new DeleteGameRoomCommand(
+                authenticatedUserProvider.getAuthenticatedUser().id(),
+                gameRoomId
+            ));
+            return noContent().build();
+        } catch (GameRoomNotFoundException ex) {
+            throw new ErrorResponseException(NOT_FOUND, ex);
+        }
+    }
 }

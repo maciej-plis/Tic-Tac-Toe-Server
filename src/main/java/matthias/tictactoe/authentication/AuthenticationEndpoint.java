@@ -1,8 +1,8 @@
 package matthias.tictactoe.authentication;
 
 import lombok.RequiredArgsConstructor;
-import matthias.tictactoe.authentication.dto.LoginUserRequest;
-import matthias.tictactoe.authentication.dto.RegisterUserRequest;
+import matthias.tictactoe.authentication.request.LoginUserRequest;
+import matthias.tictactoe.authentication.request.RegisterUserRequest;
 import matthias.tictactoe.jwt.dto.TokenDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;

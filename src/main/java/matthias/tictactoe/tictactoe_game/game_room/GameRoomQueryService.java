@@ -32,12 +32,10 @@ public class GameRoomQueryService {
         return paginate(gameRooms.stream().map(GameRoom::getBasicGameRoomInfo).toList(), pageable);
     }
 
-    public BasicGameRoomDto getGameRoomById(UUID gameRoomId) {
+    public DetailedGameRoomInfoDTO getGameRoomById(UUID gameRoomId) {
         final var user = authenticatedUserProvider.getAuthenticatedUser();
         final var gameRoom = gameRoomManager.getById(gameRoomId);
-        return gameRoom.isPlayerOrSpectator(user.id()) ?
-            gameRoom.getBasicGameRoomInfo() :
-            gameRoom.getDetailedGameRoomInfo(user.id());
+        return gameRoom.getDetailedGameRoomInfo(user.id());
     }
 
     private <T> Page<T> paginate(List<T> content, Pageable pageable) {
