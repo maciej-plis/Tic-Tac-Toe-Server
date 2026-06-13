@@ -1,0 +1,9 @@
+client.url: https://beautiful-tic-tac-toe.herokuapp.com
+
+spring:
+  jpa.hibernate.ddl-auto: update
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    platform: postgres
+    initialization-mode: never
+

@@ -20,6 +20,7 @@ import java.util.Map;
 
 @Getter
 public class TicTacToeGame {
+
     private final List<GameEventsFollower> followers = new ArrayList<>();
     private GameState state;
 
@@ -82,7 +83,6 @@ public class TicTacToeGame {
     public Map<String, Object> getGameData() {
         Map<String, Object> gameData = state.getGameData();
         gameData.put("messages", chat.getMessages());
-
         return gameData;
     }
 

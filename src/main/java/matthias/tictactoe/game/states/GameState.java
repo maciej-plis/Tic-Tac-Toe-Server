@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class GameState {
+
     protected final TicTacToeGame game;
     protected final StateType type;
 

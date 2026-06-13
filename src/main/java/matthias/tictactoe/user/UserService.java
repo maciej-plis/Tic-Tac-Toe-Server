@@ -1,0 +1,71 @@
+package matthias.tictactoe.user;
+
+import lombok.RequiredArgsConstructor;
+import matthias.tictactoe.user.database.UserRepository;
+import matthias.tictactoe.user.dto.CreateUserRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+import static matthias.tictactoe.user.User.Role.USER;
+import static org.apache.commons.lang3.RandomStringUtils.insecure;
+
+@Service
+@RequiredArgsConstructor
+class UserService {
+
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+
+    public Optional<User> findUserById(UUID id) {
+        return userRepository.findById(id)
+            .map(userMapper::toDomain);
+    }
+
+    Optional<User> findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+            .map(userMapper::toDomain);
+    }
+
+    Optional<User> findUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+            .map(userMapper::toDomain);
+    }
+
+    boolean isUsernameAvailable(String username) {
+        return !userRepository.existsByUsername(username);
+    }
+
+    boolean isEmailAvailable(String email) {
+        return !userRepository.existsByEmail(email);
+    }
+
+    UUID createUser(CreateUserRequest request) {
+        final var user = buildUser(request);
+        final var userEntity = userRepository.save(userMapper.toEntity(user));
+        return userEntity.getId();
+    }
+
+    public UUID createGuestUser() {
+        final var guestUser = buildGuestUser();
+        final var userEntity = userRepository.save(userMapper.toEntity(guestUser));
+        return userEntity.getId();
+    }
+
+    private User buildUser(CreateUserRequest request) {
+        return new User(
+            request.username(),
+            request.email(),
+            passwordEncoder.encode(request.password()),
+            Set.of(USER)
+        );
+    }
+
+    private GuestUser buildGuestUser() {
+        return new GuestUser("Guest_" + insecure().next(6, "0123456789")); // TODO
+    }
+}

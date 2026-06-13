@@ -6,6 +6,7 @@ import matthias.tictactoe.game.events.GameEventFactory;
 import java.util.function.Consumer;
 
 public class ActiveSymbol {
+
     private final Consumer<GameEvent> eventCallback;
     private PlayerSymbol symbol;
 
